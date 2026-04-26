@@ -7,4 +7,5 @@ words:
   - shellcheck
   - Stylesheet
   - sveltekit
+  - threlte
 ignorePaths: []

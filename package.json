@@ -47,6 +47,11 @@
 	"version": "0.0.1",
 	"packageManager": "pnpm@10.33.2",
 	"type": "module",
+	"pnpm": {
+		"overrides": {
+			"cookie": "^0.7.0"
+		}
+	},
 	"size-limit": [
 		{
 			"path": ".svelte-kit/output/client/_app/immutable/**/*.js",

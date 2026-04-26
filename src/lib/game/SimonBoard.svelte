@@ -2,6 +2,7 @@
 	import { T } from '@threlte/core';
 	import { Text } from '@threlte/extras';
 	import { simon } from '$lib/simon/simon.svelte';
+	import { game_state } from '$lib/game/state.svelte';
 	import type { ButtonColor } from '$lib/simon/types';
 	import { messages } from '$lib/messages/en';
 
@@ -23,6 +24,7 @@
 	const MODE_BOX_D = 0.01;
 	const FONT_SIZE = 0.08;
 	const EMISSIVE_INTENSITY = 0.8;
+	const CYBER_EMISSIVE_INTENSITY = 1.5;
 	const BOARD_Y = 1.2;
 	const BOARD_Z = -4.8;
 
@@ -31,32 +33,55 @@
 		rotation: number;
 		lit_color: string;
 		dim_color: string;
+		cyber_lit_color: string;
+		cyber_dim_color: string;
 	}
 
 	const BUTTON_CONFIGS = [
-		{ color: 'green' as ButtonColor, rotation: 0, lit_color: '#00ff00', dim_color: '#003300' },
+		{
+			color: 'green' as ButtonColor,
+			rotation: 0,
+			lit_color: '#00ff00',
+			dim_color: '#003300',
+			cyber_lit_color: '#00ffaa',
+			cyber_dim_color: '#002211'
+		},
 		{
 			color: 'red' as ButtonColor,
 			rotation: Math.PI / 2,
 			lit_color: '#ff2222',
-			dim_color: '#330000'
+			dim_color: '#330000',
+			cyber_lit_color: '#ff0088',
+			cyber_dim_color: '#330011'
 		},
 		{
 			color: 'yellow' as ButtonColor,
 			rotation: Math.PI,
 			lit_color: '#ffff00',
-			dim_color: '#333300'
+			dim_color: '#333300',
+			cyber_lit_color: '#ffff00',
+			cyber_dim_color: '#333300'
 		},
 		{
 			color: 'blue' as ButtonColor,
 			rotation: -Math.PI / 2,
 			lit_color: '#2266ff',
-			dim_color: '#001133'
+			dim_color: '#001133',
+			cyber_lit_color: '#00ccff',
+			cyber_dim_color: '#002233'
 		}
 	] as const satisfies readonly ButtonConfig[];
 
 	function is_lit(color: ButtonColor): boolean {
 		return simon.active_color === color || simon.pressed_color === color;
+	}
+
+	function btn_lit(btn: ButtonConfig): string {
+		return game_state.is_cyber ? btn.cyber_lit_color : btn.lit_color;
+	}
+
+	function btn_dim(btn: ButtonConfig): string {
+		return game_state.is_cyber ? btn.cyber_dim_color : btn.dim_color;
 	}
 
 	function on_press(color: ButtonColor): void {
@@ -75,6 +100,9 @@
 
 	let center_text = $derived(get_center_text());
 	let mode_text = $derived(get_mode_text());
+	let emissive_intensity = $derived(
+		game_state.is_cyber ? CYBER_EMISSIVE_INTENSITY : EMISSIVE_INTENSITY
+	);
 </script>
 
 <T.Group position={[0, BOARD_Y, BOARD_Z]}>
@@ -89,10 +117,13 @@
 				<T.RingGeometry
 					args={[INNER_RADIUS, OUTER_RADIUS, THETA_SEGMENTS, 1, THETA_START, THETA_LENGTH]}
 				/>
+				{@const lit = btn_lit(btn)}
+				{@const dim = btn_dim(btn)}
+				{@const active = is_lit(btn.color)}
 				<T.MeshStandardMaterial
-					color={is_lit(btn.color) ? btn.lit_color : btn.dim_color}
-					emissive={is_lit(btn.color) ? btn.lit_color : '#000000'}
-					emissiveIntensity={EMISSIVE_INTENSITY}
+					color={active ? lit : dim}
+					emissive={active ? lit : '#000000'}
+					emissiveIntensity={emissive_intensity}
 				/>
 			</T.Mesh>
 		</T.Group>

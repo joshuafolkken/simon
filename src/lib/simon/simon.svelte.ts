@@ -18,6 +18,7 @@ let active_color = $state<ButtonColor | null>(null);
 let pressed_color = $state<ButtonColor | null>(null);
 let round = $state(0);
 let show_gen = 0;
+let press_feedback_timer: ReturnType<typeof setTimeout> | null = null;
 
 function delay(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -86,12 +87,24 @@ function start(): void {
 	void run_show(show_gen);
 }
 
+function schedule_press_feedback(): void {
+	if (press_feedback_timer !== null) clearTimeout(press_feedback_timer);
+	press_feedback_timer = setTimeout(() => {
+		pressed_color = null;
+		press_feedback_timer = null;
+	}, PRESS_FEEDBACK_MS);
+}
+
+function cancel_press_feedback(): void {
+	if (press_feedback_timer !== null) clearTimeout(press_feedback_timer);
+	press_feedback_timer = null;
+	pressed_color = null;
+}
+
 function press(color: ButtonColor): void {
 	if (phase !== 'player_input') return;
 	pressed_color = color;
-	setTimeout(() => {
-		pressed_color = null;
-	}, PRESS_FEEDBACK_MS);
+	schedule_press_feedback();
 	if (color === sequence[position]) {
 		handle_correct_press();
 	} else {
@@ -101,12 +114,12 @@ function press(color: ButtonColor): void {
 
 function reset(): void {
 	show_gen += 1;
+	cancel_press_feedback();
 	phase = 'idle';
 	mode = 'normal';
 	sequence = [];
 	position = 0;
 	active_color = null;
-	pressed_color = null;
 	round = 0;
 }
 

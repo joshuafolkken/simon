@@ -137,6 +137,18 @@ describe('simon FSM', () => {
 		expect(simon.round).toBe(0);
 	});
 
+	it('reset() cancels press feedback timer to prevent stale clear', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		const wrong = wrong_color(seq_at(0));
+		simon.press(wrong);
+		expect(simon.pressed_color).toBe(wrong);
+		simon.reset();
+		expect(simon.pressed_color).toBeNull();
+		await vi.advanceTimersByTimeAsync(PRESS_FEEDBACK_MS + 10);
+		expect(simon.phase).toBe('idle');
+	});
+
 	it('reset() cancels an in-progress sequence display', async () => {
 		simon.start();
 		simon.reset();

@@ -76,6 +76,19 @@ describe('input', () => {
 		expect(input.pitch).toBeGreaterThan(-Math.PI / 2);
 	});
 
+	it('prevents default on arrow keys to stop page scroll', () => {
+		const evt = new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true });
+		document.dispatchEvent(evt);
+		expect(evt.defaultPrevented).toBe(true);
+		expect(input.keys.w).toBe(true);
+	});
+
+	it('does not prevent default on letter keys', () => {
+		const evt = new KeyboardEvent('keydown', { key: 'w', cancelable: true });
+		document.dispatchEvent(evt);
+		expect(evt.defaultPrevented).toBe(false);
+	});
+
 	it('cleanup resets all state including joysticks', () => {
 		input.set_joystick_move(1, 1);
 		input.set_joystick_look(1, 1);

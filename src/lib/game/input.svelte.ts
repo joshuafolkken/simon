@@ -38,7 +38,9 @@ function on_mouse_move(e: MouseEvent): void {
 
 function on_key(e: KeyboardEvent, is_down: boolean): void {
 	const key = KEY_MAP[e.key];
-	if (key) keys[key] = is_down;
+	if (!key) return;
+	keys[key] = is_down;
+	if (e.key.startsWith('Arrow')) e.preventDefault();
 }
 
 function handle_keydown(e: KeyboardEvent): void {

@@ -20,6 +20,9 @@ importers:
       '@threlte/rapier':
         specifier: ^3.4.2
         version: 3.4.2(@dimforge/rapier3d-compat@0.19.3)(svelte@5.55.5(@typescript-eslint/types@8.59.0))(three@0.184.0)
+      nipplejs:
+        specifier: ^1.0.1
+        version: 1.0.1
       three:
         specifier: ^0.184.0
         version: 0.184.0
@@ -2276,6 +2279,9 @@ packages:
   netmask@2.1.1:
     resolution: {integrity: sha512-eonl3sLUha+S1GzTPxychyhnUzKyeQkZ7jLjKrBagJgPla13F+uQ71HgpFefyHgqrjEbCPkDArxYsjY8/+gLKA==}
     engines: {node: '>= 0.4.0'}
+
+  nipplejs@1.0.1:
+    resolution: {integrity: sha512-+GhZWy62hfGIo6qE7vkAbbSFPWDIf3KLxOXwOruryKO3e8Tm8bDMz9EyK+CUr6zqWUC2sT7jZjsQIUawndGzQA==}
 
   obug@2.1.1:
     resolution: {integrity: sha512-uTqF9MuPraAQ+IsnPf366RG4cP9RtUi7MLO1N3KEc+wb0a6yKpeL0lmk2IB1jY5KHPAlTc6T/JRdC/YqxHNwkQ==}
@@ -4925,6 +4931,8 @@ snapshots:
   natural-compare@1.4.0: {}
 
   netmask@2.1.1: {}
+
+  nipplejs@1.0.1: {}
 
   obug@2.1.1: {}
 

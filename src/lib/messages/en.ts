@@ -1,5 +1,6 @@
 export const messages = {
 	game_title: 'SIMON',
 	press_start: 'PRESS START',
-	game_scene_placeholder: 'Game Scene'
+	cyber_switch_label: 'CYBER',
+	click_to_play: 'CLICK TO PLAY'
 } as const;

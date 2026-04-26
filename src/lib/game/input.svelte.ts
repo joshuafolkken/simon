@@ -8,6 +8,7 @@ let is_pointer_locked = $state(false);
 let yaw = $state(0);
 let pitch = $state(0);
 let keys = $state<Keys>({ w: false, a: false, s: false, d: false });
+let active_cleanup: (() => void) | null = null;
 const joystick_move = $state<Vec2>({ x: 0, y: 0 });
 const joystick_look = $state<Vec2>({ x: 0, y: 0 });
 
@@ -51,23 +52,32 @@ function handle_keyup(e: KeyboardEvent): void {
 	on_key(e, false);
 }
 
+function reset_keys(): void {
+	keys = { w: false, a: false, s: false, d: false };
+}
+
 function setup_listeners(): () => void {
+	if (active_cleanup) return active_cleanup;
 	document.addEventListener('pointerlockchange', on_pointer_lock_change);
 	document.addEventListener('mousemove', on_mouse_move);
 	document.addEventListener('keydown', handle_keydown);
 	document.addEventListener('keyup', handle_keyup);
-	return function cleanup(): void {
+	globalThis.addEventListener('blur', reset_keys);
+	active_cleanup = function cleanup(): void {
 		document.removeEventListener('pointerlockchange', on_pointer_lock_change);
 		document.removeEventListener('mousemove', on_mouse_move);
 		document.removeEventListener('keydown', handle_keydown);
 		document.removeEventListener('keyup', handle_keyup);
+		globalThis.removeEventListener('blur', reset_keys);
+		active_cleanup = null;
 		is_pointer_locked = false;
 		yaw = 0;
 		pitch = 0;
-		keys = { w: false, a: false, s: false, d: false };
+		reset_keys();
 		set_joystick_move(0, 0);
 		set_joystick_look(0, 0);
 	};
+	return active_cleanup;
 }
 
 function set_joystick_move(x: number, y: number): void {

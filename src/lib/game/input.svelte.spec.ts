@@ -89,6 +89,18 @@ describe('input', () => {
 		expect(evt.defaultPrevented).toBe(false);
 	});
 
+	it('resets keys on window blur to prevent stuck movement', () => {
+		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'w' }));
+		expect(input.keys.w).toBe(true);
+		globalThis.dispatchEvent(new Event('blur'));
+		expect(input.keys.w).toBe(false);
+	});
+
+	it('setup_listeners is idempotent when called twice', () => {
+		const second_cleanup = input.setup_listeners();
+		expect(second_cleanup).toBe(cleanup);
+	});
+
 	it('cleanup resets all state including joysticks', () => {
 		input.set_joystick_move(1, 1);
 		input.set_joystick_look(1, 1);

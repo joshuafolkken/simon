@@ -8,8 +8,8 @@ declare global {
 		// interface PageState {}
 		interface Platform {
 			env: {
-				DB: D1Database;
-				CACHE: KVNamespace;
+				DB?: D1Database;
+				CACHE?: KVNamespace;
 			};
 			context: ExecutionContext;
 			caches: CacheStorage & { default: Cache };

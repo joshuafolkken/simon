@@ -21,22 +21,22 @@
 			"enabled": true,
 			"head_sampling_rate": 0.1
 		}
-	},
+	}
 
-	"kv_namespaces": [
-		{
-			"binding": "CACHE",
-			"id": "",
-			"preview_id": ""
-		}
-	],
+	// "kv_namespaces": [
+	// 	{
+	// 		"binding": "CACHE",
+	// 		"id": "<kv-namespace-id>",
+	// 		"preview_id": "<kv-preview-id>"
+	// 	}
+	// ],
 
-	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "simon-db",
-			"database_id": "",
-			"migrations_dir": "drizzle/migrations"
-		}
-	]
+	// "d1_databases": [
+	// 	{
+	// 		"binding": "DB",
+	// 		"database_name": "simon-db",
+	// 		"database_id": "<d1-database-id>",
+	// 		"migrations_dir": "drizzle/migrations"
+	// 	}
+	// ]
 }

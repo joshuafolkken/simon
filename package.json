@@ -4,6 +4,7 @@
 		"@eslint/js": "^10.0.1",
 		"@joshuafolkken/kit": "^0.113.0",
 		"@playwright/test": "^1.59.1",
+		"@size-limit/preset-app": "^12.1.0",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/kit": "^2.57.0",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",

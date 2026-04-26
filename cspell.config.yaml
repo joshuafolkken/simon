@@ -8,4 +8,6 @@ words:
   - Stylesheet
   - sveltekit
   - threlte
+  - nipplejs
+  - oncreate
 ignorePaths: []

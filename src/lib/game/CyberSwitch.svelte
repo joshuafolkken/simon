@@ -4,13 +4,14 @@
 	import { game_state } from '$lib/game/state.svelte';
 	import { fonts } from '$lib/game/fonts';
 	import { messages } from '$lib/messages/en';
+	import { HALF_D } from '$lib/game/room-config';
 
-	const SWITCH_X = 2.0;
+	const SWITCH_X = 1.0;
 	const SWITCH_Y = 1.2;
-	const SWITCH_Z = -4.3;
 	const BASE_RADIUS = 0.32;
 	const BASE_DEPTH = 0.06;
 	const BASE_HALF_DEPTH = BASE_DEPTH / 2;
+	const SWITCH_Z = -(HALF_D - BASE_HALF_DEPTH);
 	const HEX_FACES = 6;
 	const RING_RADIUS = 0.26;
 	const RING_TUBE = 0.025;

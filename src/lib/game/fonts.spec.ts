@@ -13,4 +13,9 @@ describe('fonts', () => {
 	it('retro and cyber fonts are different URLs', () => {
 		expect(fonts.FONT_RETRO).not.toBe(fonts.FONT_CYBER);
 	});
+
+	it('font paths are self-hosted local paths', () => {
+		expect(fonts.FONT_RETRO).toMatch(/^\/fonts\//);
+		expect(fonts.FONT_CYBER).toMatch(/^\/fonts\//);
+	});
 });

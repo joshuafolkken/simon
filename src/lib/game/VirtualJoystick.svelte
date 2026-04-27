@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import nipplejs from 'nipplejs';
 	import { input } from '$lib/game/input.svelte';
+	import { messages } from '$lib/messages/en';
 
 	type JoystickMgr = ReturnType<typeof nipplejs.create>;
 
@@ -52,7 +53,17 @@
 </script>
 
 <div class="joystick-overlay" aria-hidden="true">
-	<div class="joystick-zone" bind:this={move_zone}></div>
+	<div class="joystick-zone" bind:this={move_zone}>
+		<button
+			class="sprint-btn"
+			data-testid="sprint-btn"
+			onpointerdown={() => input.set_sprinting(true)}
+			onpointerup={() => input.set_sprinting(false)}
+			onpointerleave={() => input.set_sprinting(false)}
+		>
+			{messages.sprint_button}
+		</button>
+	</div>
 	<div class="joystick-zone" bind:this={look_zone}></div>
 </div>
 
@@ -67,5 +78,32 @@
 	.joystick-zone {
 		flex: 1;
 		pointer-events: all;
+		position: relative;
+	}
+
+	.sprint-btn {
+		position: absolute;
+		bottom: 20%;
+		left: 25%;
+		transform: translateX(-50%);
+		width: 60px;
+		height: 60px;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.2);
+		border: 2px solid rgba(255, 255, 255, 0.5);
+		color: rgba(255, 255, 255, 0.8);
+		font-size: 0.7rem;
+		letter-spacing: 0.1em;
+		pointer-events: all;
+		touch-action: none;
+		display: none;
+	}
+
+	@media (hover: none) and (pointer: coarse) {
+		.sprint-btn {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
 	}
 </style>

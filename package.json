@@ -4,6 +4,7 @@
 		"@eslint/js": "^10.0.1",
 		"@joshuafolkken/kit": "^0.113.0",
 		"@playwright/test": "^1.59.1",
+		"@size-limit/file": "^12.1.0",
 		"@size-limit/preset-app": "^12.1.0",
 		"@sveltejs/adapter-cloudflare": "^7.2.8",
 		"@sveltejs/kit": "^2.58.0",
@@ -19,6 +20,7 @@
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.17.1",
 		"globals": "^17.5.0",
+		"lefthook": "^2.1.6",
 		"playwright": "^1.59.1",
 		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^3.5.1",
@@ -32,8 +34,7 @@
 		"typescript-eslint": "^8.59.0",
 		"vite": "^8.0.10",
 		"vitest": "^4.1.5",
-		"vitest-browser-svelte": "^2.1.1",
-		"@size-limit/file": "^12.1.0"
+		"vitest-browser-svelte": "^2.1.1"
 	},
 	"scripts": {
 		"dev": "vite dev",
@@ -47,7 +48,7 @@
 	},
 	"name": "simon",
 	"private": true,
-	"version": "0.35.0",
+	"version": "0.35.1",
 	"packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8",
 	"type": "module",
 	"pnpm": {

@@ -4,12 +4,14 @@
 	import GameSceneObjects from './GameSceneObjects.svelte';
 	import VirtualJoystick from './VirtualJoystick.svelte';
 	import { input } from '$lib/game/input.svelte';
+	import { audio } from '$lib/game/audio';
 	import { messages } from '$lib/messages/en';
 
 	let container: HTMLElement;
 	let is_locked = $derived(input.is_pointer_locked);
 
 	function request_lock(): void {
+		audio.init_audio();
 		container?.querySelector('canvas')?.requestPointerLock();
 	}
 
@@ -20,9 +22,7 @@
 	{#if !is_locked}
 		<div class="click-hint" aria-live="polite">{messages.click_to_play}</div>
 	{/if}
-	{#if is_locked}
-		<div class="crosshair" aria-hidden="true" data-testid="crosshair"></div>
-	{/if}
+	<div class="crosshair" aria-hidden="true" data-testid="crosshair"></div>
 	<Canvas shadows>
 		<GameSceneObjects />
 	</Canvas>

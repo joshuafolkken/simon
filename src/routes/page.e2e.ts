@@ -40,3 +40,27 @@ test('crosshair appears when pointer lock is simulated', async ({ page }) => {
 
 	await expect(page.getByTestId('crosshair')).toBeVisible();
 });
+
+test('pointer lock is requested on canvas element', async ({ page }) => {
+	await page.goto('/');
+	await page.locator('.title-container').click();
+
+	const lock_target = await page.evaluate(
+		() =>
+			new Promise<string>((resolve) => {
+				const canvas = document.querySelector('canvas');
+				if (!canvas) {
+					resolve('no-canvas');
+					return;
+				}
+				const orig = canvas.requestPointerLock.bind(canvas);
+				canvas.requestPointerLock = function () {
+					resolve('canvas');
+					return orig();
+				};
+				document.querySelector<HTMLElement>('[data-testid="game-scene"]')?.click();
+			})
+	);
+
+	expect(lock_target).toBe('canvas');
+});

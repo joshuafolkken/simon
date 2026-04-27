@@ -43,7 +43,7 @@
 		"preview": "vite preview",
 		"prepare": "pnpm gen && svelte-kit sync",
 		"gen": "pnpm gen:pre && wrangler types",
-		"gen:pre": "rm -f .svelte-kit/cloudflare/_worker.*",
+		"gen:pre": "node -e \"const fs=require('node:fs');const d='.svelte-kit/cloudflare';if(fs.existsSync(d))fs.readdirSync(d).forEach(f=>f.startsWith('_worker.')&&fs.rmSync(d+'/'+f,{force:true}))\"",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"postinstall": "lefthook install",
 		"josh": "josh",

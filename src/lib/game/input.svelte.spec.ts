@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { input } from '$lib/game/input.svelte';
 
 describe('input', () => {
@@ -130,29 +130,22 @@ describe('input', () => {
 		expect(input.is_sprinting).toBe(false);
 	});
 
-	it('Space keydown sets is_dashing true', () => {
-		vi.useFakeTimers();
+	it('Space keydown sets is_jump_requested true', () => {
 		document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
-		expect(input.is_dashing).toBe(true);
-		vi.useRealTimers();
+		expect(input.is_jump_requested).toBe(true);
 	});
 
-	it('is_dashing auto-clears after DASH_BURST_MS', async () => {
-		vi.useFakeTimers();
+	it('clear_jump_request clears is_jump_requested', () => {
 		document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
-		await vi.advanceTimersByTimeAsync(300);
-		expect(input.is_dashing).toBe(false);
-		vi.useRealTimers();
+		input.clear_jump_request();
+		expect(input.is_jump_requested).toBe(false);
 	});
 
-	it('reset_keys clears is_sprinting and is_dashing', () => {
-		vi.useFakeTimers();
+	it('reset_keys clears is_sprinting and is_jump_requested', () => {
 		input.set_sprinting(true);
 		document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
-		document.dispatchEvent(new KeyboardEvent('blur'));
 		globalThis.dispatchEvent(new Event('blur'));
 		expect(input.is_sprinting).toBe(false);
-		expect(input.is_dashing).toBe(false);
-		vi.useRealTimers();
+		expect(input.is_jump_requested).toBe(false);
 	});
 });

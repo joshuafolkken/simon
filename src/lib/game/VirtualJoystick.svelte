@@ -63,6 +63,9 @@
 		>
 			{messages.sprint_button}
 		</button>
+		<button class="jump-btn" data-testid="jump-btn" onpointerdown={() => input.trigger_jump()}>
+			{messages.jump_button}
+		</button>
 	</div>
 	<div class="joystick-zone" bind:this={look_zone}></div>
 </div>
@@ -99,8 +102,32 @@
 		display: none;
 	}
 
+	.jump-btn {
+		position: absolute;
+		bottom: 20%;
+		left: 45%;
+		transform: translateX(-50%);
+		width: 60px;
+		height: 60px;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.2);
+		border: 2px solid rgba(255, 255, 255, 0.5);
+		color: rgba(255, 255, 255, 0.8);
+		font-size: 0.7rem;
+		letter-spacing: 0.1em;
+		pointer-events: all;
+		touch-action: none;
+		display: none;
+	}
+
 	@media (hover: none) and (pointer: coarse) {
 		.sprint-btn {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.jump-btn {
 			display: flex;
 			align-items: center;
 			justify-content: center;

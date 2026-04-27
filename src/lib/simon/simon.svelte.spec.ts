@@ -8,6 +8,7 @@ const STEP_MS = 500;
 const ON_RATIO = 0.7;
 const OFF_RATIO = 0.3;
 const PRESS_FEEDBACK_MS = 200;
+const RESTART_DELAY_MS = 1000;
 const ON_MS = STEP_MS * ON_RATIO;
 const OFF_MS = STEP_MS * OFF_RATIO;
 
@@ -71,13 +72,31 @@ describe('simon FSM', () => {
 		expect(simon.phase).toBe('player_input');
 	});
 
-	it('correct final press in round advances to next round showing', async () => {
+	it('correct final press blocks further input immediately', async () => {
 		simon.start();
 		await vi.runAllTimersAsync();
 		simon.press(seq_at(0));
+		expect(simon.phase).toBe('showing');
+		expect(simon.round).toBe(1);
+	});
+
+	it('next round starts after 1 second delay following final correct press', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		await vi.advanceTimersByTimeAsync(RESTART_DELAY_MS);
 		expect(simon.round).toBe(2);
 		expect(simon.sequence).toHaveLength(2);
-		expect(simon.phase).toBe('showing');
+	});
+
+	it('reset() cancels restart timer so next round does not start', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		simon.reset();
+		await vi.advanceTimersByTimeAsync(RESTART_DELAY_MS);
+		expect(simon.phase).toBe('idle');
+		expect(simon.round).toBe(0);
 	});
 
 	it('correct intermediate press advances position without completing round', async () => {

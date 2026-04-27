@@ -6,8 +6,22 @@ test('game scene renders immediately with canvas', async ({ page }) => {
 	await expect(page.locator('[data-testid="game-scene"] canvas')).toBeVisible();
 });
 
-test('crosshair is visible before pointer lock is acquired', async ({ page }) => {
+test('crosshair is hidden before pointer lock is acquired', async ({ page }) => {
 	await page.goto('/');
+	await expect(page.getByTestId('crosshair')).toHaveCount(0);
+});
+
+test('crosshair is visible after pointer lock is simulated', async ({ page }) => {
+	await page.goto('/');
+
+	await page.evaluate(() => {
+		Object.defineProperty(document, 'pointerLockElement', {
+			get: () => document.body,
+			configurable: true
+		});
+		document.dispatchEvent(new Event('pointerlockchange'));
+	});
+
 	await expect(page.getByTestId('crosshair')).toBeVisible();
 });
 

@@ -6,9 +6,9 @@ test('game scene renders immediately with canvas', async ({ page }) => {
 	await expect(page.locator('[data-testid="game-scene"] canvas')).toBeVisible();
 });
 
-test('crosshair is visible before pointer lock is acquired', async ({ page }) => {
+test('crosshair is hidden before pointer lock is acquired', async ({ page }) => {
 	await page.goto('/');
-	await expect(page.getByTestId('crosshair')).toBeVisible();
+	await expect(page.getByTestId('crosshair')).toBeHidden();
 });
 
 test('CLICK TO PLAY hint is visible before pointer lock', async ({ page }) => {

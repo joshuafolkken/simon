@@ -6,9 +6,11 @@
 	import { input } from '$lib/game/input.svelte';
 	import { audio } from '$lib/game/audio';
 	import { messages } from '$lib/messages/en';
+	import { game_state } from '$lib/game/state.svelte';
 
 	let container: HTMLElement;
 	let is_locked = $derived(input.is_pointer_locked);
+	let is_cyber = $derived(game_state.is_cyber);
 
 	function request_lock(): void {
 		audio.init_audio();
@@ -22,7 +24,15 @@
 	{#if !is_locked}
 		<div class="click-hint" aria-live="polite">{messages.click_to_play}</div>
 	{/if}
-	<div class="crosshair" aria-hidden="true" data-testid="crosshair"></div>
+	<div
+		class="crosshair"
+		aria-hidden="true"
+		data-testid="crosshair"
+		style:display={is_locked ? '' : 'none'}
+	></div>
+	{#if is_cyber}
+		<div class="cyber-glow" data-testid="cyber-glow" aria-hidden="true"></div>
+	{/if}
 	<Canvas shadows>
 		<GameSceneObjects />
 	</Canvas>
@@ -80,5 +90,30 @@
 		height: 100%;
 		left: 50%;
 		transform: translateX(-50%);
+	}
+
+	.cyber-glow {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		z-index: 5;
+		background: radial-gradient(
+			ellipse at center,
+			rgba(255, 0, 255, 0.12) 0%,
+			rgba(100, 0, 255, 0.06) 50%,
+			transparent 70%
+		);
+		mix-blend-mode: screen;
+		animation: cyber-pulse 2s ease-in-out infinite;
+	}
+
+	@keyframes cyber-pulse {
+		0%,
+		100% {
+			opacity: 0.7;
+		}
+		50% {
+			opacity: 1;
+		}
 	}
 </style>

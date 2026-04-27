@@ -9,6 +9,7 @@ const STEP_MS_21_PLUS = 150;
 const ON_RATIO = 0.7;
 const OFF_RATIO = 0.3;
 const TONE_MS = 200;
+const ERROR_BEEP_MS = 3000;
 const RESTART_DELAY_MS = 1000;
 
 let phase = $state<SimonPhase>('idle');
@@ -82,6 +83,7 @@ function handle_correct_press(): void {
 }
 
 function handle_wrong_press(): void {
+	simon_audio.play_error_tone(ERROR_BEEP_MS);
 	phase = 'gameover';
 }
 

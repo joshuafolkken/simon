@@ -32,6 +32,7 @@ test('CLICK TO PLAY hint disappears when pointer lock is simulated', async ({ pa
 
 test('pointer lock is requested on canvas element', async ({ page }) => {
 	await page.goto('/');
+	await expect(page.locator('canvas')).toBeVisible();
 
 	const lock_target = await page.evaluate(
 		() =>

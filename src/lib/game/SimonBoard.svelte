@@ -3,6 +3,7 @@
 	import { Text } from '@threlte/extras';
 	import { simon } from '$lib/simon/simon.svelte';
 	import { game_state } from '$lib/game/state.svelte';
+	import { fonts } from '$lib/game/fonts';
 	import type { ButtonColor } from '$lib/simon/types';
 	import { messages } from '$lib/messages/en';
 
@@ -94,6 +95,7 @@
 	let emissive_intensity = $derived(
 		game_state.is_cyber ? CYBER_EMISSIVE_INTENSITY : EMISSIVE_INTENSITY
 	);
+	let current_font = $derived(fonts.get_font(game_state.is_cyber));
 </script>
 
 <T.Group position={[0, BOARD_Y, BOARD_Z]}>
@@ -132,6 +134,7 @@
 	<T.Group position={[0, 0, LABEL_Z]}>
 		<Text
 			text={center_text}
+			font={current_font}
 			fontSize={FONT_SIZE}
 			color="#ffffff"
 			anchorX="center"

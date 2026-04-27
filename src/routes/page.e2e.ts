@@ -11,20 +11,6 @@ test('crosshair is hidden before pointer lock is acquired', async ({ page }) => 
 	await expect(page.getByTestId('crosshair')).toHaveCount(0);
 });
 
-test('crosshair is visible after pointer lock is simulated', async ({ page }) => {
-	await page.goto('/');
-
-	await page.evaluate(() => {
-		Object.defineProperty(document, 'pointerLockElement', {
-			get: () => document.body,
-			configurable: true
-		});
-		document.dispatchEvent(new Event('pointerlockchange'));
-	});
-
-	await expect(page.getByTestId('crosshair')).toBeVisible();
-});
-
 test('CLICK TO PLAY hint is visible before pointer lock', async ({ page }) => {
 	await page.goto('/');
 	await expect(page.locator('.click-hint')).toBeVisible();
@@ -42,6 +28,7 @@ test('CLICK TO PLAY hint disappears when pointer lock is simulated', async ({ pa
 	});
 
 	await expect(page.locator('.click-hint')).toHaveCount(0);
+	await expect(page.getByTestId('crosshair')).toBeVisible();
 });
 
 test('pointer lock is requested on canvas element', async ({ page }) => {

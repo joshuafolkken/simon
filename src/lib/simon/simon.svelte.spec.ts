@@ -8,6 +8,7 @@ const STEP_MS = 500;
 const ON_RATIO = 0.7;
 const OFF_RATIO = 0.3;
 const TONE_MS = 200;
+const ERROR_BEEP_MS = 3000;
 const RESTART_DELAY_MS = 1000;
 const ON_MS = STEP_MS * ON_RATIO;
 const OFF_MS = STEP_MS * OFF_RATIO;
@@ -116,6 +117,14 @@ describe('simon FSM', () => {
 		await vi.runAllTimersAsync();
 		simon.press(wrong_color(seq_at(0)));
 		expect(simon.phase).toBe('gameover');
+	});
+
+	it('wrong press plays error tone for ERROR_BEEP_MS', async () => {
+		const spy = vi.spyOn(simon_audio, 'play_error_tone');
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(wrong_color(seq_at(0)));
+		expect(spy).toHaveBeenCalledWith(ERROR_BEEP_MS);
 	});
 
 	it('press() is ignored when not in player_input phase', () => {

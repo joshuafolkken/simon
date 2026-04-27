@@ -34,6 +34,10 @@ describe('simon audio', () => {
 	it.each(ALL_COLORS)('play_tone does not throw for %s', (color) => {
 		expect(() => simon_audio.play_tone(color, 100)).not.toThrow();
 	});
+
+	it('play_error_tone does not throw', () => {
+		expect(() => simon_audio.play_error_tone(100)).not.toThrow();
+	});
 });
 
 describe('simon audio cyber mode', () => {
@@ -74,6 +78,38 @@ describe('simon audio envelope', () => {
 		vi.spyOn(game_audio, 'get_audio_context').mockReturnValue(ctx as unknown as AudioContext);
 
 		simon_audio.play_tone('green', 200);
+
+		expect(gain_node.gain.exponentialRampToValueAtTime).toHaveBeenCalled();
+	});
+
+	it('play_error_tone uses ERROR_FREQ', () => {
+		const { ctx, osc_node } = make_mock_ctx();
+		vi.spyOn(game_audio, 'init_audio').mockImplementation(() => {});
+		vi.spyOn(game_audio, 'get_audio_context').mockReturnValue(ctx as unknown as AudioContext);
+
+		simon_audio.play_error_tone(3000);
+
+		expect(osc_node.frequency.setValueAtTime).toHaveBeenCalledWith(simon_audio.ERROR_FREQ, 0);
+	});
+
+	it('play_error_tone normal mode uses flat envelope', () => {
+		const { ctx, gain_node } = make_mock_ctx();
+		vi.spyOn(game_audio, 'init_audio').mockImplementation(() => {});
+		vi.spyOn(game_audio, 'get_audio_context').mockReturnValue(ctx as unknown as AudioContext);
+
+		simon_audio.play_error_tone(3000);
+
+		expect(gain_node.gain.setValueAtTime).toHaveBeenCalled();
+		expect(gain_node.gain.exponentialRampToValueAtTime).not.toHaveBeenCalled();
+	});
+
+	it('play_error_tone cyber mode applies exponential gain ramp', () => {
+		game_state.toggle_cyber();
+		const { ctx, gain_node } = make_mock_ctx();
+		vi.spyOn(game_audio, 'init_audio').mockImplementation(() => {});
+		vi.spyOn(game_audio, 'get_audio_context').mockReturnValue(ctx as unknown as AudioContext);
+
+		simon_audio.play_error_tone(3000);
 
 		expect(gain_node.gain.exponentialRampToValueAtTime).toHaveBeenCalled();
 	});

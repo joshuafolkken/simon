@@ -21,4 +21,13 @@ describe('lighting', () => {
 			lighting.get_point_light_intensity(false)
 		);
 	});
+
+	it('get_ambient_color returns white in normal mode', () => {
+		expect(lighting.get_ambient_color(false)).toBe(lighting.AMBIENT_COLOR_NORMAL);
+	});
+
+	it('get_ambient_color returns non-white color in cyber mode', () => {
+		expect(lighting.get_ambient_color(true)).toBe(lighting.AMBIENT_COLOR_CYBER);
+		expect(lighting.get_ambient_color(true)).not.toBe(lighting.AMBIENT_COLOR_NORMAL);
+	});
 });

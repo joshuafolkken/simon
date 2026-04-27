@@ -3,9 +3,9 @@
 	import { Text } from '@threlte/extras';
 	import { game_state } from '$lib/game/state.svelte';
 	import { messages } from '$lib/messages/en';
-	const SWITCH_X = 4.5;
+	const SWITCH_X = 1.2;
 	const SWITCH_Y = 1.2;
-	const SWITCH_Z = 0;
+	const SWITCH_Z = -4.8;
 	const BOX_W = 0.4;
 	const BOX_H = 0.6;
 	const BOX_D = 0.15;

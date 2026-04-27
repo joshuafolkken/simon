@@ -15,8 +15,8 @@
 	const NORMAL_BG = '#0d0d12';
 	const CYBER_BG = '#030318';
 	const TITLE_FONT_SIZE = 0.6;
-	const TITLE_Y = 3;
-	const TITLE_Z = -4.8;
+	const TITLE_Y = 2.5;
+	const TITLE_Z = -1;
 	const BOB_SPEED = 0.001;
 	const BOB_AMPLITUDE = 0.05;
 

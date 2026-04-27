@@ -7,10 +7,17 @@
 	import { audio } from '$lib/game/audio';
 	import { messages } from '$lib/messages/en';
 	import { game_state } from '$lib/game/state.svelte';
+	import { fonts } from '$lib/game/fonts';
+
+	const CLICK_HINT_BASE_FONT_SIZE_REM = 1;
 
 	let container: HTMLElement;
 	let is_locked = $derived(input.is_pointer_locked);
 	let is_cyber = $derived(game_state.is_cyber);
+	let click_hint_font_family = $derived(fonts.get_font_family(is_cyber));
+	let click_hint_font_size_rem = $derived(
+		CLICK_HINT_BASE_FONT_SIZE_REM * fonts.get_font_size_multiplier(is_cyber)
+	);
 
 	function request_lock(): void {
 		audio.init_audio();
@@ -22,7 +29,14 @@
 
 <div class="game-container" bind:this={container} onclick={request_lock} data-testid="game-scene">
 	{#if !is_locked}
-		<div class="click-hint" aria-live="polite">{messages.click_to_play}</div>
+		<div
+			class="click-hint"
+			aria-live="polite"
+			style:font-family={click_hint_font_family}
+			style:font-size="{click_hint_font_size_rem}rem"
+		>
+			{messages.click_to_play}
+		</div>
 	{/if}
 	<div
 		class="crosshair"

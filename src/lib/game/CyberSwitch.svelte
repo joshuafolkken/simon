@@ -6,7 +6,7 @@
 	import { messages } from '$lib/messages/en';
 	import { HALF_D } from '$lib/game/room-config';
 
-	const SWITCH_X = 1.0;
+	const SWITCH_X = 1.6;
 	const SWITCH_Y = 1.2;
 	const BASE_RADIUS = 0.32;
 	const BASE_DEPTH = 0.06;
@@ -30,8 +30,11 @@
 	const HIT_AREA_Z_OFFSET = 0.01;
 	const HIT_AREA_Z = ORB_Z + ORB_RADIUS + HIT_AREA_Z_OFFSET;
 	const HIT_AREA_SEGMENTS = 32;
+	const LIGHT_HIT_RADIUS_MULTIPLIER = 1.4;
+	const LIGHT_HIT_RADIUS = ORB_RADIUS * LIGHT_HIT_RADIUS_MULTIPLIER;
+	const LIGHT_HIT_SEGMENTS = 16;
 	const LABEL_FONT_SIZE = 0.1;
-	const LABEL_Y_OFFSET = 0.38;
+	const LABEL_Y_OFFSET = 0.58;
 	const LABEL_Z = 0.05;
 	const FACE_ROTATION_X = Math.PI / 2;
 	const NORMAL_COLOR = '#00aaff';
@@ -60,6 +63,9 @@
 	);
 	let ring_emissive = $derived(game_state.is_cyber ? CYBER_RING_EMISSIVE : NORMAL_RING_EMISSIVE);
 	let orb_emissive = $derived(game_state.is_cyber ? CYBER_ORB_EMISSIVE : NORMAL_ORB_EMISSIVE);
+	let current_font_size = $derived(
+		LABEL_FONT_SIZE * fonts.get_font_size_multiplier(game_state.is_cyber)
+	);
 </script>
 
 <T.Group position={[SWITCH_X, SWITCH_Y, SWITCH_Z]}>
@@ -106,11 +112,15 @@
 		<T.CircleGeometry args={[HIT_AREA_RADIUS, HIT_AREA_SEGMENTS]} />
 		<T.MeshBasicMaterial transparent={true} opacity={0} depthWrite={false} />
 	</T.Mesh>
+	<T.Mesh position.z={ORB_Z} onclick={handle_click}>
+		<T.SphereGeometry args={[LIGHT_HIT_RADIUS, LIGHT_HIT_SEGMENTS, LIGHT_HIT_SEGMENTS]} />
+		<T.MeshBasicMaterial transparent={true} opacity={0} depthWrite={false} />
+	</T.Mesh>
 	<T.Group position={[0, -LABEL_Y_OFFSET, LABEL_Z]}>
 		<Text
 			text={messages.cyber_switch_label}
 			font={current_font}
-			fontSize={LABEL_FONT_SIZE}
+			fontSize={current_font_size}
 			color="#ffffff"
 			anchorX="center"
 			anchorY="middle"

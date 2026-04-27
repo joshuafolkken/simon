@@ -7,7 +7,7 @@ const ALL_COLORS: ButtonColor[] = ['green', 'red', 'yellow', 'blue'];
 const STEP_MS = 500;
 const ON_RATIO = 0.7;
 const OFF_RATIO = 0.3;
-const PRESS_FEEDBACK_MS = 200;
+const TONE_MS = 200;
 const RESTART_DELAY_MS = 1000;
 const ON_MS = STEP_MS * ON_RATIO;
 const OFF_MS = STEP_MS * OFF_RATIO;
@@ -124,13 +124,21 @@ describe('simon FSM', () => {
 		expect(simon.phase).toBe('showing');
 	});
 
-	it('pressed_color is set on press and clears after feedback duration', async () => {
+	it('pressed_color is set on press and does not auto-clear', async () => {
 		simon.start();
 		await vi.runAllTimersAsync();
 		const color = seq_at(0);
 		simon.press(color);
 		expect(simon.pressed_color).toBe(color);
-		await vi.advanceTimersByTimeAsync(PRESS_FEEDBACK_MS);
+		await vi.advanceTimersByTimeAsync(TONE_MS + 10);
+		expect(simon.pressed_color).toBe(color);
+	});
+
+	it('release() clears pressed_color', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		simon.release();
 		expect(simon.pressed_color).toBeNull();
 	});
 
@@ -146,7 +154,7 @@ describe('simon FSM', () => {
 		expect(simon.round).toBe(0);
 	});
 
-	it('reset() cancels press feedback timer to prevent stale clear', async () => {
+	it('reset() clears pressed_color immediately', async () => {
 		simon.start();
 		await vi.runAllTimersAsync();
 		const wrong = wrong_color(seq_at(0));
@@ -154,8 +162,6 @@ describe('simon FSM', () => {
 		expect(simon.pressed_color).toBe(wrong);
 		simon.reset();
 		expect(simon.pressed_color).toBeNull();
-		await vi.advanceTimersByTimeAsync(PRESS_FEEDBACK_MS + 10);
-		expect(simon.phase).toBe('idle');
 	});
 
 	it('reset() cancels an in-progress sequence display', async () => {
@@ -188,13 +194,13 @@ describe('simon FSM', () => {
 		expect(simon.phase).toBe('player_input');
 	});
 
-	it('press() plays tone with pressed color and PRESS_FEEDBACK_MS duration', async () => {
+	it('press() plays tone with pressed color and TONE_MS duration', async () => {
 		const spy = vi.spyOn(simon_audio, 'play_tone');
 		simon.start();
 		await vi.runAllTimersAsync();
 		const color = seq_at(0);
 		simon.press(color);
-		expect(spy).toHaveBeenCalledWith(color, PRESS_FEEDBACK_MS);
+		expect(spy).toHaveBeenCalledWith(color, TONE_MS);
 	});
 
 	it('press() does not play tone when not in player_input phase', () => {

@@ -12,6 +12,11 @@
 	const BASE_DEPTH = 0.06;
 	const BASE_HALF_DEPTH = BASE_DEPTH / 2;
 	const SWITCH_Z = -(HALF_D - BASE_HALF_DEPTH);
+	const MOUNT_PLATE_RADIUS = 0.44;
+	const MOUNT_PLATE_DEPTH = 0.01;
+	const MOUNT_PLATE_HALF_DEPTH = MOUNT_PLATE_DEPTH / 2;
+	const MOUNT_PLATE_Z = -(BASE_HALF_DEPTH - MOUNT_PLATE_HALF_DEPTH);
+	const MOUNT_PLATE_EMISSIVE = 0.05;
 	const HEX_FACES = 6;
 	const RING_RADIUS = 0.26;
 	const RING_TUBE = 0.025;
@@ -21,7 +26,7 @@
 	const ORB_SEGMENTS = 16;
 	const ORB_EMBED = 0.5;
 	const ORB_Z = BASE_HALF_DEPTH + ORB_RADIUS * ORB_EMBED;
-	const HIT_AREA_RADIUS = BASE_RADIUS;
+	const HIT_AREA_RADIUS = MOUNT_PLATE_RADIUS;
 	const HIT_AREA_Z_OFFSET = 0.01;
 	const HIT_AREA_Z = ORB_Z + ORB_RADIUS + HIT_AREA_Z_OFFSET;
 	const HIT_AREA_SEGMENTS = 32;
@@ -58,6 +63,18 @@
 </script>
 
 <T.Group position={[SWITCH_X, SWITCH_Y, SWITCH_Z]}>
+	<T.Mesh position.z={MOUNT_PLATE_Z} onclick={handle_click} rotation.x={FACE_ROTATION_X}>
+		<T.CylinderGeometry
+			args={[MOUNT_PLATE_RADIUS, MOUNT_PLATE_RADIUS, MOUNT_PLATE_DEPTH, HEX_FACES]}
+		/>
+		<T.MeshStandardMaterial
+			color={housing_color}
+			emissive={current_color}
+			emissiveIntensity={MOUNT_PLATE_EMISSIVE}
+			metalness={METALNESS}
+			roughness={ROUGHNESS_HOUSING}
+		/>
+	</T.Mesh>
 	<T.Mesh onclick={handle_click} rotation.x={FACE_ROTATION_X}>
 		<T.CylinderGeometry args={[BASE_RADIUS, BASE_RADIUS, BASE_DEPTH, HEX_FACES]} />
 		<T.MeshStandardMaterial

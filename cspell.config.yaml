@@ -11,4 +11,6 @@ words:
   - nipplejs
   - oncreate
   - gameover
+  - raycaster
+  - Raycaster
 ignorePaths: []

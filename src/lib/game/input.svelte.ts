@@ -1,6 +1,5 @@
 const MOUSE_SENSITIVITY = 0.002;
 const MAX_PITCH = Math.PI / 2 - 0.01;
-const DASH_BURST_MS = 300;
 
 type Keys = { w: boolean; a: boolean; s: boolean; d: boolean };
 type Vec2 = { x: number; y: number };
@@ -10,8 +9,7 @@ let yaw = $state(0);
 let pitch = $state(0);
 let keys = $state<Keys>({ w: false, a: false, s: false, d: false });
 let is_sprinting = $state(false);
-let is_dashing = $state(false);
-let dash_timer: ReturnType<typeof setTimeout> | null = null;
+let is_jump_requested = $state(false);
 let active_cleanup: (() => void) | null = null;
 const joystick_move = $state<Vec2>({ x: 0, y: 0 });
 const joystick_look = $state<Vec2>({ x: 0, y: 0 });
@@ -41,15 +39,12 @@ function on_mouse_move(e: MouseEvent): void {
 	pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, pitch - e.movementY * MOUSE_SENSITIVITY));
 }
 
-function clear_dash(): void {
-	is_dashing = false;
-	dash_timer = null;
+function trigger_jump(): void {
+	is_jump_requested = true;
 }
 
-function trigger_dash(): void {
-	if (dash_timer !== null) clearTimeout(dash_timer);
-	is_dashing = true;
-	dash_timer = setTimeout(clear_dash, DASH_BURST_MS);
+function clear_jump_request(): void {
+	is_jump_requested = false;
 }
 
 function set_sprinting(value: boolean): void {
@@ -62,7 +57,7 @@ function on_key(e: KeyboardEvent, is_down: boolean): void {
 		return;
 	}
 	if (is_down && e.key === ' ') {
-		trigger_dash();
+		trigger_jump();
 		return;
 	}
 	const key = KEY_MAP[e.key];
@@ -82,9 +77,7 @@ function handle_keyup(e: KeyboardEvent): void {
 function reset_keys(): void {
 	keys = { w: false, a: false, s: false, d: false };
 	is_sprinting = false;
-	if (dash_timer !== null) clearTimeout(dash_timer);
-	is_dashing = false;
-	dash_timer = null;
+	is_jump_requested = false;
 }
 
 function setup_listeners(): () => void {
@@ -142,8 +135,8 @@ export const input = {
 	get is_sprinting() {
 		return is_sprinting;
 	},
-	get is_dashing() {
-		return is_dashing;
+	get is_jump_requested() {
+		return is_jump_requested;
 	},
 	get joystick_move() {
 		return joystick_move;
@@ -155,5 +148,7 @@ export const input = {
 	set_joystick_move,
 	set_joystick_look,
 	set_sprinting,
+	trigger_jump,
+	clear_jump_request,
 	apply_look_delta
 };

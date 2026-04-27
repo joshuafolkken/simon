@@ -6,5 +6,6 @@ export const messages = {
 	simon_start: 'START',
 	simon_round: 'ROUND',
 	simon_gameover: 'GAME OVER',
-	sprint_button: 'SPRINT'
+	sprint_button: 'SPRINT',
+	jump_button: 'JUMP'
 } as const;

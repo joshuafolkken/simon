@@ -7,4 +7,9 @@ describe('VirtualJoystick', () => {
 		const { container } = render(VirtualJoystick);
 		expect(container.querySelector('[data-testid="sprint-btn"]')).toBeTruthy();
 	});
+
+	it('renders jump button', () => {
+		const { container } = render(VirtualJoystick);
+		expect(container.querySelector('[data-testid="jump-btn"]')).toBeTruthy();
+	});
 });

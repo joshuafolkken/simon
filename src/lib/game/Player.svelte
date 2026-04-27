@@ -15,10 +15,13 @@
 	const CAPSULE_RADIUS = 0.4;
 	const FOV = 75;
 	const JOYSTICK_LOOK_SPEED = 2;
+	const JUMP_VELOCITY = 4;
+	const JUMP_GRAVITY = 12;
 	let rapier_body: RapierBody | undefined;
 	let cam_x = $state(SPAWN_X);
 	let cam_y = $state(SPAWN_Y + HEAD_HEIGHT);
 	let cam_z = $state(SPAWN_Z);
+	let jump_vel_y = 0;
 
 	function compute_velocity(): { x: number; y: number; z: number } {
 		const fw_x = -Math.sin(input.yaw);
@@ -32,21 +35,36 @@
 		const len = Math.sqrt(vx * vx + vz * vz);
 		const nx = len > 1 ? vx / len : vx;
 		const nz = len > 1 ? vz / len : vz;
-		const speed = player_speed.get_move_speed(input.is_sprinting, input.is_dashing);
+		const speed = player_speed.get_move_speed(input.is_sprinting);
 		return { x: nx * speed, y: 0, z: nz * speed };
+	}
+
+	function apply_jump(delta: number, pos_y: number): number {
+		if (input.is_jump_requested) {
+			if (jump_vel_y === 0) jump_vel_y = JUMP_VELOCITY;
+			input.clear_jump_request();
+		}
+		jump_vel_y -= JUMP_GRAVITY * delta;
+		const new_y = pos_y + jump_vel_y * delta;
+		if (new_y <= SPAWN_Y) {
+			jump_vel_y = 0;
+			return SPAWN_Y;
+		}
+		return new_y;
 	}
 
 	function tick(delta: number): void {
 		if (!rapier_body) return;
 		const vel = compute_velocity();
 		const pos = rapier_body.translation();
+		const new_y = apply_jump(delta, pos.y);
 		rapier_body.setNextKinematicTranslation({
 			x: pos.x + vel.x * delta,
-			y: SPAWN_Y,
+			y: new_y,
 			z: pos.z + vel.z * delta
 		});
 		cam_x = pos.x;
-		cam_y = SPAWN_Y + HEAD_HEIGHT;
+		cam_y = new_y + HEAD_HEIGHT;
 		cam_z = pos.z;
 		if (input.joystick_look.x || input.joystick_look.y) {
 			input.apply_look_delta(

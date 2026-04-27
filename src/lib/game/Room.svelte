@@ -12,9 +12,9 @@
 	const FLOOR_COLOR = '#3a2f2f';
 	const WALL_COLOR = '#4a4a5a';
 	const CEILING_COLOR = '#2a2a3a';
-	const CYBER_FLOOR_COLOR = '#000d0d';
-	const CYBER_WALL_COLOR = '#001122';
-	const CYBER_CEILING_COLOR = '#000011';
+	const CYBER_FLOOR_COLOR = '#0d2525';
+	const CYBER_WALL_COLOR = '#0a2035';
+	const CYBER_CEILING_COLOR = '#08082a';
 
 	let floor_color = $derived(game_state.is_cyber ? CYBER_FLOOR_COLOR : FLOOR_COLOR);
 	let wall_color = $derived(game_state.is_cyber ? CYBER_WALL_COLOR : WALL_COLOR);

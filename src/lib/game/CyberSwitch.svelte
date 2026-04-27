@@ -4,9 +4,9 @@
 	import { game_state } from '$lib/game/state.svelte';
 	import { messages } from '$lib/messages/en';
 
-	const SWITCH_X = 1.6;
+	const SWITCH_X = 1.2;
 	const SWITCH_Y = 1.2;
-	const SWITCH_Z = -4.8;
+	const SWITCH_Z = -4.3;
 	const BASE_RADIUS = 0.32;
 	const BASE_DEPTH = 0.06;
 	const BASE_HALF_DEPTH = BASE_DEPTH / 2;

@@ -1,5 +1,6 @@
 const MOUSE_SENSITIVITY = 0.002;
 const MAX_PITCH = Math.PI / 2 - 0.01;
+const DASH_BURST_MS = 300;
 
 type Keys = { w: boolean; a: boolean; s: boolean; d: boolean };
 type Vec2 = { x: number; y: number };
@@ -8,6 +9,9 @@ let is_pointer_locked = $state(false);
 let yaw = $state(0);
 let pitch = $state(0);
 let keys = $state<Keys>({ w: false, a: false, s: false, d: false });
+let is_sprinting = $state(false);
+let is_dashing = $state(false);
+let dash_timer: ReturnType<typeof setTimeout> | null = null;
 let active_cleanup: (() => void) | null = null;
 const joystick_move = $state<Vec2>({ x: 0, y: 0 });
 const joystick_look = $state<Vec2>({ x: 0, y: 0 });
@@ -37,7 +41,30 @@ function on_mouse_move(e: MouseEvent): void {
 	pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, pitch - e.movementY * MOUSE_SENSITIVITY));
 }
 
+function clear_dash(): void {
+	is_dashing = false;
+	dash_timer = null;
+}
+
+function trigger_dash(): void {
+	if (dash_timer !== null) clearTimeout(dash_timer);
+	is_dashing = true;
+	dash_timer = setTimeout(clear_dash, DASH_BURST_MS);
+}
+
+function set_sprinting(value: boolean): void {
+	is_sprinting = value;
+}
+
 function on_key(e: KeyboardEvent, is_down: boolean): void {
+	if (e.key === 'Shift') {
+		set_sprinting(is_down);
+		return;
+	}
+	if (is_down && e.key === ' ') {
+		trigger_dash();
+		return;
+	}
 	const key = KEY_MAP[e.key];
 	if (!key) return;
 	keys[key] = is_down;
@@ -54,6 +81,10 @@ function handle_keyup(e: KeyboardEvent): void {
 
 function reset_keys(): void {
 	keys = { w: false, a: false, s: false, d: false };
+	is_sprinting = false;
+	if (dash_timer !== null) clearTimeout(dash_timer);
+	is_dashing = false;
+	dash_timer = null;
 }
 
 function setup_listeners(): () => void {
@@ -108,6 +139,12 @@ export const input = {
 	get keys() {
 		return keys;
 	},
+	get is_sprinting() {
+		return is_sprinting;
+	},
+	get is_dashing() {
+		return is_dashing;
+	},
 	get joystick_move() {
 		return joystick_move;
 	},
@@ -117,5 +154,6 @@ export const input = {
 	setup_listeners,
 	set_joystick_move,
 	set_joystick_look,
+	set_sprinting,
 	apply_look_delta
 };

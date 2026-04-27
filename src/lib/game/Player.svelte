@@ -3,6 +3,7 @@
 	import { T, useTask } from '@threlte/core';
 	import { RigidBody, Collider } from '@threlte/rapier';
 	import { input } from '$lib/game/input.svelte';
+	import { player_speed } from '$lib/game/player-speed';
 
 	type RapierBody = NonNullable<ComponentProps<typeof RigidBody>['rigidBody']>;
 
@@ -12,7 +13,6 @@
 	const HEAD_HEIGHT = 0.6;
 	const CAPSULE_HALF_H = 0.5;
 	const CAPSULE_RADIUS = 0.4;
-	const MOVE_SPEED = 5;
 	const FOV = 75;
 	const JOYSTICK_LOOK_SPEED = 2;
 	let rapier_body: RapierBody | undefined;
@@ -32,7 +32,8 @@
 		const len = Math.sqrt(vx * vx + vz * vz);
 		const nx = len > 1 ? vx / len : vx;
 		const nz = len > 1 ? vz / len : vz;
-		return { x: nx * MOVE_SPEED, y: 0, z: nz * MOVE_SPEED };
+		const speed = player_speed.get_move_speed(input.is_sprinting, input.is_dashing);
+		return { x: nx * speed, y: 0, z: nz * speed };
 	}
 
 	function tick(delta: number): void {

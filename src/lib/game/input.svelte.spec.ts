@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { input } from '$lib/game/input.svelte';
 
 describe('input', () => {
@@ -110,5 +110,49 @@ describe('input', () => {
 		expect(input.joystick_move.x).toBe(0);
 		expect(input.joystick_look.x).toBe(0);
 		cleanup = input.setup_listeners();
+	});
+
+	it('Shift keydown sets is_sprinting true', () => {
+		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift' }));
+		expect(input.is_sprinting).toBe(true);
+	});
+
+	it('Shift keyup sets is_sprinting false', () => {
+		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift' }));
+		document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Shift' }));
+		expect(input.is_sprinting).toBe(false);
+	});
+
+	it('set_sprinting toggles is_sprinting', () => {
+		input.set_sprinting(true);
+		expect(input.is_sprinting).toBe(true);
+		input.set_sprinting(false);
+		expect(input.is_sprinting).toBe(false);
+	});
+
+	it('Space keydown sets is_dashing true', () => {
+		vi.useFakeTimers();
+		document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+		expect(input.is_dashing).toBe(true);
+		vi.useRealTimers();
+	});
+
+	it('is_dashing auto-clears after DASH_BURST_MS', async () => {
+		vi.useFakeTimers();
+		document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+		await vi.advanceTimersByTimeAsync(300);
+		expect(input.is_dashing).toBe(false);
+		vi.useRealTimers();
+	});
+
+	it('reset_keys clears is_sprinting and is_dashing', () => {
+		vi.useFakeTimers();
+		input.set_sprinting(true);
+		document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+		document.dispatchEvent(new KeyboardEvent('blur'));
+		globalThis.dispatchEvent(new Event('blur'));
+		expect(input.is_sprinting).toBe(false);
+		expect(input.is_dashing).toBe(false);
+		vi.useRealTimers();
 	});
 });

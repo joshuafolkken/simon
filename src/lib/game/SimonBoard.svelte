@@ -104,7 +104,11 @@
 
 	{#each BUTTON_CONFIGS as btn (btn.color)}
 		<T.Group rotation.z={btn.rotation}>
-			<T.Mesh onclick={() => on_press(btn.color)}>
+			<T.Mesh
+				onpointerdown={() => on_press(btn.color)}
+				onpointerup={() => simon.release()}
+				onpointerleave={() => simon.release()}
+			>
 				<T.RingGeometry
 					args={[INNER_RADIUS, OUTER_RADIUS, THETA_SEGMENTS, 1, THETA_START, THETA_LENGTH]}
 				/>

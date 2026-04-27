@@ -11,24 +11,57 @@ const GAIN_FLOOR = 0.001;
 const NORMAL_WAVE: OscillatorType = 'sine';
 const CYBER_WAVE: OscillatorType = 'square';
 
-function play_raw_tone(freq: number, duration_ms: number): void {
+let active_osc: OscillatorNode | null = null;
+
+type OscGraph = { osc: OscillatorNode; gain: GainNode; ctx: AudioContext };
+
+function create_osc_graph(freq: number): OscGraph | null {
 	game_audio.init_audio();
 	const ctx = game_audio.get_audio_context();
-	if (!ctx) return;
+	if (!ctx) return null;
 	const osc = ctx.createOscillator();
 	const gain = ctx.createGain();
 	osc.connect(gain);
 	gain.connect(ctx.destination);
-	const is_cyber = game_state.is_cyber;
 	osc.frequency.setValueAtTime(freq, ctx.currentTime);
-	osc.type = is_cyber ? CYBER_WAVE : NORMAL_WAVE;
-	const duration_s = duration_ms / MS_PER_SECOND;
+	osc.type = game_state.is_cyber ? CYBER_WAVE : NORMAL_WAVE;
 	gain.gain.setValueAtTime(GAIN_VALUE, ctx.currentTime);
-	if (is_cyber) {
+	return { osc, gain, ctx };
+}
+
+function stop_tone(): void {
+	if (!active_osc) return;
+	try {
+		active_osc.stop();
+	} catch {
+		// already stopped
+	}
+	active_osc = null;
+}
+
+function start_tone_raw(freq: number): void {
+	stop_tone();
+	const nodes = create_osc_graph(freq);
+	if (!nodes) return;
+	nodes.osc.start(nodes.ctx.currentTime);
+	active_osc = nodes.osc;
+}
+
+function play_raw_tone(freq: number, duration_ms: number): void {
+	const nodes = create_osc_graph(freq);
+	if (!nodes) return;
+	const { osc, gain, ctx } = nodes;
+	const duration_s = duration_ms / MS_PER_SECOND;
+	if (game_state.is_cyber) {
 		gain.gain.exponentialRampToValueAtTime(GAIN_FLOOR, ctx.currentTime + duration_s);
 	}
 	osc.start(ctx.currentTime);
 	osc.stop(ctx.currentTime + duration_s);
+}
+
+function start_tone(color: ButtonColor): void {
+	const is_cyber = game_state.is_cyber;
+	start_tone_raw(is_cyber ? CYBER_FREQ[color] : FREQ[color]);
 }
 
 function play_tone(color: ButtonColor, duration_ms: number): void {
@@ -40,4 +73,10 @@ function play_error_tone(duration_ms: number): void {
 	play_raw_tone(ERROR_FREQ, duration_ms);
 }
 
-export const simon_audio = { play_tone, play_error_tone, ERROR_FREQ };
+export const simon_audio = {
+	play_tone,
+	play_error_tone,
+	start_tone,
+	stop_tone,
+	ERROR_FREQ
+};

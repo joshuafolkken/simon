@@ -19,3 +19,24 @@ test('game scene renders canvas after start', async ({ page }) => {
 	await expect(game_scene).toBeVisible();
 	await expect(game_scene.locator('canvas')).toBeVisible();
 });
+
+test('crosshair is absent when pointer is not locked', async ({ page }) => {
+	await page.goto('/');
+	await page.locator('.title-container').click();
+	await expect(page.getByTestId('crosshair')).toHaveCount(0);
+});
+
+test('crosshair appears when pointer lock is simulated', async ({ page }) => {
+	await page.goto('/');
+	await page.locator('.title-container').click();
+
+	await page.evaluate(() => {
+		Object.defineProperty(document, 'pointerLockElement', {
+			get: () => document.body,
+			configurable: true
+		});
+		document.dispatchEvent(new Event('pointerlockchange'));
+	});
+
+	await expect(page.getByTestId('crosshair')).toBeVisible();
+});

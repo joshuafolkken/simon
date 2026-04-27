@@ -20,6 +20,9 @@
 	{#if !is_locked}
 		<div class="click-hint" aria-live="polite">{messages.click_to_play}</div>
 	{/if}
+	{#if is_locked}
+		<div class="crosshair" aria-hidden="true" data-testid="crosshair"></div>
+	{/if}
 	<Canvas shadows>
 		<GameSceneObjects />
 	</Canvas>
@@ -45,5 +48,37 @@
 		letter-spacing: 0.2em;
 		pointer-events: none;
 		z-index: 10;
+	}
+
+	.crosshair {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 16px;
+		height: 16px;
+		pointer-events: none;
+		z-index: 10;
+	}
+
+	.crosshair::before,
+	.crosshair::after {
+		content: '';
+		position: absolute;
+		background: rgba(255, 255, 255, 0.8);
+	}
+
+	.crosshair::before {
+		width: 100%;
+		height: 2px;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	.crosshair::after {
+		width: 2px;
+		height: 100%;
+		left: 50%;
+		transform: translateX(-50%);
 	}
 </style>

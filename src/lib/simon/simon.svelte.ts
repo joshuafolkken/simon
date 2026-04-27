@@ -1,5 +1,5 @@
 import { simon_audio } from './audio';
-import type { ButtonColor, SimonPhase, SimonMode } from './types';
+import type { ButtonColor, SimonPhase } from './types';
 
 const COLORS: readonly ButtonColor[] = ['green', 'red', 'yellow', 'blue'];
 const STEP_MS_1_5 = 500;
@@ -12,7 +12,6 @@ const PRESS_FEEDBACK_MS = 200;
 const RESTART_DELAY_MS = 1000;
 
 let phase = $state<SimonPhase>('idle');
-let mode = $state<SimonMode>('normal');
 let sequence = $state<ButtonColor[]>([]);
 let position = $state(0);
 let active_color = $state<ButtonColor | null>(null);
@@ -84,13 +83,7 @@ function handle_correct_press(): void {
 }
 
 function handle_wrong_press(): void {
-	if (mode === 'strict') {
-		phase = 'gameover';
-		return;
-	}
-	phase = 'showing';
-	show_gen += 1;
-	void run_show(show_gen);
+	phase = 'gameover';
 }
 
 function start(): void {
@@ -135,23 +128,15 @@ function reset(): void {
 	cancel_press_feedback();
 	cancel_restart_timer();
 	phase = 'idle';
-	mode = 'normal';
 	sequence = [];
 	position = 0;
 	active_color = null;
 	round = 0;
 }
 
-function toggle_mode(): void {
-	mode = mode === 'normal' ? 'strict' : 'normal';
-}
-
 export const simon = {
 	get phase() {
 		return phase;
-	},
-	get mode() {
-		return mode;
 	},
 	get sequence() {
 		return sequence;
@@ -170,6 +155,5 @@ export const simon = {
 	},
 	start,
 	press,
-	reset,
-	toggle_mode
+	reset
 };

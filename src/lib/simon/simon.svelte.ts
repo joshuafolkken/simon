@@ -9,6 +9,7 @@ const STEP_MS_21_PLUS = 150;
 const ON_RATIO = 0.7;
 const OFF_RATIO = 0.3;
 const PRESS_FEEDBACK_MS = 200;
+const RESTART_DELAY_MS = 1000;
 
 let phase = $state<SimonPhase>('idle');
 let mode = $state<SimonMode>('normal');
@@ -19,6 +20,7 @@ let pressed_color = $state<ButtonColor | null>(null);
 let round = $state(0);
 let show_gen = 0;
 let press_feedback_timer: ReturnType<typeof setTimeout> | null = null;
+let restart_timer: ReturnType<typeof setTimeout> | null = null;
 
 function delay(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -56,14 +58,29 @@ async function run_show(gen: number): Promise<void> {
 	position = 0;
 }
 
+function cancel_restart_timer(): void {
+	if (restart_timer !== null) clearTimeout(restart_timer);
+	restart_timer = null;
+}
+
+function start_next_round(): void {
+	restart_timer = null;
+	round += 1;
+	add_to_sequence();
+	show_gen += 1;
+	void run_show(show_gen);
+}
+
+function schedule_next_round(): void {
+	cancel_restart_timer();
+	phase = 'showing';
+	restart_timer = setTimeout(start_next_round, RESTART_DELAY_MS);
+}
+
 function handle_correct_press(): void {
 	position += 1;
 	if (position < sequence.length) return;
-	round += 1;
-	add_to_sequence();
-	phase = 'showing';
-	show_gen += 1;
-	void run_show(show_gen);
+	schedule_next_round();
 }
 
 function handle_wrong_press(): void {
@@ -116,6 +133,7 @@ function press(color: ButtonColor): void {
 function reset(): void {
 	show_gen += 1;
 	cancel_press_feedback();
+	cancel_restart_timer();
 	phase = 'idle';
 	mode = 'normal';
 	sequence = [];

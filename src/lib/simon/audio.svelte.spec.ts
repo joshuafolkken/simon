@@ -38,6 +38,14 @@ describe('simon audio', () => {
 	it('play_error_tone does not throw', () => {
 		expect(() => simon_audio.play_error_tone(100)).not.toThrow();
 	});
+
+	it.each(ALL_COLORS)('start_tone does not throw for %s', (color) => {
+		expect(() => simon_audio.start_tone(color)).not.toThrow();
+	});
+
+	it('stop_tone does not throw when no tone is playing', () => {
+		expect(() => simon_audio.stop_tone()).not.toThrow();
+	});
 });
 
 describe('simon audio cyber mode', () => {
@@ -90,6 +98,28 @@ describe('simon audio envelope', () => {
 		simon_audio.play_error_tone(3000);
 
 		expect(osc_node.frequency.setValueAtTime).toHaveBeenCalledWith(simon_audio.ERROR_FREQ, 0);
+	});
+
+	it('start_tone starts oscillator without calling stop', () => {
+		const { ctx, osc_node } = make_mock_ctx();
+		vi.spyOn(game_audio, 'init_audio').mockImplementation(() => {});
+		vi.spyOn(game_audio, 'get_audio_context').mockReturnValue(ctx as unknown as AudioContext);
+
+		simon_audio.start_tone('green');
+
+		expect(osc_node.start).toHaveBeenCalled();
+		expect(osc_node.stop).not.toHaveBeenCalled();
+	});
+
+	it('stop_tone calls stop on the active oscillator', () => {
+		const { ctx, osc_node } = make_mock_ctx();
+		vi.spyOn(game_audio, 'init_audio').mockImplementation(() => {});
+		vi.spyOn(game_audio, 'get_audio_context').mockReturnValue(ctx as unknown as AudioContext);
+
+		simon_audio.start_tone('red');
+		simon_audio.stop_tone();
+
+		expect(osc_node.stop).toHaveBeenCalledTimes(1);
 	});
 
 	it('play_error_tone normal mode uses flat envelope', () => {

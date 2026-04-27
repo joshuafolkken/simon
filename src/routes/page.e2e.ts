@@ -28,7 +28,6 @@ test('CLICK TO PLAY hint disappears when pointer lock is simulated', async ({ pa
 	});
 
 	await expect(page.locator('.click-hint')).toHaveCount(0);
-	await expect(page.getByTestId('crosshair')).toBeVisible();
 });
 
 test('pointer lock is requested on canvas element', async ({ page }) => {

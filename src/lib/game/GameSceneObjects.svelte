@@ -19,6 +19,10 @@
 	const TITLE_Z = -1;
 	const BOB_SPEED = 0.001;
 	const BOB_AMPLITUDE = 0.05;
+	const CYBER_ACCENT_COLOR = '#ff00ff';
+	const CYBER_ACCENT_INTENSITY = 6;
+	const CYBER_ACCENT_Y = 0.5;
+	const CYBER_ACCENT_Z = -2;
 
 	const { camera } = useThrelte();
 	interactivity({ compute: make_pointer_compute(camera) });
@@ -38,6 +42,13 @@
 <T.Color attach="background" args={[bg_color]} />
 <T.AmbientLight intensity={ambient_intensity} />
 <T.PointLight position={[0, POINT_LIGHT_Y, 0]} intensity={point_light_intensity} castShadow />
+{#if game_state.is_cyber}
+	<T.PointLight
+		position={[0, CYBER_ACCENT_Y, CYBER_ACCENT_Z]}
+		color={CYBER_ACCENT_COLOR}
+		intensity={CYBER_ACCENT_INTENSITY}
+	/>
+{/if}
 
 <T.Group position={[0, title_y, TITLE_Z]}>
 	<Text

@@ -8,7 +8,7 @@ const STEP_MS_14_20 = 250;
 const STEP_MS_21_PLUS = 150;
 const ON_RATIO = 0.7;
 const OFF_RATIO = 0.3;
-const PRESS_FEEDBACK_MS = 200;
+const TONE_MS = 200;
 const RESTART_DELAY_MS = 1000;
 
 let phase = $state<SimonPhase>('idle');
@@ -18,7 +18,6 @@ let active_color = $state<ButtonColor | null>(null);
 let pressed_color = $state<ButtonColor | null>(null);
 let round = $state(0);
 let show_gen = 0;
-let press_feedback_timer: ReturnType<typeof setTimeout> | null = null;
 let restart_timer: ReturnType<typeof setTimeout> | null = null;
 
 function delay(ms: number): Promise<void> {
@@ -97,25 +96,14 @@ function start(): void {
 	void run_show(show_gen);
 }
 
-function schedule_press_feedback(): void {
-	if (press_feedback_timer !== null) clearTimeout(press_feedback_timer);
-	press_feedback_timer = setTimeout(() => {
-		pressed_color = null;
-		press_feedback_timer = null;
-	}, PRESS_FEEDBACK_MS);
-}
-
-function cancel_press_feedback(): void {
-	if (press_feedback_timer !== null) clearTimeout(press_feedback_timer);
-	press_feedback_timer = null;
+function release(): void {
 	pressed_color = null;
 }
 
 function press(color: ButtonColor): void {
 	if (phase !== 'player_input') return;
 	pressed_color = color;
-	simon_audio.play_tone(color, PRESS_FEEDBACK_MS);
-	schedule_press_feedback();
+	simon_audio.play_tone(color, TONE_MS);
 	if (color === sequence[position]) {
 		handle_correct_press();
 	} else {
@@ -125,7 +113,7 @@ function press(color: ButtonColor): void {
 
 function reset(): void {
 	show_gen += 1;
-	cancel_press_feedback();
+	release();
 	cancel_restart_timer();
 	phase = 'idle';
 	sequence = [];
@@ -155,5 +143,6 @@ export const simon = {
 	},
 	start,
 	press,
+	release,
 	reset
 };

@@ -1,5 +1,6 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { simon } from '$lib/simon/simon.svelte';
+import { simon_audio } from '$lib/simon/audio';
 import type { ButtonColor } from '$lib/simon/types';
 
 const ALL_COLORS: ButtonColor[] = ['green', 'red', 'yellow', 'blue'];
@@ -29,6 +30,7 @@ describe('simon FSM', () => {
 	afterEach(() => {
 		vi.clearAllTimers();
 		vi.useRealTimers();
+		vi.restoreAllMocks();
 		simon.reset();
 	});
 
@@ -191,5 +193,21 @@ describe('simon FSM', () => {
 		await vi.runAllTimersAsync();
 		simon.start();
 		expect(simon.phase).toBe('player_input');
+	});
+
+	it('press() plays tone with pressed color and PRESS_FEEDBACK_MS duration', async () => {
+		const spy = vi.spyOn(simon_audio, 'play_tone');
+		simon.start();
+		await vi.runAllTimersAsync();
+		const color = seq_at(0);
+		simon.press(color);
+		expect(spy).toHaveBeenCalledWith(color, PRESS_FEEDBACK_MS);
+	});
+
+	it('press() does not play tone when not in player_input phase', () => {
+		simon.start(); // phase = showing
+		const spy = vi.spyOn(simon_audio, 'play_tone');
+		simon.press('green');
+		expect(spy).not.toHaveBeenCalled();
 	});
 });

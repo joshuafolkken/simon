@@ -10,7 +10,7 @@
 	let is_locked = $derived(input.is_pointer_locked);
 
 	function request_lock(): void {
-		container?.requestPointerLock();
+		container?.querySelector('canvas')?.requestPointerLock();
 	}
 
 	onMount(() => input.setup_listeners());

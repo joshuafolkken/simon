@@ -96,6 +96,7 @@
 		game_state.is_cyber ? CYBER_EMISSIVE_INTENSITY : EMISSIVE_INTENSITY
 	);
 	let current_font = $derived(fonts.get_font(game_state.is_cyber));
+	let current_font_size = $derived(FONT_SIZE * fonts.get_font_size_multiplier(game_state.is_cyber));
 </script>
 
 <T.Group position={[0, BOARD_Y, BOARD_Z]}>
@@ -135,7 +136,7 @@
 		<Text
 			text={center_text}
 			font={current_font}
-			fontSize={FONT_SIZE}
+			fontSize={current_font_size}
 			color="#ffffff"
 			anchorX="center"
 			anchorY="middle"

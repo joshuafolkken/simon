@@ -1,7 +1,7 @@
-let is_cyber = $state(false);
+let is_cyber = $state(true);
 
 function return_to_title(): void {
-	is_cyber = false;
+	is_cyber = true;
 }
 
 function toggle_cyber(): void {

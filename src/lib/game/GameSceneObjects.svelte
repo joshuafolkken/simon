@@ -44,6 +44,9 @@
 	let ambient_color = $derived(lighting.get_ambient_color(game_state.is_cyber));
 	let point_light_intensity = $derived(lighting.get_point_light_intensity(game_state.is_cyber));
 	let current_font = $derived(fonts.get_font(game_state.is_cyber));
+	let current_title_font_size = $derived(
+		TITLE_FONT_SIZE * fonts.get_font_size_multiplier(game_state.is_cyber)
+	);
 	let title_y = $state(TITLE_Y);
 
 	function tick(): void {
@@ -98,7 +101,7 @@
 	<Text
 		text={messages.game_title}
 		font={current_font}
-		fontSize={TITLE_FONT_SIZE}
+		fontSize={current_title_font_size}
 		color="#ffffff"
 		anchorX="center"
 		anchorY="middle"

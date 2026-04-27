@@ -78,7 +78,7 @@ function schedule_next_round(): void {
 function handle_correct_press(): void {
 	position += 1;
 	if (position < sequence.length) return;
-	schedule_next_round();
+	phase = 'round_complete';
 }
 
 function handle_wrong_press(): void {
@@ -100,6 +100,7 @@ function start(): void {
 function release(): void {
 	simon_audio.stop_tone();
 	pressed_color = null;
+	if (phase === 'round_complete') schedule_next_round();
 }
 
 function press(color: ButtonColor): void {

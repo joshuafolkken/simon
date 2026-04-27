@@ -13,4 +13,6 @@ words:
   - gameover
   - raycaster
   - Raycaster
+  - metalness
+  - METALNESS
 ignorePaths: []

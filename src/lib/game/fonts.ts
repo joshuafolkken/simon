@@ -1,5 +1,5 @@
-const FONT_RETRO = 'https://fonts.gstatic.com/s/pressstart2p/v15/ZLfdm8dIPQ0YJQSIFYlE.ttf';
-const FONT_CYBER = 'https://fonts.gstatic.com/s/orbitron/v31/yMJRMIlzdpvBhQQL_Qq7dy0.ttf';
+const FONT_RETRO = '/fonts/PressStart2P.ttf';
+const FONT_CYBER = '/fonts/Orbitron.ttf';
 
 function get_font(is_cyber: boolean): string {
 	return is_cyber ? FONT_CYBER : FONT_RETRO;

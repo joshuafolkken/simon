@@ -24,7 +24,9 @@ function play_tone(color: ButtonColor, duration_ms: number): void {
 	osc.type = is_cyber ? CYBER_WAVE : NORMAL_WAVE;
 	const duration_s = duration_ms / MS_PER_SECOND;
 	gain.gain.setValueAtTime(GAIN_VALUE, ctx.currentTime);
-	gain.gain.exponentialRampToValueAtTime(GAIN_FLOOR, ctx.currentTime + duration_s);
+	if (is_cyber) {
+		gain.gain.exponentialRampToValueAtTime(GAIN_FLOOR, ctx.currentTime + duration_s);
+	}
 	osc.start(ctx.currentTime);
 	osc.stop(ctx.currentTime + duration_s);
 }

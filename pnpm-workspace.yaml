@@ -1,5 +1,4 @@
 onlyBuiltDependencies:
-  - '@joshuafolkken/kit'
   - esbuild
   - lefthook
   - unrs-resolver

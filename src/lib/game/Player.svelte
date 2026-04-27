@@ -4,6 +4,7 @@
 	import { RigidBody, Collider } from '@threlte/rapier';
 	import { input } from '$lib/game/input.svelte';
 	import { player_speed } from '$lib/game/player-speed';
+	import { player_bounds, PLAYER_RADIUS } from '$lib/game/player-bounds';
 
 	type RapierBody = NonNullable<ComponentProps<typeof RigidBody>['rigidBody']>;
 
@@ -12,7 +13,7 @@
 	const SPAWN_Z = 3;
 	const HEAD_HEIGHT = 0.6;
 	const CAPSULE_HALF_H = 0.5;
-	const CAPSULE_RADIUS = 0.4;
+	const CAPSULE_RADIUS = PLAYER_RADIUS;
 	const FOV = 75;
 	const JOYSTICK_LOOK_SPEED = 2;
 	const JUMP_VELOCITY = 4;
@@ -58,10 +59,13 @@
 		const vel = compute_velocity();
 		const pos = rapier_body.translation();
 		const new_y = apply_jump(delta, pos.y);
+		const raw_x = pos.x + vel.x * delta;
+		const raw_z = pos.z + vel.z * delta;
+		const { x: clamped_x, z: clamped_z } = player_bounds.clamp_to_room(raw_x, raw_z);
 		rapier_body.setNextKinematicTranslation({
-			x: pos.x + vel.x * delta,
+			x: clamped_x,
 			y: new_y,
-			z: pos.z + vel.z * delta
+			z: clamped_z
 		});
 		cam_x = pos.x;
 		cam_y = new_y + HEAD_HEIGHT;

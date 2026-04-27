@@ -203,19 +203,28 @@ describe('simon FSM', () => {
 		expect(simon.phase).toBe('player_input');
 	});
 
-	it('press() plays tone with pressed color and TONE_MS duration', async () => {
-		const spy = vi.spyOn(simon_audio, 'play_tone');
+	it('press() starts tone for pressed color', async () => {
+		const spy = vi.spyOn(simon_audio, 'start_tone');
 		simon.start();
 		await vi.runAllTimersAsync();
 		const color = seq_at(0);
 		simon.press(color);
-		expect(spy).toHaveBeenCalledWith(color, TONE_MS);
+		expect(spy).toHaveBeenCalledWith(color);
 	});
 
-	it('press() does not play tone when not in player_input phase', () => {
+	it('press() does not start tone when not in player_input phase', () => {
 		simon.start(); // phase = showing
-		const spy = vi.spyOn(simon_audio, 'play_tone');
+		const spy = vi.spyOn(simon_audio, 'start_tone');
 		simon.press('green');
 		expect(spy).not.toHaveBeenCalled();
+	});
+
+	it('release() stops the tone', async () => {
+		const spy = vi.spyOn(simon_audio, 'stop_tone');
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		simon.release();
+		expect(spy).toHaveBeenCalled();
 	});
 });

@@ -8,7 +8,6 @@ const STEP_MS_14_20 = 250;
 const STEP_MS_21_PLUS = 150;
 const ON_RATIO = 0.7;
 const OFF_RATIO = 0.3;
-const TONE_MS = 200;
 const ERROR_BEEP_MS = 3000;
 const RESTART_DELAY_MS = 1000;
 
@@ -99,13 +98,14 @@ function start(): void {
 }
 
 function release(): void {
+	simon_audio.stop_tone();
 	pressed_color = null;
 }
 
 function press(color: ButtonColor): void {
 	if (phase !== 'player_input') return;
 	pressed_color = color;
-	simon_audio.play_tone(color, TONE_MS);
+	simon_audio.start_tone(color);
 	if (color === sequence[position]) {
 		handle_correct_press();
 	} else {

@@ -111,18 +111,7 @@ describe('simon FSM', () => {
 		expect(simon.round).toBe(2);
 	});
 
-	it('wrong press in normal mode replays sequence then returns to player_input', async () => {
-		simon.start();
-		await vi.runAllTimersAsync();
-		simon.press(wrong_color(seq_at(0)));
-		expect(simon.phase).toBe('showing');
-		await vi.runAllTimersAsync();
-		expect(simon.phase).toBe('player_input');
-		expect(simon.position).toBe(0);
-	});
-
-	it('wrong press in strict mode triggers gameover', async () => {
-		simon.toggle_mode();
+	it('wrong press triggers gameover', async () => {
 		simon.start();
 		await vi.runAllTimersAsync();
 		simon.press(wrong_color(seq_at(0)));
@@ -150,7 +139,6 @@ describe('simon FSM', () => {
 		await vi.runAllTimersAsync();
 		simon.reset();
 		expect(simon.phase).toBe('idle');
-		expect(simon.mode).toBe('normal');
 		expect(simon.sequence).toHaveLength(0);
 		expect(simon.position).toBe(0);
 		expect(simon.active_color).toBeNull();
@@ -177,20 +165,7 @@ describe('simon FSM', () => {
 		expect(simon.phase).toBe('idle');
 	});
 
-	it('toggle_mode() switches from normal to strict', () => {
-		expect(simon.mode).toBe('normal');
-		simon.toggle_mode();
-		expect(simon.mode).toBe('strict');
-	});
-
-	it('toggle_mode() switches from strict back to normal', () => {
-		simon.toggle_mode();
-		simon.toggle_mode();
-		expect(simon.mode).toBe('normal');
-	});
-
-	it('start() from gameover restarts the game in the same mode', async () => {
-		simon.toggle_mode();
+	it('start() from gameover restarts the game', async () => {
 		simon.start();
 		await vi.runAllTimersAsync();
 		simon.press(wrong_color(seq_at(0)));
@@ -198,7 +173,6 @@ describe('simon FSM', () => {
 		simon.start();
 		expect(simon.phase).toBe('showing');
 		expect(simon.round).toBe(1);
-		expect(simon.mode).toBe('strict');
 	});
 
 	it('start() is ignored while showing', () => {

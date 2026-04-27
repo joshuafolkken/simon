@@ -5,7 +5,5 @@ export const messages = {
 	click_to_play: 'CLICK TO PLAY',
 	simon_start: 'START',
 	simon_round: 'ROUND',
-	simon_gameover: 'GAME OVER',
-	simon_strict: 'STRICT',
-	simon_normal: 'NORMAL'
+	simon_gameover: 'GAME OVER'
 } as const;

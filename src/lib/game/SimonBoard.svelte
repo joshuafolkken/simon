@@ -18,10 +18,6 @@
 	const CENTER_RADIUS = 0.22;
 	const LABEL_Z = 0.02;
 	const BACKING_Z = -0.01;
-	const MODE_TOGGLE_Y = -1.0;
-	const MODE_BOX_W = 0.5;
-	const MODE_BOX_H = 0.12;
-	const MODE_BOX_D = 0.01;
 	const FONT_SIZE = 0.08;
 	const EMISSIVE_INTENSITY = 0.8;
 	const CYBER_EMISSIVE_INTENSITY = 1.5;
@@ -94,12 +90,7 @@
 		return messages.simon_start;
 	}
 
-	function get_mode_text(): string {
-		return simon.mode === 'strict' ? messages.simon_strict : messages.simon_normal;
-	}
-
 	let center_text = $derived(get_center_text());
-	let mode_text = $derived(get_mode_text());
 	let emissive_intensity = $derived(
 		game_state.is_cyber ? CYBER_EMISSIVE_INTENSITY : EMISSIVE_INTENSITY
 	);
@@ -142,14 +133,5 @@
 			anchorX="center"
 			anchorY="middle"
 		/>
-	</T.Group>
-
-	<T.Mesh position={[0, MODE_TOGGLE_Y, 0]} onclick={() => simon.toggle_mode()}>
-		<T.BoxGeometry args={[MODE_BOX_W, MODE_BOX_H, MODE_BOX_D]} />
-		<T.MeshStandardMaterial color="#333333" roughness={0.5} />
-	</T.Mesh>
-
-	<T.Group position={[0, MODE_TOGGLE_Y, LABEL_Z]}>
-		<Text text={mode_text} fontSize={FONT_SIZE} color="#aaaaaa" anchorX="center" anchorY="middle" />
 	</T.Group>
 </T.Group>

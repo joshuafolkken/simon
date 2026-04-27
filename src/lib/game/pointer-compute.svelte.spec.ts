@@ -45,7 +45,7 @@ const UNLOCKED_OFFSET_Y = 300;
 const SKIP_OFFSET_X = 100;
 const SKIP_OFFSET_Y = 100;
 
-// Expected NDC for off-center locked test if lock were bypassed
+// Expected NDC when pointer lock is active: forced to center, ignoring offsets
 const EXPECTED_LOCKED_X = CENTER;
 const EXPECTED_LOCKED_Y = CENTER;
 

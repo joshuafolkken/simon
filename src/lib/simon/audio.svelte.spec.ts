@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { simon_audio } from '$lib/simon/audio';
 import { audio as game_audio } from '$lib/game/audio';
 import { game_state } from '$lib/game/state.svelte';
@@ -49,10 +49,6 @@ describe('simon audio', () => {
 });
 
 describe('simon audio cyber mode', () => {
-	beforeEach(() => {
-		game_state.toggle_cyber();
-	});
-
 	afterEach(() => {
 		game_state.return_to_title();
 	});
@@ -69,6 +65,7 @@ describe('simon audio envelope', () => {
 	});
 
 	it('normal mode uses flat envelope — no exponential ramp', () => {
+		game_state.toggle_cyber();
 		const { ctx, gain_node } = make_mock_ctx();
 		vi.spyOn(game_audio, 'init_audio').mockImplementation(() => {});
 		vi.spyOn(game_audio, 'get_audio_context').mockReturnValue(ctx as unknown as AudioContext);
@@ -80,7 +77,6 @@ describe('simon audio envelope', () => {
 	});
 
 	it('cyber mode applies exponential gain ramp', () => {
-		game_state.toggle_cyber();
 		const { ctx, gain_node } = make_mock_ctx();
 		vi.spyOn(game_audio, 'init_audio').mockImplementation(() => {});
 		vi.spyOn(game_audio, 'get_audio_context').mockReturnValue(ctx as unknown as AudioContext);
@@ -123,6 +119,7 @@ describe('simon audio envelope', () => {
 	});
 
 	it('play_error_tone normal mode uses flat envelope', () => {
+		game_state.toggle_cyber();
 		const { ctx, gain_node } = make_mock_ctx();
 		vi.spyOn(game_audio, 'init_audio').mockImplementation(() => {});
 		vi.spyOn(game_audio, 'get_audio_context').mockReturnValue(ctx as unknown as AudioContext);
@@ -134,7 +131,6 @@ describe('simon audio envelope', () => {
 	});
 
 	it('play_error_tone cyber mode applies exponential gain ramp', () => {
-		game_state.toggle_cyber();
 		const { ctx, gain_node } = make_mock_ctx();
 		vi.spyOn(game_audio, 'init_audio').mockImplementation(() => {});
 		vi.spyOn(game_audio, 'get_audio_context').mockReturnValue(ctx as unknown as AudioContext);

@@ -6,24 +6,24 @@ describe('game_state', () => {
 		game_state.return_to_title();
 	});
 
-	it('starts with cyber mode off', () => {
+	it('starts with cyber mode on', () => {
+		expect(game_state.is_cyber).toBe(true);
+	});
+
+	it('toggles cyber mode off', () => {
+		game_state.toggle_cyber();
 		expect(game_state.is_cyber).toBe(false);
 	});
 
-	it('toggles cyber mode on', () => {
+	it('toggles cyber mode on again', () => {
+		game_state.toggle_cyber();
 		game_state.toggle_cyber();
 		expect(game_state.is_cyber).toBe(true);
 	});
 
-	it('toggles cyber mode off again', () => {
-		game_state.toggle_cyber();
-		game_state.toggle_cyber();
-		expect(game_state.is_cyber).toBe(false);
-	});
-
-	it('resets cyber mode on return_to_title', () => {
+	it('resets cyber mode to default (on) on return_to_title', () => {
 		game_state.toggle_cyber();
 		game_state.return_to_title();
-		expect(game_state.is_cyber).toBe(false);
+		expect(game_state.is_cyber).toBe(true);
 	});
 });

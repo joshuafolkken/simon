@@ -73,27 +73,60 @@ describe('simon FSM', () => {
 		expect(simon.phase).toBe('player_input');
 	});
 
-	it('correct final press blocks further input immediately', async () => {
+	it('correct final press transitions to round_complete and blocks further input', async () => {
 		simon.start();
 		await vi.runAllTimersAsync();
 		simon.press(seq_at(0));
-		expect(simon.phase).toBe('showing');
+		expect(simon.phase).toBe('round_complete');
 		expect(simon.round).toBe(1);
 	});
 
-	it('next round starts after 1 second delay following final correct press', async () => {
+	it('next round does not start while last button is still held', async () => {
 		simon.start();
 		await vi.runAllTimersAsync();
 		simon.press(seq_at(0));
+		await vi.advanceTimersByTimeAsync(RESTART_DELAY_MS * 2);
+		expect(simon.phase).toBe('round_complete');
+		expect(simon.round).toBe(1);
+	});
+
+	it('next round starts after 1 second delay following release of final button', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		simon.release();
+		expect(simon.phase).toBe('showing');
 		await vi.advanceTimersByTimeAsync(RESTART_DELAY_MS);
 		expect(simon.round).toBe(2);
 		expect(simon.sequence).toHaveLength(2);
+	});
+
+	it('press is ignored during round_complete phase', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		const spy = vi.spyOn(simon_audio, 'start_tone');
+		simon.press('green');
+		simon.press('red');
+		expect(spy).not.toHaveBeenCalled();
+		expect(simon.phase).toBe('round_complete');
+	});
+
+	it('reset() during round_complete cancels pending next round', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		simon.reset();
+		await vi.advanceTimersByTimeAsync(RESTART_DELAY_MS);
+		expect(simon.phase).toBe('idle');
+		expect(simon.round).toBe(0);
 	});
 
 	it('reset() cancels restart timer so next round does not start', async () => {
 		simon.start();
 		await vi.runAllTimersAsync();
 		simon.press(seq_at(0));
+		simon.release();
 		simon.reset();
 		await vi.advanceTimersByTimeAsync(RESTART_DELAY_MS);
 		expect(simon.phase).toBe('idle');
@@ -104,6 +137,7 @@ describe('simon FSM', () => {
 		simon.start();
 		await vi.runAllTimersAsync();
 		simon.press(seq_at(0)); // complete round 1
+		simon.release();
 		await vi.runAllTimersAsync(); // drain round 2 show
 		const first_color = seq_at(0);
 		simon.press(first_color); // first of two correct presses

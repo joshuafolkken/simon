@@ -44,7 +44,7 @@
 			lit_color: '#00ff00',
 			dim_color: '#003300',
 			cyber_lit_color: '#00ffaa',
-			cyber_dim_color: '#002211'
+			cyber_dim_color: '#005533'
 		},
 		{
 			color: 'red' as ButtonColor,
@@ -52,7 +52,7 @@
 			lit_color: '#ff2222',
 			dim_color: '#330000',
 			cyber_lit_color: '#ff0088',
-			cyber_dim_color: '#330011'
+			cyber_dim_color: '#550022'
 		},
 		{
 			color: 'yellow' as ButtonColor,
@@ -60,7 +60,7 @@
 			lit_color: '#ffff00',
 			dim_color: '#333300',
 			cyber_lit_color: '#ffff00',
-			cyber_dim_color: '#333300'
+			cyber_dim_color: '#555500'
 		},
 		{
 			color: 'blue' as ButtonColor,
@@ -68,7 +68,7 @@
 			lit_color: '#2266ff',
 			dim_color: '#001133',
 			cyber_lit_color: '#00ccff',
-			cyber_dim_color: '#002233'
+			cyber_dim_color: '#003355'
 		}
 	] as const satisfies readonly ButtonConfig[];
 

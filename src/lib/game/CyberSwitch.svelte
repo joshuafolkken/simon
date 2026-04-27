@@ -38,9 +38,9 @@
 	const NORMAL_HOUSING_EMISSIVE = 0.15;
 	const CYBER_HOUSING_EMISSIVE = 0.4;
 	const NORMAL_RING_EMISSIVE = 0.8;
-	const CYBER_RING_EMISSIVE = 2.0;
+	const CYBER_RING_EMISSIVE = 4.0;
 	const NORMAL_ORB_EMISSIVE = 0.6;
-	const CYBER_ORB_EMISSIVE = 2.5;
+	const CYBER_ORB_EMISSIVE = 5.0;
 
 	function handle_click(): void {
 		game_state.toggle_cyber();

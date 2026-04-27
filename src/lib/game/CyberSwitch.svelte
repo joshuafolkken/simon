@@ -2,6 +2,7 @@
 	import { T } from '@threlte/core';
 	import { Text } from '@threlte/extras';
 	import { game_state } from '$lib/game/state.svelte';
+	import { fonts } from '$lib/game/fonts';
 	import { messages } from '$lib/messages/en';
 
 	const SWITCH_X = 2.0;
@@ -45,6 +46,7 @@
 		game_state.toggle_cyber();
 	}
 
+	let current_font = $derived(fonts.get_font(game_state.is_cyber));
 	let current_color = $derived(game_state.is_cyber ? CYBER_COLOR : NORMAL_COLOR);
 	let housing_color = $derived(game_state.is_cyber ? CYBER_HOUSING : NORMAL_HOUSING);
 	let housing_emissive = $derived(
@@ -89,6 +91,7 @@
 	<T.Group position={[0, -LABEL_Y_OFFSET, LABEL_Z]}>
 		<Text
 			text={messages.cyber_switch_label}
+			font={current_font}
 			fontSize={LABEL_FONT_SIZE}
 			color="#ffffff"
 			anchorX="center"

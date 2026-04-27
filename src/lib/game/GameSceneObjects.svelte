@@ -9,6 +9,7 @@
 	import { game_state } from '$lib/game/state.svelte';
 	import { make_pointer_compute } from '$lib/game/pointer-compute.js';
 	import { lighting } from '$lib/game/lighting';
+	import { fonts } from '$lib/game/fonts';
 	import { messages } from '$lib/messages/en';
 
 	const POINT_LIGHT_Y = 2.5;
@@ -42,6 +43,7 @@
 	let ambient_intensity = $derived(lighting.get_ambient_intensity(game_state.is_cyber));
 	let ambient_color = $derived(lighting.get_ambient_color(game_state.is_cyber));
 	let point_light_intensity = $derived(lighting.get_point_light_intensity(game_state.is_cyber));
+	let current_font = $derived(fonts.get_font(game_state.is_cyber));
 	let title_y = $state(TITLE_Y);
 
 	function tick(): void {
@@ -95,6 +97,7 @@
 <T.Group position={[0, title_y, TITLE_Z]}>
 	<Text
 		text={messages.game_title}
+		font={current_font}
 		fontSize={TITLE_FONT_SIZE}
 		color="#ffffff"
 		anchorX="center"

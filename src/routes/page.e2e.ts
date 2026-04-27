@@ -1,34 +1,23 @@
 import { test, expect } from '@playwright/test';
 
-test('title screen renders with canvas', async ({ page }) => {
+test('game scene renders immediately with canvas', async ({ page }) => {
 	await page.goto('/');
-	await expect(page.locator('canvas')).toBeVisible();
-});
-
-test('clicking title screen starts game', async ({ page }) => {
-	await page.goto('/');
-	await expect(page.locator('canvas')).toBeVisible();
-	await page.locator('.title-container').click();
 	await expect(page.locator('[data-testid="game-scene"]')).toBeVisible();
+	await expect(page.locator('[data-testid="game-scene"] canvas')).toBeVisible();
 });
 
-test('game scene renders canvas after start', async ({ page }) => {
+test('crosshair is visible before pointer lock is acquired', async ({ page }) => {
 	await page.goto('/');
-	await page.locator('.title-container').click();
-	const game_scene = page.locator('[data-testid="game-scene"]');
-	await expect(game_scene).toBeVisible();
-	await expect(game_scene.locator('canvas')).toBeVisible();
+	await expect(page.getByTestId('crosshair')).toBeVisible();
 });
 
-test('crosshair is absent when pointer is not locked', async ({ page }) => {
+test('CLICK TO PLAY hint is visible before pointer lock', async ({ page }) => {
 	await page.goto('/');
-	await page.locator('.title-container').click();
-	await expect(page.getByTestId('crosshair')).toHaveCount(0);
+	await expect(page.locator('.click-hint')).toBeVisible();
 });
 
-test('crosshair appears when pointer lock is simulated', async ({ page }) => {
+test('CLICK TO PLAY hint disappears when pointer lock is simulated', async ({ page }) => {
 	await page.goto('/');
-	await page.locator('.title-container').click();
 
 	await page.evaluate(() => {
 		Object.defineProperty(document, 'pointerLockElement', {
@@ -38,12 +27,12 @@ test('crosshair appears when pointer lock is simulated', async ({ page }) => {
 		document.dispatchEvent(new Event('pointerlockchange'));
 	});
 
-	await expect(page.getByTestId('crosshair')).toBeVisible();
+	await expect(page.locator('.click-hint')).toHaveCount(0);
 });
 
 test('pointer lock is requested on canvas element', async ({ page }) => {
 	await page.goto('/');
-	await page.locator('.title-container').click();
+	await expect(page.locator('canvas')).toBeVisible();
 
 	const lock_target = await page.evaluate(
 		() =>

@@ -6,21 +6,6 @@ describe('game_state', () => {
 		game_state.return_to_title();
 	});
 
-	it('starts in title scene', () => {
-		expect(game_state.current_scene).toBe('title');
-	});
-
-	it('transitions to playing on start_game', () => {
-		game_state.start_game();
-		expect(game_state.current_scene).toBe('playing');
-	});
-
-	it('returns to title on return_to_title', () => {
-		game_state.start_game();
-		game_state.return_to_title();
-		expect(game_state.current_scene).toBe('title');
-	});
-
 	it('starts with cyber mode off', () => {
 		expect(game_state.is_cyber).toBe(false);
 	});

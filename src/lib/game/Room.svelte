@@ -2,13 +2,7 @@
 	import { T } from '@threlte/core';
 	import { RigidBody, Collider } from '@threlte/rapier';
 	import { game_state } from '$lib/game/state.svelte';
-
-	const ROOM_W = 10;
-	const ROOM_D = 10;
-	const ROOM_H = 3;
-	const HALF_W = ROOM_W / 2;
-	const HALF_D = ROOM_D / 2;
-	const WALL_THICK = 0.1;
+	import { ROOM_W, ROOM_D, ROOM_H, HALF_W, HALF_D, WALL_THICK } from '$lib/game/room-config';
 	const FLOOR_COLOR = '#3a2f2f';
 	const WALL_COLOR = '#4a4a5a';
 	const CEILING_COLOR = '#2a2a3a';

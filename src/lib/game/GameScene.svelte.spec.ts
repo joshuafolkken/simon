@@ -23,6 +23,13 @@ describe('GameScene', () => {
 		expect(container.querySelector('[data-testid="cyber-glow"]')).toBeNull();
 	});
 
+	it('crosshair is hidden when pointer is not locked', () => {
+		const { container } = render(GameScene);
+		const crosshair = container.querySelector<HTMLElement>('[data-testid="crosshair"]');
+		expect(crosshair).not.toBeNull();
+		expect(crosshair?.style.display).toBe('none');
+	});
+
 	it('renders cyber-glow overlay when cyber mode is active', () => {
 		game_state.toggle_cyber();
 		const { container } = render(GameScene);

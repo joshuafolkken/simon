@@ -24,7 +24,12 @@
 	{#if !is_locked}
 		<div class="click-hint" aria-live="polite">{messages.click_to_play}</div>
 	{/if}
-	<div class="crosshair" aria-hidden="true" data-testid="crosshair"></div>
+	<div
+		class="crosshair"
+		aria-hidden="true"
+		data-testid="crosshair"
+		style:display={is_locked ? '' : 'none'}
+	></div>
 	{#if is_cyber}
 		<div class="cyber-glow" data-testid="cyber-glow" aria-hidden="true"></div>
 	{/if}

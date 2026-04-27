@@ -19,6 +19,11 @@
 	const ORB_SEGMENTS = 16;
 	const ORB_EMBED = 0.5;
 	const ORB_Z = BASE_HALF_DEPTH + ORB_RADIUS * ORB_EMBED;
+	const HIT_AREA_INSET = 0.02;
+	const HIT_AREA_RADIUS = BASE_RADIUS - HIT_AREA_INSET;
+	const HIT_AREA_Z_OFFSET = 0.01;
+	const HIT_AREA_Z = ORB_Z + ORB_RADIUS + HIT_AREA_Z_OFFSET;
+	const HIT_AREA_SEGMENTS = 32;
 	const LABEL_FONT_SIZE = 0.1;
 	const LABEL_Y_OFFSET = 0.38;
 	const LABEL_Z = 0.05;
@@ -77,6 +82,10 @@
 			emissiveIntensity={orb_emissive}
 			roughness={ORB_ROUGHNESS}
 		/>
+	</T.Mesh>
+	<T.Mesh position.z={HIT_AREA_Z} onclick={handle_click}>
+		<T.CircleGeometry args={[HIT_AREA_RADIUS, HIT_AREA_SEGMENTS]} />
+		<T.MeshBasicMaterial transparent={true} opacity={0} depthWrite={false} />
 	</T.Mesh>
 	<T.Group position={[0, -LABEL_Y_OFFSET, LABEL_Z]}>
 		<Text

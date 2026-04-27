@@ -104,6 +104,7 @@ function cancel_press_feedback(): void {
 function press(color: ButtonColor): void {
 	if (phase !== 'player_input') return;
 	pressed_color = color;
+	simon_audio.play_tone(color, PRESS_FEEDBACK_MS);
 	schedule_press_feedback();
 	if (color === sequence[position]) {
 		handle_correct_press();

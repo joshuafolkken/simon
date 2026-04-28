@@ -18,9 +18,11 @@ test('loading overlay displays the logo svg', async ({ page }) => {
 	await expect(page.locator('[data-testid="loading-overlay"] svg.logo')).toBeVisible();
 });
 
-test('loading overlay shows progress percentage', async ({ page }) => {
+test('loading overlay reaches 100% progress once the scene is ready', async ({ page }) => {
 	await page.goto('/');
-	await expect(page.locator('[data-testid="loading-overlay"] .progress')).toHaveText(/\d+%/);
+	await expect(page.locator('[data-testid="loading-overlay"] .progress')).toHaveText('100%', {
+		timeout: LOADING_OVERLAY_TIMEOUT_MS
+	});
 });
 
 test('loading overlay shows ready text once the scene is ready', async ({ page }) => {

@@ -147,44 +147,63 @@ function reset_transient_input(): void {
 	is_dragging_look = false;
 }
 
-function setup_listeners(): () => void {
-	if (active_cleanup) return active_cleanup;
-	document.addEventListener('mousedown', on_mouse_down);
-	document.addEventListener('mousemove', on_mouse_move);
-	document.addEventListener('mouseup', on_mouse_up);
-	document.addEventListener('mousedown', on_left_mouse_for_synth, { capture: true });
-	document.addEventListener('mouseup', on_left_mouse_for_synth, { capture: true });
-	document.addEventListener('wheel', on_wheel, { passive: false });
-	document.addEventListener('contextmenu', on_context_menu);
-	document.addEventListener('pointerlockchange', on_pointer_lock_change);
-	document.addEventListener('pointerdown', override_offset_during_drag, { capture: true });
-	document.addEventListener('pointerup', override_offset_during_drag, { capture: true });
-	document.addEventListener('pointermove', override_offset_during_drag, { capture: true });
-	document.addEventListener('click', override_offset_during_drag, { capture: true });
-	document.addEventListener('keydown', handle_keydown);
-	document.addEventListener('keyup', handle_keyup);
-	globalThis.addEventListener('blur', reset_transient_input);
-	active_cleanup = build_cleanup();
-	return active_cleanup;
+type ListenerSpec = {
+	target: EventTarget;
+	type: string;
+	handler: EventListener;
+	options?: AddEventListenerOptions;
+};
+
+const PASSIVE_FALSE: AddEventListenerOptions = { passive: false };
+const CAPTURE: AddEventListenerOptions = { capture: true };
+
+function get_listener_specs(): readonly ListenerSpec[] {
+	return [
+		{ target: document, type: 'mousedown', handler: on_mouse_down as EventListener },
+		{ target: document, type: 'mousemove', handler: on_mouse_move as EventListener },
+		{ target: document, type: 'mouseup', handler: on_mouse_up as EventListener },
+		{
+			target: document,
+			type: 'mousedown',
+			handler: on_left_mouse_for_synth as EventListener,
+			options: CAPTURE
+		},
+		{
+			target: document,
+			type: 'mouseup',
+			handler: on_left_mouse_for_synth as EventListener,
+			options: CAPTURE
+		},
+		{ target: document, type: 'wheel', handler: on_wheel as EventListener, options: PASSIVE_FALSE },
+		{ target: document, type: 'contextmenu', handler: on_context_menu as EventListener },
+		{ target: document, type: 'pointerlockchange', handler: on_pointer_lock_change },
+		{
+			target: document,
+			type: 'pointerdown',
+			handler: override_offset_during_drag,
+			options: CAPTURE
+		},
+		{ target: document, type: 'pointerup', handler: override_offset_during_drag, options: CAPTURE },
+		{
+			target: document,
+			type: 'pointermove',
+			handler: override_offset_during_drag,
+			options: CAPTURE
+		},
+		{ target: document, type: 'click', handler: override_offset_during_drag, options: CAPTURE },
+		{ target: document, type: 'keydown', handler: handle_keydown as EventListener },
+		{ target: document, type: 'keyup', handler: handle_keyup as EventListener },
+		{ target: globalThis, type: 'blur', handler: reset_transient_input }
+	];
 }
 
-function build_cleanup(): () => void {
-	return function cleanup(): void {
-		document.removeEventListener('mousedown', on_mouse_down);
-		document.removeEventListener('mousemove', on_mouse_move);
-		document.removeEventListener('mouseup', on_mouse_up);
-		document.removeEventListener('mousedown', on_left_mouse_for_synth, { capture: true });
-		document.removeEventListener('mouseup', on_left_mouse_for_synth, { capture: true });
-		document.removeEventListener('wheel', on_wheel);
-		document.removeEventListener('contextmenu', on_context_menu);
-		document.removeEventListener('pointerlockchange', on_pointer_lock_change);
-		document.removeEventListener('pointerdown', override_offset_during_drag, { capture: true });
-		document.removeEventListener('pointerup', override_offset_during_drag, { capture: true });
-		document.removeEventListener('pointermove', override_offset_during_drag, { capture: true });
-		document.removeEventListener('click', override_offset_during_drag, { capture: true });
-		document.removeEventListener('keydown', handle_keydown);
-		document.removeEventListener('keyup', handle_keyup);
-		globalThis.removeEventListener('blur', reset_transient_input);
+function setup_listeners(): () => void {
+	if (active_cleanup) return active_cleanup;
+	const specs = get_listener_specs();
+	for (const spec of specs) spec.target.addEventListener(spec.type, spec.handler, spec.options);
+	active_cleanup = function cleanup(): void {
+		for (const spec of specs)
+			spec.target.removeEventListener(spec.type, spec.handler, spec.options);
 		active_cleanup = null;
 		yaw = 0;
 		pitch = 0;
@@ -192,6 +211,7 @@ function build_cleanup(): () => void {
 		set_joystick_move(0, 0);
 		set_joystick_look(0, 0);
 	};
+	return active_cleanup;
 }
 
 function set_joystick_move(x: number, y: number): void {

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { T, useThrelte, useTask } from '@threlte/core';
 	import { interactivity, Text } from '@threlte/extras';
-	import { World } from '@threlte/rapier';
 	import Room from './Room.svelte';
 	import Player from './Player.svelte';
 	import SimonBoard from './SimonBoard.svelte';
@@ -108,9 +107,7 @@
 	/>
 </T.Group>
 
-<World gravity={[0, 0, 0]}>
-	<Room />
-	<Player />
-	<SimonBoard />
-	<CyberSwitch />
-</World>
+<Room />
+<Player />
+<SimonBoard />
+<CyberSwitch />

@@ -46,6 +46,11 @@ test('loading overlay displays the logo svg', async ({ page }) => {
 	await expect(page.locator('[data-testid="loading-overlay"] svg.logo')).toBeVisible();
 });
 
+test('loading overlay displays Joshua Folkken below the logo', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="loading-overlay"] .brand')).toHaveText('Joshua Folkken');
+});
+
 test('loading overlay reaches 100% progress once the scene is ready', async ({ page }) => {
 	await page.goto('/');
 	await expect(page.locator('[data-testid="loading-overlay"] .progress')).toHaveText('100%', {

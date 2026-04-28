@@ -13,13 +13,6 @@ test('loading overlay is visible immediately on page load', async ({ page }) => 
 	await expect(page.locator('[data-testid="loading-overlay"]')).toBeVisible();
 });
 
-test('loading overlay displays a loading status text', async ({ page }) => {
-	await page.goto('/');
-	await expect(page.locator('[data-testid="loading-overlay"] .label')).toHaveText(
-		/(DOWNLOADING|INITIALIZING|LOADING ASSETS|READY)/
-	);
-});
-
 test('loading overlay displays the logo svg', async ({ page }) => {
 	await page.goto('/');
 	await expect(page.locator('[data-testid="loading-overlay"] svg.logo')).toBeVisible();

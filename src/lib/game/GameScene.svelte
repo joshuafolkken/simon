@@ -12,11 +12,11 @@
 	import { fullscreen } from '$lib/game/fullscreen.svelte';
 	import { loading } from '$lib/game/loading.svelte';
 	import { device } from '$lib/game/device';
+	import { session } from '$lib/game/session.svelte';
 
 	const CLICK_HINT_BASE_FONT_SIZE_REM = 1;
 
 	let container: HTMLElement;
-	let did_start = $state(false);
 	let is_dragging_look = $derived(input.is_dragging_look);
 	let drag_start_x = $derived(input.drag_start_x);
 	let drag_start_y = $derived(input.drag_start_y);
@@ -28,10 +28,10 @@
 	);
 
 	function start_session(): void {
-		if (did_start) return;
+		if (session.is_session_started) return;
 		audio.init_audio();
 		if (container && device.is_touch_primary()) void fullscreen.request(container);
-		did_start = true;
+		session.start_session();
 	}
 
 	function on_scene_loaded(): void {
@@ -57,7 +57,7 @@
 	onclick={start_session}
 	data-testid="game-scene"
 >
-	{#if !did_start}
+	{#if !session.is_session_started}
 		<div
 			class="click-hint"
 			aria-live="polite"

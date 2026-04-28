@@ -4,7 +4,7 @@
 	import { simon } from '$lib/simon/simon.svelte';
 	import { game_state } from '$lib/game/state.svelte';
 	import { fonts } from '$lib/game/fonts';
-	import { pointer_button } from '$lib/game/pointer-button';
+	import { simon_board_input } from '$lib/game/simon-board-input';
 	import type { ButtonColor } from '$lib/simon/types';
 	import { messages } from '$lib/messages/en';
 
@@ -82,18 +82,6 @@
 		return game_state.is_cyber ? btn.cyber_dim_color : btn.dim_color;
 	}
 
-	function on_press(color: ButtonColor): void {
-		simon.press(color);
-	}
-
-	function on_button_pointer_down(
-		e: { nativeEvent: { button: number } },
-		color: ButtonColor
-	): void {
-		if (!pointer_button.is_left_click(e)) return;
-		on_press(color);
-	}
-
 	function get_center_text(): string {
 		if (simon.phase === 'gameover') return messages.simon_gameover;
 		if (simon.round > 0) return `${messages.simon_round} ${simon.round}`;
@@ -118,9 +106,9 @@
 		<T.Group rotation.z={btn.rotation}>
 			<T.Mesh
 				onpointerdown={(e: { nativeEvent: { button: number } }) =>
-					on_button_pointer_down(e, btn.color)}
-				onpointerup={() => simon.release()}
-				onpointerleave={() => simon.release()}
+					simon_board_input.on_button_pointer_down(e, btn.color)}
+				onpointerup={() => simon_board_input.on_button_release()}
+				onpointerleave={() => simon_board_input.on_button_release()}
 			>
 				<T.RingGeometry
 					args={[INNER_RADIUS, OUTER_RADIUS, THETA_SEGMENTS, 1, THETA_START, THETA_LENGTH]}
@@ -137,7 +125,7 @@
 		</T.Group>
 	{/each}
 
-	<T.Mesh onclick={() => simon.start()}>
+	<T.Mesh onclick={() => simon_board_input.on_center_click()}>
 		<T.CircleGeometry args={[CENTER_RADIUS, CIRCLE_SEGMENTS]} />
 		<T.MeshStandardMaterial color="#222222" roughness={0.5} />
 	</T.Mesh>

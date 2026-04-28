@@ -1,14 +1,17 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
+import { flushSync } from 'svelte';
 import GameScene from './GameScene.svelte';
 import { game_state } from '$lib/game/state.svelte';
 import { audio } from '$lib/game/audio';
 import { device } from '$lib/game/device';
 import { fullscreen } from '$lib/game/fullscreen.svelte';
+import { session } from '$lib/game/session.svelte';
 
 describe('GameScene', () => {
 	afterEach(() => {
 		if (game_state.is_cyber) game_state.toggle_cyber();
+		session.reset_session();
 		vi.restoreAllMocks();
 	});
 
@@ -59,6 +62,27 @@ describe('GameScene', () => {
 		if (!scene) return;
 		scene.click();
 		expect(fullscreen_spy).toHaveBeenCalledTimes(1);
+	});
+
+	it('clicking the scene flips session.is_session_started to true', () => {
+		expect(session.is_session_started).toBe(false);
+		const { container } = render(GameScene);
+		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
+		expect(scene).toBeTruthy();
+		if (!scene) return;
+		scene.click();
+		expect(session.is_session_started).toBe(true);
+	});
+
+	it('hides the click-hint after the session starts', () => {
+		const { container } = render(GameScene);
+		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
+		expect(scene).toBeTruthy();
+		if (!scene) return;
+		expect(container.querySelector('.click-hint')).toBeTruthy();
+		scene.click();
+		flushSync();
+		expect(container.querySelector('.click-hint')).toBeNull();
 	});
 
 	it('start_session does not request fullscreen on desktop devices but still inits audio', () => {

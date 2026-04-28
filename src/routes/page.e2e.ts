@@ -79,6 +79,18 @@ test('CLICK TO PLAY hint disappears after the game scene is clicked', async ({ p
 	await expect(page.locator('.click-hint')).toHaveCount(0);
 });
 
+test('first click on the game scene does not toggle cyber mode while CLICK TO PLAY is shown', async ({
+	page
+}) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="game-scene"]')).toBeVisible();
+	await expect(page.locator('.click-hint')).toBeVisible();
+	await expect(page.locator('[data-testid="cyber-glow"]')).toBeVisible();
+	await page.locator('[data-testid="game-scene"]').click();
+	await expect(page.locator('.click-hint')).toHaveCount(0);
+	await expect(page.locator('[data-testid="cyber-glow"]')).toBeVisible();
+});
+
 test('fullscreen is requested on touch-primary devices when CLICK TO PLAY is clicked', async ({
 	page
 }) => {

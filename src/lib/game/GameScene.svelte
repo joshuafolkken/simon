@@ -17,6 +17,8 @@
 	let container: HTMLElement;
 	let did_start = $state(false);
 	let is_dragging_look = $derived(input.is_dragging_look);
+	let drag_start_x = $derived(input.drag_start_x);
+	let drag_start_y = $derived(input.drag_start_y);
 	let is_cyber = $derived(game_state.is_cyber);
 	let is_pseudo_fullscreen = $derived(fullscreen.is_pseudo_fullscreen);
 	let click_hint_font_family = $derived(fonts.get_font_family(is_cyber));
@@ -49,7 +51,7 @@
 <div
 	class="game-container"
 	class:pseudo-fullscreen={is_pseudo_fullscreen}
-	class:dragging-look={is_dragging_look}
+	class:is-dragging-look={is_dragging_look}
 	bind:this={container}
 	onclick={start_session}
 	data-testid="game-scene"
@@ -73,6 +75,26 @@
 		</Suspense>
 	</Canvas>
 	<VirtualJoystick />
+	{#if is_dragging_look}
+		<svg
+			class="fake-cursor"
+			data-testid="fake-cursor"
+			aria-hidden="true"
+			width="20"
+			height="20"
+			viewBox="0 0 20 20"
+			style:left="{drag_start_x}px"
+			style:top="{drag_start_y}px"
+		>
+			<path
+				d="M2 2 L2 16 L6 12 L9 18 L11 17 L8 11 L13 11 Z"
+				fill="white"
+				stroke="black"
+				stroke-width="1"
+				stroke-linejoin="round"
+			/>
+		</svg>
+	{/if}
 </div>
 
 <style>
@@ -83,16 +105,23 @@
 		background: #0d0d12;
 	}
 
-	.game-container.dragging-look {
-		cursor: grabbing;
-	}
-
 	.game-container.pseudo-fullscreen {
 		position: fixed;
 		inset: 0;
 		width: 100vw;
 		height: 100vh;
 		z-index: 9999;
+	}
+
+	.game-container.is-dragging-look {
+		cursor: none;
+	}
+
+	.fake-cursor {
+		position: fixed;
+		pointer-events: none;
+		z-index: 100;
+		transform: translate(-2px, -2px);
 	}
 
 	.click-hint {

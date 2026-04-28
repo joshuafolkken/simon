@@ -66,6 +66,29 @@ describe('fullscreen', () => {
 		expect(fullscreen.is_active).toBe(false);
 	});
 
+	it('initializes is_native_fullscreen from current document state on setup', () => {
+		cleanup();
+		const fake_element = document.createElement('section');
+		const original_descriptor = Object.getOwnPropertyDescriptor(
+			Document.prototype,
+			'fullscreenElement'
+		);
+		Object.defineProperty(document, 'fullscreenElement', {
+			get: () => fake_element,
+			configurable: true
+		});
+		try {
+			cleanup = fullscreen.setup_listeners();
+			expect(fullscreen.is_native_fullscreen).toBe(true);
+		} finally {
+			if (original_descriptor) {
+				Object.defineProperty(document, 'fullscreenElement', original_descriptor);
+			} else {
+				Reflect.deleteProperty(document, 'fullscreenElement');
+			}
+		}
+	});
+
 	it('falls back to webkitRequestFullscreen when standard API is missing', async () => {
 		Object.defineProperty(el, 'requestFullscreen', { value: undefined, configurable: true });
 		const webkit_spy = vi.fn().mockResolvedValue(undefined);

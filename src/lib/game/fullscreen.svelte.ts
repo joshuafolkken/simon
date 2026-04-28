@@ -58,6 +58,7 @@ async function exit(): Promise<void> {
 
 function setup_listeners(): () => void {
 	if (active_cleanup) return active_cleanup;
+	on_fullscreen_change();
 	document.addEventListener('fullscreenchange', on_fullscreen_change);
 	document.addEventListener('webkitfullscreenchange', on_fullscreen_change);
 	active_cleanup = function cleanup(): void {

@@ -5,6 +5,7 @@
 	import { fonts } from '$lib/game/fonts';
 	import { messages } from '$lib/messages/en';
 	import { HALF_D } from '$lib/game/room-config';
+	import { cyber_switch_input } from '$lib/game/cyber-switch-input';
 
 	const SWITCH_X = 1.6;
 	const SWITCH_Y = 1.2;
@@ -51,10 +52,6 @@
 	const NORMAL_ORB_EMISSIVE = 0.6;
 	const CYBER_ORB_EMISSIVE = 5.0;
 
-	function handle_click(): void {
-		game_state.toggle_cyber();
-	}
-
 	let current_font = $derived(fonts.get_font(game_state.is_cyber));
 	let current_color = $derived(game_state.is_cyber ? CYBER_COLOR : NORMAL_COLOR);
 	let housing_color = $derived(game_state.is_cyber ? CYBER_HOUSING : NORMAL_HOUSING);
@@ -69,7 +66,11 @@
 </script>
 
 <T.Group position={[SWITCH_X, SWITCH_Y, SWITCH_Z]}>
-	<T.Mesh position.z={MOUNT_PLATE_Z} onclick={handle_click} rotation.x={FACE_ROTATION_X}>
+	<T.Mesh
+		position.z={MOUNT_PLATE_Z}
+		onclick={cyber_switch_input.on_click}
+		rotation.x={FACE_ROTATION_X}
+	>
 		<T.CylinderGeometry
 			args={[MOUNT_PLATE_RADIUS, MOUNT_PLATE_RADIUS, MOUNT_PLATE_DEPTH, HEX_FACES]}
 		/>
@@ -81,7 +82,7 @@
 			roughness={ROUGHNESS_HOUSING}
 		/>
 	</T.Mesh>
-	<T.Mesh onclick={handle_click} rotation.x={FACE_ROTATION_X}>
+	<T.Mesh onclick={cyber_switch_input.on_click} rotation.x={FACE_ROTATION_X}>
 		<T.CylinderGeometry args={[BASE_RADIUS, BASE_RADIUS, BASE_DEPTH, HEX_FACES]} />
 		<T.MeshStandardMaterial
 			color={housing_color}
@@ -91,7 +92,7 @@
 			roughness={ROUGHNESS_HOUSING}
 		/>
 	</T.Mesh>
-	<T.Mesh position.z={BASE_HALF_DEPTH} onclick={handle_click}>
+	<T.Mesh position.z={BASE_HALF_DEPTH} onclick={cyber_switch_input.on_click}>
 		<T.TorusGeometry args={[RING_RADIUS, RING_TUBE, RING_RADIAL, RING_TUBULAR]} />
 		<T.MeshStandardMaterial
 			color={current_color}
@@ -99,7 +100,7 @@
 			emissiveIntensity={ring_emissive}
 		/>
 	</T.Mesh>
-	<T.Mesh position.z={ORB_Z} onclick={handle_click}>
+	<T.Mesh position.z={ORB_Z} onclick={cyber_switch_input.on_click}>
 		<T.SphereGeometry args={[ORB_RADIUS, ORB_SEGMENTS, ORB_SEGMENTS]} />
 		<T.MeshStandardMaterial
 			color={current_color}
@@ -108,11 +109,11 @@
 			roughness={ORB_ROUGHNESS}
 		/>
 	</T.Mesh>
-	<T.Mesh position.z={HIT_AREA_Z} onclick={handle_click}>
+	<T.Mesh position.z={HIT_AREA_Z} onclick={cyber_switch_input.on_click}>
 		<T.CircleGeometry args={[HIT_AREA_RADIUS, HIT_AREA_SEGMENTS]} />
 		<T.MeshBasicMaterial transparent={true} opacity={0} depthWrite={false} />
 	</T.Mesh>
-	<T.Mesh position.z={ORB_Z} onclick={handle_click}>
+	<T.Mesh position.z={ORB_Z} onclick={cyber_switch_input.on_click}>
 		<T.SphereGeometry args={[LIGHT_HIT_RADIUS, LIGHT_HIT_SEGMENTS, LIGHT_HIT_SEGMENTS]} />
 		<T.MeshBasicMaterial transparent={true} opacity={0} depthWrite={false} />
 	</T.Mesh>

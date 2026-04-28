@@ -88,6 +88,7 @@ function reset(): void {
 		clearTimeout(hide_timer_id);
 		hide_timer_id = null;
 	}
+	disconnect_observer();
 	is_visible = true;
 	show_overlay_element();
 	set_step('downloading');

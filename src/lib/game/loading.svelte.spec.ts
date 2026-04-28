@@ -28,11 +28,12 @@ describe('loading', () => {
 		overlay_element.appendChild(progress_element);
 		document.body.appendChild(overlay_element);
 
+		loading.reset();
+
 		observer_disconnect = vi.fn();
 		(globalThis as Record<string, unknown>)[loading.OBSERVER_GLOBAL_KEY] = {
 			disconnect: observer_disconnect
 		};
-		loading.reset();
 	});
 
 	afterEach(() => {
@@ -73,6 +74,11 @@ describe('loading', () => {
 			SAMPLE_PROGRESS_VALUE
 		);
 		expect(progress_element.textContent).toBe(SAMPLE_PROGRESS_VALUE);
+	});
+
+	it('disconnects the active observer on reset', () => {
+		loading.reset();
+		expect(observer_disconnect).toHaveBeenCalledTimes(1);
 	});
 
 	it('snaps progress to ready value, updates label, and disconnects the observer on mark_ready', () => {

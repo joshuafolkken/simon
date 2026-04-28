@@ -39,4 +39,14 @@ describe('Logo', () => {
 		const svg = container.querySelector('svg');
 		expect(svg?.getAttribute('aria-label')).toBe(CUSTOM_ARIA_LABEL);
 	});
+
+	it('generates a unique filter id per instance', () => {
+		const first = render(Logo);
+		const second = render(Logo);
+		const first_id = first.container.querySelector('filter')?.getAttribute('id');
+		const second_id = second.container.querySelector('filter')?.getAttribute('id');
+		expect(first_id).toBeTruthy();
+		expect(second_id).toBeTruthy();
+		expect(first_id).not.toBe(second_id);
+	});
 });

@@ -1,9 +1,48 @@
 import { test, expect } from '@playwright/test';
 
+const LOADING_OVERLAY_TIMEOUT_MS = 8000;
+
 test('game scene renders immediately with canvas', async ({ page }) => {
 	await page.goto('/');
 	await expect(page.locator('[data-testid="game-scene"]')).toBeVisible();
 	await expect(page.locator('[data-testid="game-scene"] canvas')).toBeVisible();
+});
+
+test('loading overlay is visible immediately on page load', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="loading-overlay"]')).toBeVisible();
+});
+
+test('loading overlay displays a loading status text', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="loading-overlay"] .label')).toHaveText(
+		/(DOWNLOADING|INITIALIZING|LOADING ASSETS|READY)/
+	);
+});
+
+test('loading overlay displays the logo svg', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="loading-overlay"] svg.logo')).toBeVisible();
+});
+
+test('loading overlay shows progress percentage', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="loading-overlay"] .progress')).toHaveText(/\d+%/);
+});
+
+test('loading overlay shows ready text once the scene is ready', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="loading-overlay"] .label')).toHaveText('READY', {
+		timeout: LOADING_OVERLAY_TIMEOUT_MS
+	});
+});
+
+test('loading overlay disappears once the scene is ready', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="loading-overlay"]')).toBeHidden({
+		timeout: LOADING_OVERLAY_TIMEOUT_MS
+	});
+	await expect(page.locator('[data-testid="game-scene"]')).toBeVisible();
 });
 
 test('crosshair is hidden before pointer lock is acquired', async ({ page }) => {

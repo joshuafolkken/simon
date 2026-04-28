@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { T } from '@threlte/core';
-	import { RigidBody, Collider } from '@threlte/rapier';
 	import { game_state } from '$lib/game/state.svelte';
-	import { ROOM_W, ROOM_D, ROOM_H, HALF_W, HALF_D, WALL_THICK } from '$lib/game/room-config';
+	import { ROOM_W, ROOM_D, ROOM_H, HALF_W, HALF_D } from '$lib/game/room-config';
 	const FLOOR_COLOR = '#3a2f2f';
 	const WALL_COLOR = '#4a4a5a';
 	const CEILING_COLOR = '#2a2a3a';
@@ -14,26 +13,6 @@
 	let wall_color = $derived(game_state.is_cyber ? CYBER_WALL_COLOR : WALL_COLOR);
 	let ceiling_color = $derived(game_state.is_cyber ? CYBER_CEILING_COLOR : CEILING_COLOR);
 </script>
-
-<!-- Static physics for walls (floor excluded: player y is fixed) -->
-<RigidBody type="fixed">
-	<!-- Left wall -->
-	<T.Group position={[-HALF_W - WALL_THICK, ROOM_H / 2, 0]}>
-		<Collider shape="cuboid" args={[WALL_THICK, ROOM_H / 2, HALF_D]} />
-	</T.Group>
-	<!-- Right wall -->
-	<T.Group position={[HALF_W + WALL_THICK, ROOM_H / 2, 0]}>
-		<Collider shape="cuboid" args={[WALL_THICK, ROOM_H / 2, HALF_D]} />
-	</T.Group>
-	<!-- Back wall -->
-	<T.Group position={[0, ROOM_H / 2, -HALF_D - WALL_THICK]}>
-		<Collider shape="cuboid" args={[HALF_W, ROOM_H / 2, WALL_THICK]} />
-	</T.Group>
-	<!-- Front wall -->
-	<T.Group position={[0, ROOM_H / 2, HALF_D + WALL_THICK]}>
-		<Collider shape="cuboid" args={[HALF_W, ROOM_H / 2, WALL_THICK]} />
-	</T.Group>
-</RigidBody>
 
 <!-- Floor -->
 <T.Mesh rotation.x={-Math.PI / 2} receiveShadow>

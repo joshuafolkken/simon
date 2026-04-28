@@ -1,19 +1,20 @@
-version: '0.2'
+version: "0.2"
 import:
-  - '@joshuafolkken/kit/cspell/sveltekit'
+  - "@joshuafolkken/kit/cspell/sveltekit"
 words:
   - docstrings
+  - gameover
   - languagetool
+  - metalness
+  - METALNESS
+  - nipplejs
+  - oncreate
+  - Orbitron
+  - raycaster
+  - Raycaster
   - shellcheck
   - Stylesheet
   - sveltekit
   - threlte
-  - nipplejs
-  - oncreate
-  - gameover
-  - raycaster
-  - Raycaster
-  - metalness
-  - METALNESS
-  - Orbitron
+  - trycloudflare
 ignorePaths: []

@@ -53,3 +53,46 @@ test('pointer lock is requested on canvas element', async ({ page }) => {
 
 	expect(lock_target).toBe('canvas');
 });
+
+test('fullscreen is requested on the game-scene container when CLICK TO PLAY is clicked', async ({
+	page
+}) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="game-scene"]')).toBeVisible();
+
+	const fullscreen_target = await page.evaluate(
+		() =>
+			new Promise<string>((resolve) => {
+				const scene = document.querySelector<HTMLElement>('[data-testid="game-scene"]');
+				if (!scene) {
+					resolve('no-scene');
+					return;
+				}
+				scene.requestFullscreen = function (): Promise<void> {
+					resolve('game-scene');
+					return Promise.resolve();
+				};
+				scene.click();
+			})
+	);
+
+	expect(fullscreen_target).toBe('game-scene');
+});
+
+test('pseudo-fullscreen class is applied when native API is unavailable', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="game-scene"]')).toBeVisible();
+
+	await page.evaluate(() => {
+		const scene = document.querySelector<HTMLElement>('[data-testid="game-scene"]');
+		if (!scene) return;
+		Object.defineProperty(scene, 'requestFullscreen', { value: undefined, configurable: true });
+		Object.defineProperty(scene, 'webkitRequestFullscreen', {
+			value: undefined,
+			configurable: true
+		});
+		scene.click();
+	});
+
+	await expect(page.locator('[data-testid="game-scene"]')).toHaveClass(/pseudo-fullscreen/);
+});

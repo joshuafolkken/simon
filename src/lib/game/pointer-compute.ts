@@ -19,20 +19,12 @@ export function make_pointer_compute(
 	camera: CameraRef
 ): (event: DomEvent, ctx: ComputeCtx) => void {
 	return function compute_pointer(event: DomEvent, ctx: ComputeCtx): void {
-		if (document.pointerLockElement) {
-			ctx.pointer.update((p) => {
-				p.set(0, 0);
-				return p;
-			});
-		} else if (is_valid_target(event.target)) {
-			const { clientWidth: w, clientHeight: h } = event.target;
-			ctx.pointer.update((p) => {
-				p.set((event.offsetX / w) * NDC_SCALE - 1, -(event.offsetY / h) * NDC_SCALE + 1);
-				return p;
-			});
-		} else {
-			return;
-		}
+		if (!is_valid_target(event.target)) return;
+		const { clientWidth: w, clientHeight: h } = event.target;
+		ctx.pointer.update((p) => {
+			p.set((event.offsetX / w) * NDC_SCALE - 1, -(event.offsetY / h) * NDC_SCALE + 1);
+			return p;
+		});
 		ctx.raycaster.setFromCamera(ctx.pointer.current, camera.current);
 	};
 }

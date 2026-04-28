@@ -24,6 +24,14 @@
 				color: white;
 				display: block;
 			}
+			#static-loading-overlay .brand {
+				margin: 0;
+				color: rgba(255, 255, 255, 0.85);
+				font-family: monospace;
+				font-size: 1.15rem;
+				letter-spacing: 0.06em;
+				line-height: 1.4;
+			}
 			#static-loading-overlay .label {
 				margin: 0;
 				color: rgba(255, 255, 255, 0.85);
@@ -35,6 +43,9 @@
 				align-items: center;
 				line-height: 1.5;
 				min-height: 1.5em;
+			}
+			#static-loading-overlay .status {
+				color: rgba(255, 255, 255, 0.6);
 			}
 			#static-loading-overlay .progress {
 				color: rgba(255, 255, 255, 0.6);
@@ -101,6 +112,7 @@
 					<rect x="40" y="45" width="20" height="8" fill="currentColor" />
 				</g>
 			</svg>
+			<p class="brand">Joshua Folkken</p>
 			<p class="label">
 				<span class="status">DOWNLOADING...</span>
 				<span class="progress">0%</span>

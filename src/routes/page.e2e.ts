@@ -32,7 +32,7 @@ test('loading overlay shows progress percentage', async ({ page }) => {
 
 test('loading overlay shows ready text once the scene is ready', async ({ page }) => {
 	await page.goto('/');
-	await expect(page.locator('[data-testid="loading-overlay"] .label')).toHaveText('READY', {
+	await expect(page.locator('[data-testid="loading-overlay"] .status')).toHaveText('READY', {
 		timeout: LOADING_OVERLAY_TIMEOUT_MS
 	});
 });

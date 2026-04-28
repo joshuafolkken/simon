@@ -15,7 +15,8 @@
 	const CLICK_HINT_BASE_FONT_SIZE_REM = 1;
 
 	let container: HTMLElement;
-	let is_locked = $derived(input.is_pointer_locked);
+	let did_start = $state(false);
+	let is_dragging_look = $derived(input.is_dragging_look);
 	let is_cyber = $derived(game_state.is_cyber);
 	let is_pseudo_fullscreen = $derived(fullscreen.is_pseudo_fullscreen);
 	let click_hint_font_family = $derived(fonts.get_font_family(is_cyber));
@@ -23,10 +24,11 @@
 		CLICK_HINT_BASE_FONT_SIZE_REM * fonts.get_font_size_multiplier(is_cyber)
 	);
 
-	function request_lock(): void {
+	function start_session(): void {
+		if (did_start) return;
 		audio.init_audio();
-		container?.querySelector('canvas')?.requestPointerLock();
 		if (container) void fullscreen.request(container);
+		did_start = true;
 	}
 
 	function on_scene_loaded(): void {
@@ -47,11 +49,12 @@
 <div
 	class="game-container"
 	class:pseudo-fullscreen={is_pseudo_fullscreen}
+	class:dragging-look={is_dragging_look}
 	bind:this={container}
-	onclick={request_lock}
+	onclick={start_session}
 	data-testid="game-scene"
 >
-	{#if !is_locked}
+	{#if !did_start}
 		<div
 			class="click-hint"
 			aria-live="polite"
@@ -61,12 +64,6 @@
 			{messages.click_to_play}
 		</div>
 	{/if}
-	<div
-		class="crosshair"
-		aria-hidden="true"
-		data-testid="crosshair"
-		style:display={is_locked ? '' : 'none'}
-	></div>
 	{#if is_cyber}
 		<div class="cyber-glow" data-testid="cyber-glow" aria-hidden="true"></div>
 	{/if}
@@ -84,7 +81,10 @@
 		width: 100%;
 		height: 100vh;
 		background: #0d0d12;
-		cursor: crosshair;
+	}
+
+	.game-container.dragging-look {
+		cursor: grabbing;
 	}
 
 	.game-container.pseudo-fullscreen {
@@ -105,38 +105,6 @@
 		letter-spacing: 0.2em;
 		pointer-events: none;
 		z-index: 10;
-	}
-
-	.crosshair {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 16px;
-		height: 16px;
-		pointer-events: none;
-		z-index: 10;
-	}
-
-	.crosshair::before,
-	.crosshair::after {
-		content: '';
-		position: absolute;
-		background: rgba(255, 255, 255, 0.8);
-	}
-
-	.crosshair::before {
-		width: 100%;
-		height: 2px;
-		top: 50%;
-		transform: translateY(-50%);
-	}
-
-	.crosshair::after {
-		width: 2px;
-		height: 100%;
-		left: 50%;
-		transform: translateX(-50%);
 	}
 
 	.cyber-glow {

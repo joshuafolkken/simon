@@ -96,10 +96,11 @@ function handle_keyup(e: KeyboardEvent): void {
 	on_key(e, false);
 }
 
-function reset_keys(): void {
+function reset_transient_input(): void {
 	keys = { w: false, a: false, s: false, d: false };
 	is_sprinting = false;
 	is_jump_requested = false;
+	is_dragging_look = false;
 }
 
 function setup_listeners(): () => void {
@@ -111,7 +112,7 @@ function setup_listeners(): () => void {
 	document.addEventListener('contextmenu', on_context_menu);
 	document.addEventListener('keydown', handle_keydown);
 	document.addEventListener('keyup', handle_keyup);
-	globalThis.addEventListener('blur', reset_keys);
+	globalThis.addEventListener('blur', reset_transient_input);
 	active_cleanup = build_cleanup();
 	return active_cleanup;
 }
@@ -125,12 +126,11 @@ function build_cleanup(): () => void {
 		document.removeEventListener('contextmenu', on_context_menu);
 		document.removeEventListener('keydown', handle_keydown);
 		document.removeEventListener('keyup', handle_keyup);
-		globalThis.removeEventListener('blur', reset_keys);
+		globalThis.removeEventListener('blur', reset_transient_input);
 		active_cleanup = null;
-		is_dragging_look = false;
 		yaw = 0;
 		pitch = 0;
-		reset_keys();
+		reset_transient_input();
 		set_joystick_move(0, 0);
 		set_joystick_look(0, 0);
 	};

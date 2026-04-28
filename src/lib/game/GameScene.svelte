@@ -25,6 +25,7 @@
 	);
 
 	function start_session(): void {
+		if (did_start) return;
 		audio.init_audio();
 		if (container) void fullscreen.request(container);
 		did_start = true;

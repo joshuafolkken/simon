@@ -83,6 +83,16 @@ describe('input', () => {
 		expect(input.pitch).toBe(0);
 	});
 
+	it('window blur clears is_dragging_look so drag does not stay latched', () => {
+		start_right_drag();
+		expect(input.is_dragging_look).toBe(true);
+		globalThis.dispatchEvent(new Event('blur'));
+		expect(input.is_dragging_look).toBe(false);
+		dispatch_mouse('mousemove', { movementX: 100, movementY: 50 });
+		expect(input.yaw).toBe(0);
+		expect(input.pitch).toBe(0);
+	});
+
 	it('left mouse up does not end an active right drag', () => {
 		start_right_drag();
 		dispatch_mouse('mouseup', { button: LEFT_BUTTON });
@@ -269,7 +279,7 @@ describe('input', () => {
 		expect(input.is_jump_requested).toBe(false);
 	});
 
-	it('reset_keys clears is_sprinting and is_jump_requested', () => {
+	it('blur clears is_sprinting and is_jump_requested via reset_transient_input', () => {
 		input.set_sprinting(true);
 		document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
 		globalThis.dispatchEvent(new Event('blur'));

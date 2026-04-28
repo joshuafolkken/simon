@@ -2,8 +2,8 @@
 	import { T, useTask } from '@threlte/core';
 	import { input } from '$lib/game/input.svelte';
 	import { player_bounds } from '$lib/game/player-bounds';
-	import { player_velocity } from '$lib/game/player-velocity';
 	import { player_jump } from '$lib/game/player-jump';
+	import { player_step } from '$lib/game/player-step';
 
 	const SPAWN_X = 0;
 	const SPAWN_Y = 1;
@@ -46,26 +46,24 @@
 		pos_y = result.new_pos_y;
 	}
 
-	function apply_joystick_look(delta: number): void {
-		if (!input.joystick_look.x && !input.joystick_look.y) return;
-		input.apply_look_delta(
-			input.joystick_look.x * JOYSTICK_LOOK_SPEED * delta,
-			input.joystick_look.y * JOYSTICK_LOOK_SPEED * delta
-		);
-		input.set_joystick_look(0, 0);
-	}
-
 	function tick(delta: number): void {
 		const { forward, strafe } = get_axis_input();
-		const vel = player_velocity.compute_velocity({
+		const result = player_step.compute_velocity_after_look({
 			yaw: input.yaw,
+			joystick_look_x: input.joystick_look.x,
+			joystick_look_y: input.joystick_look.y,
+			joystick_look_speed: JOYSTICK_LOOK_SPEED,
+			delta,
 			forward,
 			strafe,
 			is_sprinting: input.is_sprinting
 		});
-		apply_movement(vel.x, vel.z, delta);
+		if (result.look_consumed) {
+			input.apply_look_delta(result.delta_yaw, result.delta_pitch);
+			input.set_joystick_look(0, 0);
+		}
+		apply_movement(result.velocity.x, result.velocity.z, delta);
 		apply_jump_step(delta);
-		apply_joystick_look(delta);
 	}
 
 	useTask(tick);

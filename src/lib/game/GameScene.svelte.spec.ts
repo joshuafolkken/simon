@@ -3,6 +3,8 @@ import { render } from 'vitest-browser-svelte';
 import GameScene from './GameScene.svelte';
 import { game_state } from '$lib/game/state.svelte';
 import { audio } from '$lib/game/audio';
+import { device } from '$lib/game/device';
+import { fullscreen } from '$lib/game/fullscreen.svelte';
 
 describe('GameScene', () => {
 	afterEach(() => {
@@ -46,5 +48,29 @@ describe('GameScene', () => {
 		scene.click();
 		scene.click();
 		expect(spy).toHaveBeenCalledTimes(1);
+	});
+
+	it('start_session requests fullscreen on touch-primary devices', () => {
+		vi.spyOn(device, 'is_touch_primary').mockReturnValue(true);
+		const fullscreen_spy = vi.spyOn(fullscreen, 'request').mockResolvedValue();
+		const { container } = render(GameScene);
+		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
+		expect(scene).toBeTruthy();
+		if (!scene) return;
+		scene.click();
+		expect(fullscreen_spy).toHaveBeenCalledTimes(1);
+	});
+
+	it('start_session does not request fullscreen on desktop devices but still inits audio', () => {
+		vi.spyOn(device, 'is_touch_primary').mockReturnValue(false);
+		const fullscreen_spy = vi.spyOn(fullscreen, 'request').mockResolvedValue();
+		const audio_spy = vi.spyOn(audio, 'init_audio');
+		const { container } = render(GameScene);
+		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
+		expect(scene).toBeTruthy();
+		if (!scene) return;
+		scene.click();
+		expect(fullscreen_spy).not.toHaveBeenCalled();
+		expect(audio_spy).toHaveBeenCalledTimes(1);
 	});
 });

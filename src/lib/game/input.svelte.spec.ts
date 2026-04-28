@@ -28,6 +28,44 @@ function end_right_drag(): void {
 	dispatch_mouse('mouseup', { button: RIGHT_BUTTON });
 }
 
+function make_zero_rect_target(): HTMLElement {
+	const target = document.createElement('div');
+	document.body.appendChild(target);
+	target.getBoundingClientRect = (): DOMRect =>
+		({
+			left: 0,
+			top: 0,
+			right: 800,
+			bottom: 600,
+			width: 800,
+			height: 600,
+			x: 0,
+			y: 0,
+			toJSON: () => ({})
+		}) as DOMRect;
+	return target;
+}
+
+function make_pointer_event_with_offsets(
+	target: HTMLElement,
+	offset_x: number,
+	offset_y: number
+): PointerEvent {
+	const evt = new PointerEvent('pointerdown', { button: 0, bubbles: true });
+	Object.defineProperty(evt, 'target', { value: target });
+	Object.defineProperty(evt, 'offsetX', { value: offset_x, configurable: true });
+	Object.defineProperty(evt, 'offsetY', { value: offset_y, configurable: true });
+	return evt;
+}
+
+function record_canvas_events(type: string): { canvas: HTMLCanvasElement; received: string[] } {
+	const canvas = document.createElement('canvas');
+	document.body.appendChild(canvas);
+	const received: string[] = [];
+	canvas.addEventListener(type, (e) => received.push(`${e.type}:${(e as PointerEvent).button}`));
+	return { canvas, received };
+}
+
 describe('input', () => {
 	let cleanup: () => void;
 
@@ -107,28 +145,11 @@ describe('input', () => {
 	});
 
 	it('during drag, capture-phase pointerdown overrides offsetX/Y to drag-start coords', () => {
-		const target = document.createElement('div');
-		document.body.appendChild(target);
-		target.getBoundingClientRect = (): DOMRect =>
-			({
-				left: 0,
-				top: 0,
-				right: 800,
-				bottom: 600,
-				width: 800,
-				height: 600,
-				x: 0,
-				y: 0,
-				toJSON: () => ({})
-			}) as DOMRect;
-
+		const target = make_zero_rect_target();
 		dispatch_mouse('mousedown', { button: RIGHT_BUTTON, clientX: 200, clientY: 150 });
 		expect(input.is_dragging_look).toBe(true);
 
-		const evt = new PointerEvent('pointerdown', { button: 0, bubbles: true });
-		Object.defineProperty(evt, 'target', { value: target });
-		Object.defineProperty(evt, 'offsetX', { value: 999, configurable: true });
-		Object.defineProperty(evt, 'offsetY', { value: 999, configurable: true });
+		const evt = make_pointer_event_with_offsets(target, 999, 999);
 		target.dispatchEvent(evt);
 
 		expect(evt.offsetX).toBe(200);
@@ -137,13 +158,8 @@ describe('input', () => {
 	});
 
 	it('without drag, capture-phase listener leaves offsetX/Y untouched', () => {
-		const target = document.createElement('div');
-		document.body.appendChild(target);
-
-		const evt = new PointerEvent('pointerdown', { button: 0, bubbles: true });
-		Object.defineProperty(evt, 'target', { value: target });
-		Object.defineProperty(evt, 'offsetX', { value: 999, configurable: true });
-		Object.defineProperty(evt, 'offsetY', { value: 999, configurable: true });
+		const target = make_zero_rect_target();
+		const evt = make_pointer_event_with_offsets(target, 999, 999);
 		target.dispatchEvent(evt);
 
 		expect(evt.offsetX).toBe(999);
@@ -152,11 +168,7 @@ describe('input', () => {
 	});
 
 	it('synthesizes pointerdown on canvas when left mousedown fires during drag', () => {
-		const canvas = document.createElement('canvas');
-		document.body.appendChild(canvas);
-		const received: string[] = [];
-		canvas.addEventListener('pointerdown', (e) => received.push(`${e.type}:${e.button}`));
-
+		const { canvas, received } = record_canvas_events('pointerdown');
 		dispatch_mouse('mousedown', { button: RIGHT_BUTTON, clientX: 200, clientY: 150 });
 		dispatch_mouse('mousedown', { button: LEFT_BUTTON });
 
@@ -165,11 +177,7 @@ describe('input', () => {
 	});
 
 	it('synthesizes pointerup on canvas when left mouseup fires during drag', () => {
-		const canvas = document.createElement('canvas');
-		document.body.appendChild(canvas);
-		const received: string[] = [];
-		canvas.addEventListener('pointerup', (e) => received.push(`${e.type}:${e.button}`));
-
+		const { canvas, received } = record_canvas_events('pointerup');
 		dispatch_mouse('mousedown', { button: RIGHT_BUTTON, clientX: 200, clientY: 150 });
 		dispatch_mouse('mouseup', { button: LEFT_BUTTON });
 
@@ -178,11 +186,7 @@ describe('input', () => {
 	});
 
 	it('does not synthesize pointer events when not dragging', () => {
-		const canvas = document.createElement('canvas');
-		document.body.appendChild(canvas);
-		const received: string[] = [];
-		canvas.addEventListener('pointerdown', () => received.push('pd'));
-
+		const { canvas, received } = record_canvas_events('pointerdown');
 		dispatch_mouse('mousedown', { button: LEFT_BUTTON });
 
 		expect(received).toHaveLength(0);
@@ -190,13 +194,8 @@ describe('input', () => {
 	});
 
 	it('does not synthesize pointer events for right mousedown during drag', () => {
-		const canvas = document.createElement('canvas');
-		document.body.appendChild(canvas);
-		const received: string[] = [];
-		canvas.addEventListener('pointerdown', () => received.push('pd'));
-
+		const { canvas, received } = record_canvas_events('pointerdown');
 		dispatch_mouse('mousedown', { button: RIGHT_BUTTON, clientX: 200, clientY: 150 });
-		// Right mousedown starts the drag itself, but the synth path only fires for left button
 		const startCount = received.length;
 		dispatch_mouse('mousedown', { button: RIGHT_BUTTON });
 		expect(received.length).toBe(startCount);

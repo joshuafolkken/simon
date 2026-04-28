@@ -11,6 +11,7 @@
 	import { fonts } from '$lib/game/fonts';
 	import { fullscreen } from '$lib/game/fullscreen.svelte';
 	import { loading } from '$lib/game/loading.svelte';
+	import { device } from '$lib/game/device';
 
 	const CLICK_HINT_BASE_FONT_SIZE_REM = 1;
 
@@ -29,7 +30,7 @@
 	function start_session(): void {
 		if (did_start) return;
 		audio.init_audio();
-		if (container) void fullscreen.request(container);
+		if (container && device.is_touch_primary()) void fullscreen.request(container);
 		did_start = true;
 	}
 

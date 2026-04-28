@@ -1,6 +1,27 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { input } from '$lib/game/input.svelte';
 
+const RIGHT_BUTTON = 2;
+const LEFT_BUTTON = 0;
+
+function dispatch_mouse(type: string, init: MouseEventInit): void {
+	document.dispatchEvent(new MouseEvent(type, init));
+}
+
+function dispatch_wheel(init: WheelEventInit): WheelEvent {
+	const evt = new WheelEvent('wheel', { ...init, cancelable: true });
+	document.dispatchEvent(evt);
+	return evt;
+}
+
+function start_right_drag(): void {
+	dispatch_mouse('mousedown', { button: RIGHT_BUTTON });
+}
+
+function end_right_drag(): void {
+	dispatch_mouse('mouseup', { button: RIGHT_BUTTON });
+}
+
 describe('input', () => {
 	let cleanup: () => void;
 
@@ -12,8 +33,113 @@ describe('input', () => {
 		cleanup();
 	});
 
-	it('starts with pointer not locked', () => {
-		expect(input.is_pointer_locked).toBe(false);
+	it('starts with look-drag inactive', () => {
+		expect(input.is_dragging_look).toBe(false);
+	});
+
+	it('right mouse down then mousemove updates yaw and pitch', () => {
+		start_right_drag();
+		dispatch_mouse('mousemove', { movementX: 100, movementY: 50 });
+		expect(input.yaw).not.toBe(0);
+		expect(input.pitch).not.toBe(0);
+	});
+
+	it('right-drag with positive movementX increases yaw (drag-the-world feel)', () => {
+		start_right_drag();
+		dispatch_mouse('mousemove', { movementX: 100, movementY: 0 });
+		expect(input.yaw).toBeGreaterThan(0);
+	});
+
+	it('right-drag with positive movementY increases pitch (drag-the-world feel)', () => {
+		start_right_drag();
+		dispatch_mouse('mousemove', { movementX: 0, movementY: 100 });
+		expect(input.pitch).toBeGreaterThan(0);
+	});
+
+	it('right-drag yaw scales by sensitivity (0.004 per pixel of movementX)', () => {
+		start_right_drag();
+		dispatch_mouse('mousemove', { movementX: 100, movementY: 0 });
+		expect(input.yaw).toBeCloseTo(0.4);
+	});
+
+	it('left mouse down then mousemove does not update yaw or pitch', () => {
+		dispatch_mouse('mousedown', { button: LEFT_BUTTON });
+		dispatch_mouse('mousemove', { movementX: 100, movementY: 50 });
+		expect(input.yaw).toBe(0);
+		expect(input.pitch).toBe(0);
+	});
+
+	it('mousemove without any drag does not update yaw or pitch', () => {
+		dispatch_mouse('mousemove', { movementX: 100, movementY: 50 });
+		expect(input.yaw).toBe(0);
+		expect(input.pitch).toBe(0);
+	});
+
+	it('right mouse up stops the drag', () => {
+		start_right_drag();
+		end_right_drag();
+		dispatch_mouse('mousemove', { movementX: 100, movementY: 50 });
+		expect(input.yaw).toBe(0);
+		expect(input.pitch).toBe(0);
+	});
+
+	it('left mouse up does not end an active right drag', () => {
+		start_right_drag();
+		dispatch_mouse('mouseup', { button: LEFT_BUTTON });
+		dispatch_mouse('mousemove', { movementX: 100, movementY: 0 });
+		expect(input.yaw).not.toBe(0);
+	});
+
+	it('wheel event updates yaw and pitch from deltaX/deltaY', () => {
+		dispatch_wheel({ deltaX: 50, deltaY: 30 });
+		expect(input.yaw).not.toBe(0);
+		expect(input.pitch).not.toBe(0);
+	});
+
+	it('wheel with positive deltaX increases yaw (drag-the-world feel)', () => {
+		dispatch_wheel({ deltaX: 50, deltaY: 0 });
+		expect(input.yaw).toBeGreaterThan(0);
+	});
+
+	it('wheel with positive deltaY increases pitch (drag-the-world feel)', () => {
+		dispatch_wheel({ deltaX: 0, deltaY: 50 });
+		expect(input.pitch).toBeGreaterThan(0);
+	});
+
+	it('wheel yaw scales by sensitivity (0.004 per unit of deltaX)', () => {
+		dispatch_wheel({ deltaX: 100, deltaY: 0 });
+		expect(input.yaw).toBeCloseTo(0.4);
+	});
+
+	it('wheel event preventDefault is called', () => {
+		const evt = dispatch_wheel({ deltaX: 10, deltaY: 0 });
+		expect(evt.defaultPrevented).toBe(true);
+	});
+
+	it('contextmenu preventDefault is called', () => {
+		const evt = new MouseEvent('contextmenu', { cancelable: true });
+		document.dispatchEvent(evt);
+		expect(evt.defaultPrevented).toBe(true);
+	});
+
+	it('clamps pitch at max during right drag', () => {
+		start_right_drag();
+		dispatch_mouse('mousemove', { movementX: 0, movementY: 100000 });
+		expect(input.pitch).toBeGreaterThan(0);
+		expect(input.pitch).toBeLessThan(Math.PI / 2);
+	});
+
+	it('clamps pitch at min during right drag', () => {
+		start_right_drag();
+		dispatch_mouse('mousemove', { movementX: 0, movementY: -100000 });
+		expect(input.pitch).toBeLessThan(0);
+		expect(input.pitch).toBeGreaterThan(-Math.PI / 2);
+	});
+
+	it('clamps pitch at max during wheel', () => {
+		dispatch_wheel({ deltaX: 0, deltaY: 100000 });
+		expect(input.pitch).toBeGreaterThan(0);
+		expect(input.pitch).toBeLessThan(Math.PI / 2);
 	});
 
 	it('maps w key to forward', () => {
@@ -64,13 +190,13 @@ describe('input', () => {
 		expect(input.pitch).toBeCloseTo(-0.05);
 	});
 
-	it('clamps pitch at max value', () => {
+	it('apply_look_delta clamps pitch at max', () => {
 		input.apply_look_delta(0, -100);
 		expect(input.pitch).toBeGreaterThan(0);
 		expect(input.pitch).toBeLessThan(Math.PI / 2);
 	});
 
-	it('clamps pitch at min value', () => {
+	it('apply_look_delta clamps pitch at min', () => {
 		input.apply_look_delta(0, 100);
 		expect(input.pitch).toBeLessThan(0);
 		expect(input.pitch).toBeGreaterThan(-Math.PI / 2);
@@ -101,11 +227,13 @@ describe('input', () => {
 		expect(second_cleanup).toBe(cleanup);
 	});
 
-	it('cleanup resets all state including joysticks', () => {
+	it('cleanup resets all state including drag and joysticks', () => {
+		start_right_drag();
 		input.set_joystick_move(1, 1);
 		input.set_joystick_look(1, 1);
 		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'w' }));
 		cleanup();
+		expect(input.is_dragging_look).toBe(false);
 		expect(input.keys.w).toBe(false);
 		expect(input.joystick_move.x).toBe(0);
 		expect(input.joystick_look.x).toBe(0);

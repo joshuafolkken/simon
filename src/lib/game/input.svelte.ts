@@ -1,10 +1,12 @@
-const MOUSE_SENSITIVITY = 0.002;
+const MOUSE_SENSITIVITY = 0.004;
+const WHEEL_SENSITIVITY = 0.004;
 const MAX_PITCH = Math.PI / 2 - 0.01;
+const RIGHT_MOUSE_BUTTON = 2;
 
 type Keys = { w: boolean; a: boolean; s: boolean; d: boolean };
 type Vec2 = { x: number; y: number };
 
-let is_pointer_locked = $state(false);
+let is_dragging_look = $state(false);
 let yaw = $state(0);
 let pitch = $state(0);
 let keys = $state<Keys>({ w: false, a: false, s: false, d: false });
@@ -29,14 +31,34 @@ const KEY_MAP: Record<string, keyof Keys> = {
 	ArrowRight: 'd'
 };
 
-function on_pointer_lock_change(): void {
-	is_pointer_locked = document.pointerLockElement !== null;
+function clamp_pitch(value: number): number {
+	return Math.max(-MAX_PITCH, Math.min(MAX_PITCH, value));
+}
+
+function on_mouse_down(e: MouseEvent): void {
+	if (e.button !== RIGHT_MOUSE_BUTTON) return;
+	is_dragging_look = true;
+}
+
+function on_mouse_up(e: MouseEvent): void {
+	if (e.button !== RIGHT_MOUSE_BUTTON) return;
+	is_dragging_look = false;
 }
 
 function on_mouse_move(e: MouseEvent): void {
-	if (!is_pointer_locked) return;
-	yaw -= e.movementX * MOUSE_SENSITIVITY;
-	pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, pitch - e.movementY * MOUSE_SENSITIVITY));
+	if (!is_dragging_look) return;
+	yaw += e.movementX * MOUSE_SENSITIVITY;
+	pitch = clamp_pitch(pitch + e.movementY * MOUSE_SENSITIVITY);
+}
+
+function on_wheel(e: WheelEvent): void {
+	e.preventDefault();
+	yaw += e.deltaX * WHEEL_SENSITIVITY;
+	pitch = clamp_pitch(pitch + e.deltaY * WHEEL_SENSITIVITY);
+}
+
+function on_context_menu(e: MouseEvent): void {
+	e.preventDefault();
 }
 
 function trigger_jump(): void {
@@ -82,26 +104,36 @@ function reset_keys(): void {
 
 function setup_listeners(): () => void {
 	if (active_cleanup) return active_cleanup;
-	document.addEventListener('pointerlockchange', on_pointer_lock_change);
+	document.addEventListener('mousedown', on_mouse_down);
 	document.addEventListener('mousemove', on_mouse_move);
+	document.addEventListener('mouseup', on_mouse_up);
+	document.addEventListener('wheel', on_wheel, { passive: false });
+	document.addEventListener('contextmenu', on_context_menu);
 	document.addEventListener('keydown', handle_keydown);
 	document.addEventListener('keyup', handle_keyup);
 	globalThis.addEventListener('blur', reset_keys);
-	active_cleanup = function cleanup(): void {
-		document.removeEventListener('pointerlockchange', on_pointer_lock_change);
+	active_cleanup = build_cleanup();
+	return active_cleanup;
+}
+
+function build_cleanup(): () => void {
+	return function cleanup(): void {
+		document.removeEventListener('mousedown', on_mouse_down);
 		document.removeEventListener('mousemove', on_mouse_move);
+		document.removeEventListener('mouseup', on_mouse_up);
+		document.removeEventListener('wheel', on_wheel);
+		document.removeEventListener('contextmenu', on_context_menu);
 		document.removeEventListener('keydown', handle_keydown);
 		document.removeEventListener('keyup', handle_keyup);
 		globalThis.removeEventListener('blur', reset_keys);
 		active_cleanup = null;
-		is_pointer_locked = false;
+		is_dragging_look = false;
 		yaw = 0;
 		pitch = 0;
 		reset_keys();
 		set_joystick_move(0, 0);
 		set_joystick_look(0, 0);
 	};
-	return active_cleanup;
 }
 
 function set_joystick_move(x: number, y: number): void {
@@ -116,12 +148,12 @@ function set_joystick_look(x: number, y: number): void {
 
 function apply_look_delta(delta_yaw: number, delta_pitch: number): void {
 	yaw -= delta_yaw;
-	pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, pitch - delta_pitch));
+	pitch = clamp_pitch(pitch - delta_pitch);
 }
 
 export const input = {
-	get is_pointer_locked() {
-		return is_pointer_locked;
+	get is_dragging_look() {
+		return is_dragging_look;
 	},
 	get yaw() {
 		return yaw;

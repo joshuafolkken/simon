@@ -80,7 +80,7 @@
 
 	.joystick-zone {
 		flex: 1;
-		pointer-events: all;
+		pointer-events: none;
 		position: relative;
 	}
 
@@ -121,6 +121,10 @@
 	}
 
 	@media (hover: none) and (pointer: coarse) {
+		.joystick-zone {
+			pointer-events: all;
+		}
+
 		.sprint-btn {
 			display: flex;
 			align-items: center;

@@ -12,4 +12,12 @@ describe('VirtualJoystick', () => {
 		const { container } = render(VirtualJoystick);
 		expect(container.querySelector('[data-testid="jump-btn"]')).toBeTruthy();
 	});
+
+	it('joystick-zone does not capture pointer events on non-touch devices', () => {
+		const { container } = render(VirtualJoystick);
+		const zone = container.querySelector<HTMLElement>('.joystick-zone');
+		expect(zone).toBeTruthy();
+		if (!zone) return;
+		expect(getComputedStyle(zone).pointerEvents).toBe('none');
+	});
 });

@@ -7,5 +7,9 @@ export const messages = {
 	simon_round: 'ROUND',
 	simon_gameover: 'GAME OVER',
 	sprint_button: 'SPRINT',
-	jump_button: 'JUMP'
+	jump_button: 'JUMP',
+	loading_downloading: 'DOWNLOADING...',
+	loading_initializing: 'INITIALIZING...',
+	loading_loading_assets: 'LOADING ASSETS...',
+	loading_ready: 'READY'
 } as const;

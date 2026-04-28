@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Canvas } from '@threlte/core';
+	import { Suspense } from '@threlte/extras';
 	import { onMount } from 'svelte';
 	import GameSceneObjects from './GameSceneObjects.svelte';
 	import VirtualJoystick from './VirtualJoystick.svelte';
@@ -9,6 +10,7 @@
 	import { game_state } from '$lib/game/state.svelte';
 	import { fonts } from '$lib/game/fonts';
 	import { fullscreen } from '$lib/game/fullscreen.svelte';
+	import { loading } from '$lib/game/loading.svelte';
 
 	const CLICK_HINT_BASE_FONT_SIZE_REM = 1;
 
@@ -27,7 +29,12 @@
 		if (container) void fullscreen.request(container);
 	}
 
+	function on_scene_loaded(): void {
+		loading.mark_ready();
+	}
+
 	onMount(() => {
+		loading.set_step('loading_assets');
 		const cleanup_input = input.setup_listeners();
 		const cleanup_fullscreen = fullscreen.setup_listeners();
 		return function cleanup(): void {
@@ -64,7 +71,9 @@
 		<div class="cyber-glow" data-testid="cyber-glow" aria-hidden="true"></div>
 	{/if}
 	<Canvas shadows>
-		<GameSceneObjects />
+		<Suspense onload={on_scene_loaded}>
+			<GameSceneObjects />
+		</Suspense>
 	</Canvas>
 	<VirtualJoystick />
 </div>

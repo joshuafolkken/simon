@@ -1,103 +1,78 @@
 <script lang="ts">
-	import type { ComponentProps } from 'svelte';
 	import { T, useTask } from '@threlte/core';
-	import { RigidBody, Collider } from '@threlte/rapier';
 	import { input } from '$lib/game/input.svelte';
-	import { player_speed } from '$lib/game/player-speed';
-	import { player_bounds, PLAYER_RADIUS } from '$lib/game/player-bounds';
-
-	type RapierBody = NonNullable<ComponentProps<typeof RigidBody>['rigidBody']>;
+	import { player_bounds } from '$lib/game/player-bounds';
+	import { player_velocity } from '$lib/game/player-velocity';
+	import { player_jump } from '$lib/game/player-jump';
 
 	const SPAWN_X = 0;
 	const SPAWN_Y = 1;
 	const SPAWN_Z = 3;
 	const HEAD_HEIGHT = 0.6;
-	const CAPSULE_HALF_H = 0.5;
-	const CAPSULE_RADIUS = PLAYER_RADIUS;
 	const FOV = 75;
+	const NEAR_PLANE = 0.1;
+	const FAR_PLANE = 50;
 	const JOYSTICK_LOOK_SPEED = 2;
-	const JUMP_VELOCITY = 4;
-	const JUMP_GRAVITY = 12;
-	let rapier_body: RapierBody | undefined;
-	let cam_x = $state(SPAWN_X);
-	let cam_y = $state(SPAWN_Y + HEAD_HEIGHT);
-	let cam_z = $state(SPAWN_Z);
+
+	let pos_x = $state(SPAWN_X);
+	let pos_y = $state(SPAWN_Y);
+	let pos_z = $state(SPAWN_Z);
 	let jump_vel_y = 0;
 
-	function compute_velocity(): { x: number; y: number; z: number } {
-		const fw_x = -Math.sin(input.yaw);
-		const fw_z = -Math.cos(input.yaw);
-		const rt_x = Math.cos(input.yaw);
-		const rt_z = -Math.sin(input.yaw);
-		const w = (input.keys.w ? 1 : 0) - (input.keys.s ? 1 : 0) + input.joystick_move.y;
-		const d = (input.keys.d ? 1 : 0) - (input.keys.a ? 1 : 0) + input.joystick_move.x;
-		const vx = fw_x * w + rt_x * d;
-		const vz = fw_z * w + rt_z * d;
-		const len = Math.sqrt(vx * vx + vz * vz);
-		const nx = len > 1 ? vx / len : vx;
-		const nz = len > 1 ? vz / len : vz;
-		const speed = player_speed.get_move_speed(input.is_sprinting);
-		return { x: nx * speed, y: 0, z: nz * speed };
+	function get_axis_input(): { forward: number; strafe: number } {
+		const forward = (input.keys.w ? 1 : 0) - (input.keys.s ? 1 : 0) + input.joystick_move.y;
+		const strafe = (input.keys.d ? 1 : 0) - (input.keys.a ? 1 : 0) + input.joystick_move.x;
+		return { forward, strafe };
 	}
 
-	function apply_jump(delta: number, pos_y: number): number {
-		if (input.is_jump_requested) {
-			if (jump_vel_y === 0) jump_vel_y = JUMP_VELOCITY;
-			input.clear_jump_request();
-		}
-		jump_vel_y -= JUMP_GRAVITY * delta;
-		const new_y = pos_y + jump_vel_y * delta;
-		if (new_y <= SPAWN_Y) {
-			jump_vel_y = 0;
-			return SPAWN_Y;
-		}
-		return new_y;
+	function apply_movement(vel_x: number, vel_z: number, delta: number): void {
+		const raw_x = pos_x + vel_x * delta;
+		const raw_z = pos_z + vel_z * delta;
+		const clamped = player_bounds.clamp_to_room(raw_x, raw_z);
+		pos_x = clamped.x;
+		pos_z = clamped.z;
+	}
+
+	function apply_jump_step(delta: number): void {
+		const result = player_jump.step_jump({
+			vel_y: jump_vel_y,
+			pos_y,
+			delta,
+			is_jump_requested: input.is_jump_requested,
+			ground_y: SPAWN_Y
+		});
+		if (result.jump_consumed) input.clear_jump_request();
+		jump_vel_y = result.new_vel_y;
+		pos_y = result.new_pos_y;
+	}
+
+	function apply_joystick_look(delta: number): void {
+		if (!input.joystick_look.x && !input.joystick_look.y) return;
+		input.apply_look_delta(
+			input.joystick_look.x * JOYSTICK_LOOK_SPEED * delta,
+			input.joystick_look.y * JOYSTICK_LOOK_SPEED * delta
+		);
+		input.set_joystick_look(0, 0);
 	}
 
 	function tick(delta: number): void {
-		if (!rapier_body) return;
-		const vel = compute_velocity();
-		const pos = rapier_body.translation();
-		const new_y = apply_jump(delta, pos.y);
-		const raw_x = pos.x + vel.x * delta;
-		const raw_z = pos.z + vel.z * delta;
-		const { x: clamped_x, z: clamped_z } = player_bounds.clamp_to_room(raw_x, raw_z);
-		rapier_body.setNextKinematicTranslation({
-			x: clamped_x,
-			y: new_y,
-			z: clamped_z
+		const { forward, strafe } = get_axis_input();
+		const vel = player_velocity.compute_velocity({
+			yaw: input.yaw,
+			forward,
+			strafe,
+			is_sprinting: input.is_sprinting
 		});
-		cam_x = pos.x;
-		cam_y = new_y + HEAD_HEIGHT;
-		cam_z = pos.z;
-		if (input.joystick_look.x || input.joystick_look.y) {
-			input.apply_look_delta(
-				input.joystick_look.x * JOYSTICK_LOOK_SPEED * delta,
-				input.joystick_look.y * JOYSTICK_LOOK_SPEED * delta
-			);
-			input.set_joystick_look(0, 0);
-		}
+		apply_movement(vel.x, vel.z, delta);
+		apply_jump_step(delta);
+		apply_joystick_look(delta);
 	}
 
 	useTask(tick);
 </script>
 
-<!-- Physics capsule at spawn position -->
-<T.Group position={[SPAWN_X, SPAWN_Y, SPAWN_Z]}>
-	<RigidBody
-		type="kinematicPosition"
-		lockRotations
-		oncreate={(body) => {
-			rapier_body = body;
-		}}
-	>
-		<Collider shape="capsule" args={[CAPSULE_HALF_H, CAPSULE_RADIUS]} />
-	</RigidBody>
-</T.Group>
-
-<!-- Camera follows physics position, rotates with yaw+pitch -->
-<T.Group position={[cam_x, cam_y, cam_z]} rotation.y={input.yaw}>
+<T.Group position={[pos_x, pos_y + HEAD_HEIGHT, pos_z]} rotation.y={input.yaw}>
 	<T.Group rotation.x={input.pitch}>
-		<T.PerspectiveCamera makeDefault fov={FOV} near={0.1} far={50} />
+		<T.PerspectiveCamera makeDefault fov={FOV} near={NEAR_PLANE} far={FAR_PLANE} />
 	</T.Group>
 </T.Group>

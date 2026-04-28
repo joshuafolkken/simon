@@ -4,6 +4,7 @@
 	import { simon } from '$lib/simon/simon.svelte';
 	import { game_state } from '$lib/game/state.svelte';
 	import { fonts } from '$lib/game/fonts';
+	import { pointer_button } from '$lib/game/pointer-button';
 	import type { ButtonColor } from '$lib/simon/types';
 	import { messages } from '$lib/messages/en';
 
@@ -85,6 +86,14 @@
 		simon.press(color);
 	}
 
+	function on_button_pointer_down(
+		e: { nativeEvent: { button: number } },
+		color: ButtonColor
+	): void {
+		if (!pointer_button.is_left_click(e)) return;
+		on_press(color);
+	}
+
 	function get_center_text(): string {
 		if (simon.phase === 'gameover') return messages.simon_gameover;
 		if (simon.round > 0) return `${messages.simon_round} ${simon.round}`;
@@ -108,7 +117,8 @@
 	{#each BUTTON_CONFIGS as btn (btn.color)}
 		<T.Group rotation.z={btn.rotation}>
 			<T.Mesh
-				onpointerdown={() => on_press(btn.color)}
+				onpointerdown={(e: { nativeEvent: { button: number } }) =>
+					on_button_pointer_down(e, btn.color)}
 				onpointerup={() => simon.release()}
 				onpointerleave={() => simon.release()}
 			>

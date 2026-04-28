@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { input } from '$lib/game/input.svelte';
 
 const RIGHT_BUTTON = 2;
@@ -6,6 +6,12 @@ const LEFT_BUTTON = 0;
 
 function dispatch_mouse(type: string, init: MouseEventInit): void {
 	document.dispatchEvent(new MouseEvent(type, init));
+}
+
+function dispatch_mouse_with_target(type: string, init: MouseEventInit, target: HTMLElement): void {
+	const evt = new MouseEvent(type, init);
+	Object.defineProperty(evt, 'target', { value: target });
+	document.dispatchEvent(evt);
 }
 
 function dispatch_wheel(init: WheelEventInit): WheelEvent {
@@ -22,6 +28,44 @@ function end_right_drag(): void {
 	dispatch_mouse('mouseup', { button: RIGHT_BUTTON });
 }
 
+function make_zero_rect_target(): HTMLElement {
+	const target = document.createElement('div');
+	document.body.appendChild(target);
+	target.getBoundingClientRect = (): DOMRect =>
+		({
+			left: 0,
+			top: 0,
+			right: 800,
+			bottom: 600,
+			width: 800,
+			height: 600,
+			x: 0,
+			y: 0,
+			toJSON: () => ({})
+		}) as DOMRect;
+	return target;
+}
+
+function make_pointer_event_with_offsets(
+	target: HTMLElement,
+	offset_x: number,
+	offset_y: number
+): PointerEvent {
+	const evt = new PointerEvent('pointerdown', { button: 0, bubbles: true });
+	Object.defineProperty(evt, 'target', { value: target });
+	Object.defineProperty(evt, 'offsetX', { value: offset_x, configurable: true });
+	Object.defineProperty(evt, 'offsetY', { value: offset_y, configurable: true });
+	return evt;
+}
+
+function record_canvas_events(type: string): { canvas: HTMLCanvasElement; received: string[] } {
+	const canvas = document.createElement('canvas');
+	document.body.appendChild(canvas);
+	const received: string[] = [];
+	canvas.addEventListener(type, (e) => received.push(`${e.type}:${(e as PointerEvent).button}`));
+	return { canvas, received };
+}
+
 describe('input', () => {
 	let cleanup: () => void;
 
@@ -31,6 +75,7 @@ describe('input', () => {
 
 	afterEach(() => {
 		cleanup();
+		vi.restoreAllMocks();
 	});
 
 	it('starts with look-drag inactive', () => {
@@ -44,22 +89,22 @@ describe('input', () => {
 		expect(input.pitch).not.toBe(0);
 	});
 
-	it('right-drag with positive movementX increases yaw (drag-the-world feel)', () => {
+	it('right-drag with positive movementX decreases yaw (FPS-style for mouse)', () => {
 		start_right_drag();
 		dispatch_mouse('mousemove', { movementX: 100, movementY: 0 });
-		expect(input.yaw).toBeGreaterThan(0);
+		expect(input.yaw).toBeLessThan(0);
 	});
 
-	it('right-drag with positive movementY increases pitch (drag-the-world feel)', () => {
+	it('right-drag with positive movementY decreases pitch (FPS-style for mouse)', () => {
 		start_right_drag();
 		dispatch_mouse('mousemove', { movementX: 0, movementY: 100 });
-		expect(input.pitch).toBeGreaterThan(0);
+		expect(input.pitch).toBeLessThan(0);
 	});
 
-	it('right-drag yaw scales by sensitivity (0.004 per pixel of movementX)', () => {
+	it('right-drag yaw scales by sensitivity (-0.004 per pixel of movementX)', () => {
 		start_right_drag();
 		dispatch_mouse('mousemove', { movementX: 100, movementY: 0 });
-		expect(input.yaw).toBeCloseTo(0.4);
+		expect(input.yaw).toBeCloseTo(-0.4);
 	});
 
 	it('left mouse down then mousemove does not update yaw or pitch', () => {
@@ -91,6 +136,101 @@ describe('input', () => {
 		dispatch_mouse('mousemove', { movementX: 100, movementY: 50 });
 		expect(input.yaw).toBe(0);
 		expect(input.pitch).toBe(0);
+	});
+
+	it('right mouse down captures drag start clientX/clientY', () => {
+		dispatch_mouse('mousedown', { button: RIGHT_BUTTON, clientX: 100, clientY: 200 });
+		expect(input.drag_start_x).toBe(100);
+		expect(input.drag_start_y).toBe(200);
+	});
+
+	it('during drag, capture-phase pointerdown overrides offsetX/Y to drag-start coords', () => {
+		const target = make_zero_rect_target();
+		dispatch_mouse('mousedown', { button: RIGHT_BUTTON, clientX: 200, clientY: 150 });
+		expect(input.is_dragging_look).toBe(true);
+
+		const evt = make_pointer_event_with_offsets(target, 999, 999);
+		target.dispatchEvent(evt);
+
+		expect(evt.offsetX).toBe(200);
+		expect(evt.offsetY).toBe(150);
+		document.body.removeChild(target);
+	});
+
+	it('without drag, capture-phase listener leaves offsetX/Y untouched', () => {
+		const target = make_zero_rect_target();
+		const evt = make_pointer_event_with_offsets(target, 999, 999);
+		target.dispatchEvent(evt);
+
+		expect(evt.offsetX).toBe(999);
+		expect(evt.offsetY).toBe(999);
+		document.body.removeChild(target);
+	});
+
+	it('synthesizes pointerdown on canvas when left mousedown fires during drag', () => {
+		const { canvas, received } = record_canvas_events('pointerdown');
+		dispatch_mouse('mousedown', { button: RIGHT_BUTTON, clientX: 200, clientY: 150 });
+		dispatch_mouse('mousedown', { button: LEFT_BUTTON });
+
+		expect(received).toContain('pointerdown:0');
+		document.body.removeChild(canvas);
+	});
+
+	it('synthesizes pointerup on canvas when left mouseup fires during drag', () => {
+		const { canvas, received } = record_canvas_events('pointerup');
+		dispatch_mouse('mousedown', { button: RIGHT_BUTTON, clientX: 200, clientY: 150 });
+		dispatch_mouse('mouseup', { button: LEFT_BUTTON });
+
+		expect(received).toContain('pointerup:0');
+		document.body.removeChild(canvas);
+	});
+
+	it('does not synthesize pointer events when not dragging', () => {
+		const { canvas, received } = record_canvas_events('pointerdown');
+		dispatch_mouse('mousedown', { button: LEFT_BUTTON });
+
+		expect(received).toHaveLength(0);
+		document.body.removeChild(canvas);
+	});
+
+	it('does not synthesize pointer events for right mousedown during drag', () => {
+		const { canvas, received } = record_canvas_events('pointerdown');
+		dispatch_mouse('mousedown', { button: RIGHT_BUTTON, clientX: 200, clientY: 150 });
+		const startCount = received.length;
+		dispatch_mouse('mousedown', { button: RIGHT_BUTTON });
+		expect(received.length).toBe(startCount);
+		document.body.removeChild(canvas);
+	});
+
+	it('right mouse down requests pointer lock on event target', () => {
+		const target = document.createElement('div');
+		document.body.appendChild(target);
+		const spy = vi.spyOn(target, 'requestPointerLock').mockResolvedValue();
+		dispatch_mouse_with_target('mousedown', { button: RIGHT_BUTTON }, target);
+		expect(spy).toHaveBeenCalledTimes(1);
+		document.body.removeChild(target);
+	});
+
+	it('right mouse up exits pointer lock when locked', () => {
+		vi.spyOn(Document.prototype, 'pointerLockElement', 'get').mockReturnValue(document.body);
+		const spy = vi.spyOn(Document.prototype, 'exitPointerLock').mockImplementation(() => {});
+		dispatch_mouse('mouseup', { button: RIGHT_BUTTON });
+		expect(spy).toHaveBeenCalledTimes(1);
+	});
+
+	it('right mouse up does not call exitPointerLock when not locked', () => {
+		vi.spyOn(Document.prototype, 'pointerLockElement', 'get').mockReturnValue(null);
+		const spy = vi.spyOn(Document.prototype, 'exitPointerLock').mockImplementation(() => {});
+		dispatch_mouse('mouseup', { button: RIGHT_BUTTON });
+		expect(spy).not.toHaveBeenCalled();
+	});
+
+	it('pointerlockchange to null clears is_dragging_look', () => {
+		start_right_drag();
+		expect(input.is_dragging_look).toBe(true);
+		vi.spyOn(Document.prototype, 'pointerLockElement', 'get').mockReturnValue(null);
+		document.dispatchEvent(new Event('pointerlockchange'));
+		expect(input.is_dragging_look).toBe(false);
 	});
 
 	it('left mouse up does not end an active right drag', () => {
@@ -134,14 +274,14 @@ describe('input', () => {
 
 	it('clamps pitch at max during right drag', () => {
 		start_right_drag();
-		dispatch_mouse('mousemove', { movementX: 0, movementY: 100000 });
+		dispatch_mouse('mousemove', { movementX: 0, movementY: -100000 });
 		expect(input.pitch).toBeGreaterThan(0);
 		expect(input.pitch).toBeLessThan(Math.PI / 2);
 	});
 
 	it('clamps pitch at min during right drag', () => {
 		start_right_drag();
-		dispatch_mouse('mousemove', { movementX: 0, movementY: -100000 });
+		dispatch_mouse('mousemove', { movementX: 0, movementY: 100000 });
 		expect(input.pitch).toBeLessThan(0);
 		expect(input.pitch).toBeGreaterThan(-Math.PI / 2);
 	});

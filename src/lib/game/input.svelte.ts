@@ -7,6 +7,8 @@ type Keys = { w: boolean; a: boolean; s: boolean; d: boolean };
 type Vec2 = { x: number; y: number };
 
 let is_dragging_look = $state(false);
+let drag_start_x = $state(0);
+let drag_start_y = $state(0);
 let yaw = $state(0);
 let pitch = $state(0);
 let keys = $state<Keys>({ w: false, a: false, s: false, d: false });
@@ -37,18 +39,26 @@ function clamp_pitch(value: number): number {
 
 function on_mouse_down(e: MouseEvent): void {
 	if (e.button !== RIGHT_MOUSE_BUTTON) return;
+	drag_start_x = e.clientX;
+	drag_start_y = e.clientY;
 	is_dragging_look = true;
+	if (e.target instanceof HTMLElement) void e.target.requestPointerLock?.();
 }
 
 function on_mouse_up(e: MouseEvent): void {
 	if (e.button !== RIGHT_MOUSE_BUTTON) return;
 	is_dragging_look = false;
+	if (document.pointerLockElement) document.exitPointerLock();
 }
 
 function on_mouse_move(e: MouseEvent): void {
 	if (!is_dragging_look) return;
-	yaw += e.movementX * MOUSE_SENSITIVITY;
-	pitch = clamp_pitch(pitch + e.movementY * MOUSE_SENSITIVITY);
+	yaw -= e.movementX * MOUSE_SENSITIVITY;
+	pitch = clamp_pitch(pitch - e.movementY * MOUSE_SENSITIVITY);
+}
+
+function on_pointer_lock_change(): void {
+	if (!document.pointerLockElement) is_dragging_look = false;
 }
 
 function on_wheel(e: WheelEvent): void {
@@ -59,6 +69,40 @@ function on_wheel(e: WheelEvent): void {
 
 function on_context_menu(e: MouseEvent): void {
 	e.preventDefault();
+}
+
+function override_offset_during_drag(event: Event): void {
+	if (!is_dragging_look) return;
+	if (!(event.target instanceof HTMLElement)) return;
+	const rect = event.target.getBoundingClientRect();
+	const offset_x = drag_start_x - rect.left;
+	const offset_y = drag_start_y - rect.top;
+	try {
+		Object.defineProperty(event, 'offsetX', { get: () => offset_x, configurable: true });
+		Object.defineProperty(event, 'offsetY', { get: () => offset_y, configurable: true });
+	} catch {
+		/* ignore browsers that disallow override */
+	}
+}
+
+function dispatch_synthetic_pointer_event(type: 'pointerdown' | 'pointerup'): void {
+	const canvas = document.querySelector('canvas');
+	if (!canvas) return;
+	const synth = new PointerEvent(type, {
+		button: 0,
+		clientX: drag_start_x,
+		clientY: drag_start_y,
+		bubbles: true,
+		cancelable: true
+	});
+	canvas.dispatchEvent(synth);
+}
+
+function on_left_mouse_for_synth(e: MouseEvent): void {
+	if (!is_dragging_look) return;
+	if (e.button !== 0) return;
+	if (e.type === 'mousedown') dispatch_synthetic_pointer_event('pointerdown');
+	else if (e.type === 'mouseup') dispatch_synthetic_pointer_event('pointerup');
 }
 
 function trigger_jump(): void {
@@ -103,30 +147,63 @@ function reset_transient_input(): void {
 	is_dragging_look = false;
 }
 
-function setup_listeners(): () => void {
-	if (active_cleanup) return active_cleanup;
-	document.addEventListener('mousedown', on_mouse_down);
-	document.addEventListener('mousemove', on_mouse_move);
-	document.addEventListener('mouseup', on_mouse_up);
-	document.addEventListener('wheel', on_wheel, { passive: false });
-	document.addEventListener('contextmenu', on_context_menu);
-	document.addEventListener('keydown', handle_keydown);
-	document.addEventListener('keyup', handle_keyup);
-	globalThis.addEventListener('blur', reset_transient_input);
-	active_cleanup = build_cleanup();
-	return active_cleanup;
+type ListenerSpec = {
+	target: EventTarget;
+	type: string;
+	handler: EventListener;
+	options?: AddEventListenerOptions;
+};
+
+const PASSIVE_FALSE: AddEventListenerOptions = { passive: false };
+const CAPTURE: AddEventListenerOptions = { capture: true };
+
+function get_listener_specs(): readonly ListenerSpec[] {
+	return [
+		{ target: document, type: 'mousedown', handler: on_mouse_down as EventListener },
+		{ target: document, type: 'mousemove', handler: on_mouse_move as EventListener },
+		{ target: document, type: 'mouseup', handler: on_mouse_up as EventListener },
+		{
+			target: document,
+			type: 'mousedown',
+			handler: on_left_mouse_for_synth as EventListener,
+			options: CAPTURE
+		},
+		{
+			target: document,
+			type: 'mouseup',
+			handler: on_left_mouse_for_synth as EventListener,
+			options: CAPTURE
+		},
+		{ target: document, type: 'wheel', handler: on_wheel as EventListener, options: PASSIVE_FALSE },
+		{ target: document, type: 'contextmenu', handler: on_context_menu as EventListener },
+		{ target: document, type: 'pointerlockchange', handler: on_pointer_lock_change },
+		{
+			target: document,
+			type: 'pointerdown',
+			handler: override_offset_during_drag,
+			options: CAPTURE
+		},
+		{ target: document, type: 'pointerup', handler: override_offset_during_drag, options: CAPTURE },
+		{
+			target: document,
+			type: 'pointermove',
+			handler: override_offset_during_drag,
+			options: CAPTURE
+		},
+		{ target: document, type: 'click', handler: override_offset_during_drag, options: CAPTURE },
+		{ target: document, type: 'keydown', handler: handle_keydown as EventListener },
+		{ target: document, type: 'keyup', handler: handle_keyup as EventListener },
+		{ target: globalThis, type: 'blur', handler: reset_transient_input }
+	];
 }
 
-function build_cleanup(): () => void {
-	return function cleanup(): void {
-		document.removeEventListener('mousedown', on_mouse_down);
-		document.removeEventListener('mousemove', on_mouse_move);
-		document.removeEventListener('mouseup', on_mouse_up);
-		document.removeEventListener('wheel', on_wheel);
-		document.removeEventListener('contextmenu', on_context_menu);
-		document.removeEventListener('keydown', handle_keydown);
-		document.removeEventListener('keyup', handle_keyup);
-		globalThis.removeEventListener('blur', reset_transient_input);
+function setup_listeners(): () => void {
+	if (active_cleanup) return active_cleanup;
+	const specs = get_listener_specs();
+	for (const spec of specs) spec.target.addEventListener(spec.type, spec.handler, spec.options);
+	active_cleanup = function cleanup(): void {
+		for (const spec of specs)
+			spec.target.removeEventListener(spec.type, spec.handler, spec.options);
 		active_cleanup = null;
 		yaw = 0;
 		pitch = 0;
@@ -134,6 +211,7 @@ function build_cleanup(): () => void {
 		set_joystick_move(0, 0);
 		set_joystick_look(0, 0);
 	};
+	return active_cleanup;
 }
 
 function set_joystick_move(x: number, y: number): void {
@@ -154,6 +232,12 @@ function apply_look_delta(delta_yaw: number, delta_pitch: number): void {
 export const input = {
 	get is_dragging_look() {
 		return is_dragging_look;
+	},
+	get drag_start_x() {
+		return drag_start_x;
+	},
+	get drag_start_y() {
+		return drag_start_y;
 	},
 	get yaw() {
 		return yaw;

@@ -3,6 +3,7 @@ import:
   - "@joshuafolkken/kit/cspell/sveltekit"
 words:
   - docstrings
+  - unstub
   - gameover
   - languagetool
   - metalness

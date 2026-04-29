@@ -24,9 +24,8 @@
 	let look_is_first_move = false;
 
 	function find_touch(list: TouchList, id: number): Touch | undefined {
-		for (let i = 0; i < list.length; i++) {
-			const t = list[i];
-			if (t && t.identifier === id) return t;
+		for (const t of list) {
+			if (t.identifier === id) return t;
 		}
 		return undefined;
 	}
@@ -35,17 +34,31 @@
 		return Math.max(min, Math.min(max, v));
 	}
 
-	function get_threlte_dom(): HTMLElement | null {
-		return document.querySelector('canvas')?.parentElement ?? null;
-	}
-
 	type DispatchCtx = { dom: HTMLElement; offset_x: number; offset_y: number };
 
 	function get_dispatch_ctx(x: number, y: number): DispatchCtx | null {
-		const dom = get_threlte_dom();
+		const dom = document.querySelector('canvas')?.parentElement;
 		if (!dom) return null;
 		const { left, top } = dom.getBoundingClientRect();
 		return { dom, offset_x: x - left, offset_y: y - top };
+	}
+
+	function build_event_opts(
+		pointer_id: number,
+		is_primary: boolean,
+		x: number,
+		y: number
+	): PointerEventInit {
+		return {
+			button: 0,
+			buttons: 0,
+			isPrimary: is_primary,
+			pointerId: pointer_id,
+			clientX: x,
+			clientY: y,
+			bubbles: true,
+			cancelable: true
+		};
 	}
 
 	function dispatch_pointer_down(
@@ -56,16 +69,8 @@
 	): void {
 		const ctx = get_dispatch_ctx(x, y);
 		if (!ctx) return;
-		const opts = {
-			button: 0,
-			buttons: 1,
-			isPrimary: is_primary,
-			pointerId: pointer_id,
-			clientX: x,
-			clientY: y,
-			bubbles: true,
-			cancelable: true
-		};
+		const opts = build_event_opts(pointer_id, is_primary, x, y);
+		opts.buttons = 1;
 		const move_ev = new PointerEvent('pointermove', opts);
 		const down_ev = new PointerEvent('pointerdown', opts);
 		override_event_offset(move_ev, ctx.offset_x, ctx.offset_y);
@@ -82,16 +87,7 @@
 	): void {
 		const ctx = get_dispatch_ctx(x, y);
 		if (!ctx) return;
-		const opts = {
-			button: 0,
-			buttons: 0,
-			isPrimary: is_primary,
-			pointerId: pointer_id,
-			clientX: x,
-			clientY: y,
-			bubbles: true,
-			cancelable: true
-		};
+		const opts = build_event_opts(pointer_id, is_primary, x, y);
 		const up_ev = new PointerEvent('pointerup', opts);
 		const click_ev = new MouseEvent('click', opts);
 		const leave_ev = new PointerEvent('pointerleave', opts);
@@ -100,6 +96,23 @@
 		override_event_offset(leave_ev, ctx.offset_x, ctx.offset_y);
 		ctx.dom.dispatchEvent(up_ev);
 		ctx.dom.dispatchEvent(click_ev);
+		ctx.dom.dispatchEvent(leave_ev);
+	}
+
+	function dispatch_pointer_cancel(
+		pointer_id: number,
+		is_primary: boolean,
+		x: number,
+		y: number
+	): void {
+		const ctx = get_dispatch_ctx(x, y);
+		if (!ctx) return;
+		const opts = build_event_opts(pointer_id, is_primary, x, y);
+		const up_ev = new PointerEvent('pointerup', opts);
+		const leave_ev = new PointerEvent('pointerleave', opts);
+		override_event_offset(up_ev, ctx.offset_x, ctx.offset_y);
+		override_event_offset(leave_ev, ctx.offset_x, ctx.offset_y);
+		ctx.dom.dispatchEvent(up_ev);
 		ctx.dom.dispatchEvent(leave_ev);
 	}
 
@@ -179,24 +192,23 @@
 		if (id === move_touch_id) {
 			move_touch_id = null;
 			input.set_joystick_move(0, 0);
+			dispatch_pointer_cancel(id, look_touch_id === null, move_start_x, move_start_y);
 		}
-		if (id === look_touch_id) look_touch_id = null;
+		if (id === look_touch_id) {
+			look_touch_id = null;
+			dispatch_pointer_cancel(id, move_touch_id === null, look_start_x, look_start_y);
+		}
 	}
 
 	function on_touch_end(e: TouchEvent): void {
-		for (let i = 0; i < e.changedTouches.length; i++) {
-			const touch = e.changedTouches[i];
-			if (!touch) continue;
+		for (const touch of e.changedTouches) {
 			if (touch.identifier === move_touch_id) on_move_touch_end(touch.identifier);
 			if (touch.identifier === look_touch_id) on_look_touch_end(touch.identifier);
 		}
 	}
 
 	function on_touch_cancel(e: TouchEvent): void {
-		for (let i = 0; i < e.changedTouches.length; i++) {
-			const touch = e.changedTouches[i];
-			if (touch) cancel_touch_by_id(touch.identifier);
-		}
+		for (const touch of e.changedTouches) cancel_touch_by_id(touch.identifier);
 	}
 
 	function on_jump_touch_start(e: TouchEvent): void {
@@ -243,6 +255,9 @@
 		touch-action: none;
 		user-select: none;
 		-webkit-user-select: none;
+		--jump-btn-size: 60px;
+		--jump-btn-bottom: 20%;
+		--jump-btn-left: 75%;
 	}
 
 	.joystick-zone {
@@ -253,11 +268,11 @@
 
 	.jump-btn {
 		position: absolute;
-		bottom: 20%;
-		left: 75%;
+		bottom: var(--jump-btn-bottom);
+		left: var(--jump-btn-left);
 		transform: translateX(-50%);
-		width: 60px;
-		height: 60px;
+		width: var(--jump-btn-size);
+		height: var(--jump-btn-size);
 		border-radius: 50%;
 		background: rgba(255, 255, 255, 0.2);
 		border: 2px solid rgba(255, 255, 255, 0.5);

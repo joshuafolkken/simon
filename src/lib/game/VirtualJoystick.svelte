@@ -192,6 +192,11 @@
 		}
 	}
 
+	function on_jump_touch_start(e: TouchEvent): void {
+		e.preventDefault();
+		input.trigger_jump();
+	}
+
 	onMount(() => {
 		if (!('ontouchstart' in window)) return;
 		move_zone.addEventListener('touchstart', on_move_start, { passive: false });
@@ -212,7 +217,12 @@
 <div class="joystick-overlay">
 	<div class="joystick-zone" aria-hidden="true" bind:this={move_zone}></div>
 	<div class="joystick-zone" aria-hidden="true" bind:this={look_zone}></div>
-	<button class="jump-btn" data-testid="jump-btn" onclick={() => input.trigger_jump()}>
+	<button
+		class="jump-btn"
+		data-testid="jump-btn"
+		onclick={() => input.trigger_jump()}
+		ontouchstart={on_jump_touch_start}
+	>
 		{messages.jump_button}
 	</button>
 </div>

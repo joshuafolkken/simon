@@ -21,7 +21,7 @@ type StepResult = {
 function compute_velocity_after_look(step_input: StepInput): StepResult {
 	const delta_yaw = step_input.joystick_look_x * step_input.joystick_look_speed * step_input.delta;
 	const delta_pitch =
-		step_input.joystick_look_y * step_input.joystick_look_speed * step_input.delta;
+		-step_input.joystick_look_y * step_input.joystick_look_speed * step_input.delta;
 	const new_yaw = step_input.yaw - delta_yaw;
 	const velocity = player_velocity.compute_velocity({
 		yaw: new_yaw,

@@ -57,7 +57,7 @@ describe('player_step.compute_velocity_after_look', () => {
 		expect(result.delta_yaw).toBeCloseTo(joystick_look_x * LOOK_SPEED * DELTA);
 	});
 
-	it('returns delta_pitch equal to joystick_look_y times speed times delta', () => {
+	it('returns delta_pitch as negative joystick_look_y times speed times delta', () => {
 		const joystick_look_y = 0.3;
 		const result = player_step.compute_velocity_after_look({
 			yaw: 0,
@@ -69,7 +69,21 @@ describe('player_step.compute_velocity_after_look', () => {
 			strafe: 0,
 			is_sprinting: false
 		});
-		expect(result.delta_pitch).toBeCloseTo(joystick_look_y * LOOK_SPEED * DELTA);
+		expect(result.delta_pitch).toBeCloseTo(-joystick_look_y * LOOK_SPEED * DELTA);
+	});
+
+	it('dragging up (joystick_look_y = 1) produces negative delta_pitch so camera looks up', () => {
+		const result = player_step.compute_velocity_after_look({
+			yaw: 0,
+			joystick_look_x: 0,
+			joystick_look_y: 1,
+			joystick_look_speed: LOOK_SPEED,
+			delta: DELTA,
+			forward: 0,
+			strafe: 0,
+			is_sprinting: false
+		});
+		expect(result.delta_pitch).toBeLessThan(0);
 	});
 
 	it('marks look_consumed true when only joystick_look_x is non-zero', () => {

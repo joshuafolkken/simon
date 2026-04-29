@@ -5,6 +5,7 @@
 	import Player from './Player.svelte';
 	import SimonBoard from './SimonBoard.svelte';
 	import Switch from './Switch.svelte';
+	import FloorCredits from './FloorCredits.svelte';
 	import { game_state } from '$lib/game/state.svelte';
 	import { fullscreen } from '$lib/game/fullscreen.svelte';
 	import { make_pointer_compute } from '$lib/game/pointer-compute.js';
@@ -124,6 +125,7 @@
 </T.Group>
 
 <Room width={ROOM_W} depth={ROOM_D} height={ROOM_H} {floor_color} {wall_color} {ceiling_color} />
+<FloorCredits />
 <Player />
 <SimonBoard />
 <Switch

@@ -1,13 +1,24 @@
 version: "0.2"
 import:
   - "@joshuafolkken/kit/cspell/sveltekit"
+ignorePaths:
+  - "**/credits-config.ts"
 words:
+  - Baer
+  - BAER
+  - Boisclair
+  - BOISCLAIR
+  - codeman
+  - CODEMAN
   - docstrings
-  - unstub
   - gameover
   - languagetool
+  - McInerney
+  - MCINERNEY
   - metalness
   - METALNESS
+  - mrdoob
+  - MRDOOB
   - nipplejs
   - oncreate
   - Orbitron
@@ -16,6 +27,10 @@ words:
   - shellcheck
   - Stylesheet
   - sveltekit
+  - tailwindlabs
+  - TAILWINDLABS
   - threlte
   - trycloudflare
-ignorePaths: []
+  - unstub
+  - yoannmoinet
+  - YOANNMOINET

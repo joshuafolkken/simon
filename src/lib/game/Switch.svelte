@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { T } from '@threlte/core';
 	import { Text } from '@threlte/extras';
-	import { game_state } from '$lib/game/state.svelte';
-	import { fonts } from '$lib/game/fonts';
-	import { messages } from '$lib/messages/en';
-	import { cyber_switch_input } from '$lib/game/cyber-switch-input';
+	import { resolve_switch_colors } from '$lib/game/switch-colors';
+	import type { SwitchColors } from '$lib/game/switch-colors';
 	import {
 		SWITCH_Y,
 		BASE_RADIUS,
@@ -37,39 +35,31 @@
 		ORB_ROUGHNESS
 	} from '$lib/game/switch-config';
 
-	const SWITCH_X = 1.6;
-	const NORMAL_COLOR = '#00aaff';
-	const CYBER_COLOR = '#ff00ff';
-	const NORMAL_HOUSING = '#001122';
-	const CYBER_HOUSING = '#120022';
-	const NORMAL_HOUSING_EMISSIVE = 0.15;
-	const CYBER_HOUSING_EMISSIVE = 0.4;
-	const NORMAL_RING_EMISSIVE = 0.8;
-	const CYBER_RING_EMISSIVE = 4.0;
-	const NORMAL_ORB_EMISSIVE = 0.6;
-	const CYBER_ORB_EMISSIVE = 5.0;
+	interface Props {
+		position_x: number;
+		is_active: boolean;
+		label: string;
+		font: string;
+		font_size_multiplier: number;
+		onclick: () => void;
+		colors: SwitchColors;
+	}
 
-	let current_font = $derived(fonts.get_font(game_state.is_cyber));
-	let current_color = $derived(game_state.is_cyber ? CYBER_COLOR : NORMAL_COLOR);
-	let housing_color = $derived(game_state.is_cyber ? CYBER_HOUSING : NORMAL_HOUSING);
-	let housing_emissive = $derived(
-		game_state.is_cyber ? CYBER_HOUSING_EMISSIVE : NORMAL_HOUSING_EMISSIVE
-	);
-	let ring_emissive = $derived(game_state.is_cyber ? CYBER_RING_EMISSIVE : NORMAL_RING_EMISSIVE);
-	let orb_emissive = $derived(game_state.is_cyber ? CYBER_ORB_EMISSIVE : NORMAL_ORB_EMISSIVE);
-	let current_font_size = $derived(
-		LABEL_FONT_SIZE * fonts.get_font_size_multiplier(game_state.is_cyber)
-	);
+	let { position_x, is_active, label, font, font_size_multiplier, onclick, colors }: Props =
+		$props();
+
+	let resolved = $derived(resolve_switch_colors(colors, is_active));
+	let current_font_size = $derived(LABEL_FONT_SIZE * font_size_multiplier);
 </script>
 
-<T.Group position={[SWITCH_X, SWITCH_Y, SWITCH_Z]}>
+<T.Group position={[position_x, SWITCH_Y, SWITCH_Z]}>
 	<T.Mesh position.z={MOUNT_PLATE_Z} rotation.x={FACE_ROTATION_X}>
 		<T.CylinderGeometry
 			args={[MOUNT_PLATE_RADIUS, MOUNT_PLATE_RADIUS, MOUNT_PLATE_DEPTH, HEX_FACES]}
 		/>
 		<T.MeshStandardMaterial
-			color={housing_color}
-			emissive={current_color}
+			color={resolved.housing_color}
+			emissive={resolved.current_color}
 			emissiveIntensity={MOUNT_PLATE_EMISSIVE}
 			metalness={METALNESS}
 			roughness={ROUGHNESS_HOUSING}
@@ -78,9 +68,9 @@
 	<T.Mesh rotation.x={FACE_ROTATION_X}>
 		<T.CylinderGeometry args={[BASE_RADIUS, BASE_RADIUS, BASE_DEPTH, HEX_FACES]} />
 		<T.MeshStandardMaterial
-			color={housing_color}
-			emissive={current_color}
-			emissiveIntensity={housing_emissive}
+			color={resolved.housing_color}
+			emissive={resolved.current_color}
+			emissiveIntensity={resolved.housing_emissive}
 			metalness={METALNESS}
 			roughness={ROUGHNESS_HOUSING}
 		/>
@@ -88,21 +78,21 @@
 	<T.Mesh position.z={BASE_HALF_DEPTH}>
 		<T.TorusGeometry args={[RING_RADIUS, RING_TUBE, RING_RADIAL, RING_TUBULAR]} />
 		<T.MeshStandardMaterial
-			color={current_color}
-			emissive={current_color}
-			emissiveIntensity={ring_emissive}
+			color={resolved.current_color}
+			emissive={resolved.current_color}
+			emissiveIntensity={resolved.ring_emissive}
 		/>
 	</T.Mesh>
 	<T.Mesh position.z={ORB_Z}>
 		<T.SphereGeometry args={[ORB_RADIUS, ORB_SEGMENTS, ORB_SEGMENTS]} />
 		<T.MeshStandardMaterial
-			color={current_color}
-			emissive={current_color}
-			emissiveIntensity={orb_emissive}
+			color={resolved.current_color}
+			emissive={resolved.current_color}
+			emissiveIntensity={resolved.orb_emissive}
 			roughness={ORB_ROUGHNESS}
 		/>
 	</T.Mesh>
-	<T.Mesh position.z={HIT_AREA_Z} onclick={cyber_switch_input.on_click}>
+	<T.Mesh position.z={HIT_AREA_Z} {onclick}>
 		<T.CircleGeometry args={[HIT_AREA_RADIUS, HIT_AREA_SEGMENTS]} />
 		<T.MeshBasicMaterial transparent={true} opacity={0} depthWrite={false} />
 	</T.Mesh>
@@ -112,8 +102,8 @@
 	</T.Mesh>
 	<T.Group position={[0, -LABEL_Y_OFFSET, LABEL_Z]}>
 		<Text
-			text={messages.cyber_switch_label}
-			font={current_font}
+			text={label}
+			{font}
 			fontSize={current_font_size}
 			color="#ffffff"
 			anchorX="center"

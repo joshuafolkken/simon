@@ -7,6 +7,7 @@
 	let look_zone: HTMLElement;
 
 	const MOVE_MAX_DIST = 40;
+	const MOVE_DEAD_ZONE = 6;
 	const TOUCH_LOOK_SENSITIVITY = 0.009;
 	const FIRST_MOVE_SENSITIVITY_FRACTION = 0.2;
 
@@ -134,10 +135,17 @@
 		dispatch_pointer_down(t.identifier, move_touch_id === null, t.clientX, t.clientY);
 	}
 
+	function apply_dead_zone(raw: number): number {
+		const abs = Math.abs(raw);
+		if (abs < MOVE_DEAD_ZONE) return 0;
+		return Math.sign(raw) * clamp((abs - MOVE_DEAD_ZONE) / (MOVE_MAX_DIST - MOVE_DEAD_ZONE), 0, 1);
+	}
+
 	function apply_move_touch(t: Touch): void {
-		const dx = clamp((t.clientX - move_start_x) / MOVE_MAX_DIST, -1, 1);
-		const dy = clamp((move_start_y - t.clientY) / MOVE_MAX_DIST, -1, 1);
-		input.set_joystick_move(dx, dy);
+		input.set_joystick_move(
+			apply_dead_zone(t.clientX - move_start_x),
+			apply_dead_zone(move_start_y - t.clientY)
+		);
 	}
 
 	function apply_look_touch(t: Touch): void {

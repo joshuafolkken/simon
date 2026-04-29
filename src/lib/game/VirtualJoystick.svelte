@@ -8,6 +8,7 @@
 
 	const MOVE_MAX_DIST = 40;
 	const TOUCH_LOOK_SENSITIVITY = 0.009;
+	const FIRST_MOVE_SENSITIVITY_FRACTION = 0.2;
 
 	let move_touch_id: number | null = null;
 	let move_start_x = 0;
@@ -18,6 +19,7 @@
 	let look_last_y = 0;
 	let look_start_x = 0;
 	let look_start_y = 0;
+	let look_is_first_move = false;
 
 	function find_touch(list: TouchList, id: number): Touch | undefined {
 		for (let i = 0; i < list.length; i++) {
@@ -128,6 +130,7 @@
 		look_last_y = t.clientY;
 		look_start_x = t.clientX;
 		look_start_y = t.clientY;
+		look_is_first_move = true;
 		dispatch_pointer_down(t.identifier, move_touch_id === null, t.clientX, t.clientY);
 	}
 
@@ -138,9 +141,13 @@
 	}
 
 	function apply_look_touch(t: Touch): void {
+		const sensitivity = look_is_first_move
+			? TOUCH_LOOK_SENSITIVITY * FIRST_MOVE_SENSITIVITY_FRACTION
+			: TOUCH_LOOK_SENSITIVITY;
+		look_is_first_move = false;
 		input.apply_look_delta(
-			(t.clientX - look_last_x) * TOUCH_LOOK_SENSITIVITY,
-			(t.clientY - look_last_y) * TOUCH_LOOK_SENSITIVITY
+			(t.clientX - look_last_x) * sensitivity,
+			(t.clientY - look_last_y) * sensitivity
 		);
 		look_last_x = t.clientX;
 		look_last_y = t.clientY;

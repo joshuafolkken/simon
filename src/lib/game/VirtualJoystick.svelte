@@ -44,7 +44,12 @@
 		}
 	}
 
-	function dispatch_pointer_down(x: number, y: number): void {
+	function dispatch_pointer_down(
+		pointer_id: number,
+		is_primary: boolean,
+		x: number,
+		y: number
+	): void {
 		const dom = get_threlte_dom();
 		if (!dom) return;
 		const rect = dom.getBoundingClientRect();
@@ -53,8 +58,8 @@
 		const opts = {
 			button: 0,
 			buttons: 1,
-			isPrimary: true,
-			pointerId: 1,
+			isPrimary: is_primary,
+			pointerId: pointer_id,
 			clientX: x,
 			clientY: y,
 			bubbles: true,
@@ -68,7 +73,12 @@
 		dom.dispatchEvent(down_ev);
 	}
 
-	function dispatch_pointer_up(x: number, y: number): void {
+	function dispatch_pointer_up(
+		pointer_id: number,
+		is_primary: boolean,
+		x: number,
+		y: number
+	): void {
 		const dom = get_threlte_dom();
 		if (!dom) return;
 		const rect = dom.getBoundingClientRect();
@@ -77,8 +87,8 @@
 		const opts = {
 			button: 0,
 			buttons: 0,
-			isPrimary: true,
-			pointerId: 1,
+			isPrimary: is_primary,
+			pointerId: pointer_id,
 			clientX: x,
 			clientY: y,
 			bubbles: true,
@@ -102,7 +112,7 @@
 		move_touch_id = t.identifier;
 		move_start_x = t.clientX;
 		move_start_y = t.clientY;
-		dispatch_pointer_down(t.clientX, t.clientY);
+		dispatch_pointer_down(t.identifier, look_touch_id === null, t.clientX, t.clientY);
 	}
 
 	function on_look_start(e: TouchEvent): void {
@@ -115,7 +125,7 @@
 		look_last_y = t.clientY;
 		look_start_x = t.clientX;
 		look_start_y = t.clientY;
-		dispatch_pointer_down(t.clientX, t.clientY);
+		dispatch_pointer_down(t.identifier, move_touch_id === null, t.clientX, t.clientY);
 	}
 
 	function apply_move_touch(t: Touch): void {
@@ -144,23 +154,38 @@
 		}
 	}
 
-	function on_move_touch_end(): void {
+	function on_move_touch_end(ptr_id: number): void {
 		move_touch_id = null;
 		input.set_joystick_move(0, 0);
-		dispatch_pointer_up(move_start_x, move_start_y);
+		dispatch_pointer_up(ptr_id, look_touch_id === null, move_start_x, move_start_y);
 	}
 
-	function on_look_touch_end(): void {
+	function on_look_touch_end(ptr_id: number): void {
 		look_touch_id = null;
-		dispatch_pointer_up(look_start_x, look_start_y);
+		dispatch_pointer_up(ptr_id, move_touch_id === null, look_start_x, look_start_y);
+	}
+
+	function cancel_touch_by_id(id: number): void {
+		if (id === move_touch_id) {
+			move_touch_id = null;
+			input.set_joystick_move(0, 0);
+		}
+		if (id === look_touch_id) look_touch_id = null;
 	}
 
 	function on_touch_end(e: TouchEvent): void {
 		for (let i = 0; i < e.changedTouches.length; i++) {
 			const touch = e.changedTouches[i];
 			if (!touch) continue;
-			if (touch.identifier === move_touch_id) on_move_touch_end();
-			if (touch.identifier === look_touch_id) on_look_touch_end();
+			if (touch.identifier === move_touch_id) on_move_touch_end(touch.identifier);
+			if (touch.identifier === look_touch_id) on_look_touch_end(touch.identifier);
+		}
+	}
+
+	function on_touch_cancel(e: TouchEvent): void {
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			const touch = e.changedTouches[i];
+			if (touch) cancel_touch_by_id(touch.identifier);
 		}
 	}
 
@@ -170,24 +195,23 @@
 		look_zone.addEventListener('touchstart', on_look_start, { passive: false });
 		document.addEventListener('touchmove', on_touch_move, { passive: false });
 		document.addEventListener('touchend', on_touch_end);
-		document.addEventListener('touchcancel', on_touch_end);
+		document.addEventListener('touchcancel', on_touch_cancel);
 		return () => {
 			move_zone.removeEventListener('touchstart', on_move_start);
 			look_zone.removeEventListener('touchstart', on_look_start);
 			document.removeEventListener('touchmove', on_touch_move);
 			document.removeEventListener('touchend', on_touch_end);
-			document.removeEventListener('touchcancel', on_touch_end);
+			document.removeEventListener('touchcancel', on_touch_cancel);
 		};
 	});
 </script>
 
-<div class="joystick-overlay" aria-hidden="true">
-	<div class="joystick-zone" bind:this={move_zone}></div>
-	<div class="joystick-zone" bind:this={look_zone}>
-		<button class="jump-btn" data-testid="jump-btn" onpointerdown={() => input.trigger_jump()}>
-			{messages.jump_button}
-		</button>
-	</div>
+<div class="joystick-overlay">
+	<div class="joystick-zone" aria-hidden="true" bind:this={move_zone}></div>
+	<div class="joystick-zone" aria-hidden="true" bind:this={look_zone}></div>
+	<button class="jump-btn" data-testid="jump-btn" onclick={() => input.trigger_jump()}>
+		{messages.jump_button}
+	</button>
 </div>
 
 <style>

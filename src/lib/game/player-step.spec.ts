@@ -72,7 +72,7 @@ describe('player_step.compute_velocity_after_look', () => {
 		expect(result.delta_pitch).toBeCloseTo(-joystick_look_y * LOOK_SPEED * DELTA);
 	});
 
-	it('dragging up (joystick_look_y = 1) produces negative delta_pitch so camera looks up', () => {
+	it('dragging up (joystick_look_y = 1) produces negative delta_pitch (camera looks down)', () => {
 		const result = player_step.compute_velocity_after_look({
 			yaw: 0,
 			joystick_look_x: 0,

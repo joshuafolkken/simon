@@ -22,12 +22,16 @@ function setup_threlte_dom(): { dom: HTMLDivElement; canvas: HTMLCanvasElement }
 }
 
 describe('VirtualJoystick', () => {
-	it('renders jump button in the look zone (right half)', () => {
+	it('renders jump button inside overlay but not inside any joystick zone', () => {
 		const { container } = render(VirtualJoystick);
-		const look_zone = container.querySelectorAll('.joystick-zone').item(1);
-		expect(look_zone).toBeTruthy();
-		if (!look_zone) return;
-		expect(look_zone.querySelector('[data-testid="jump-btn"]')).toBeTruthy();
+		const overlay = container.querySelector('.joystick-overlay');
+		expect(overlay).toBeTruthy();
+		if (!overlay) return;
+		expect(overlay.querySelector('[data-testid="jump-btn"]')).toBeTruthy();
+		const zones = container.querySelectorAll('.joystick-zone');
+		for (let i = 0; i < zones.length; i++) {
+			expect(zones[i]?.querySelector('[data-testid="jump-btn"]')).toBeNull();
+		}
 	});
 
 	it('joystick-zone does not capture pointer events on non-touch devices', () => {
@@ -147,6 +151,7 @@ describe('VirtualJoystick touch handlers', () => {
 
 		expect(spy).toHaveBeenCalledOnce();
 		const pointer_event = spy.mock.calls[0]?.[0] as PointerEvent;
+		expect(pointer_event.pointerId).toBe(1);
 		expect(pointer_event.offsetX).toBe(100);
 		expect(pointer_event.offsetY).toBe(200);
 		dom.remove();
@@ -209,8 +214,27 @@ describe('VirtualJoystick touch handlers', () => {
 
 		expect(spy).toHaveBeenCalledOnce();
 		const pointer_event = spy.mock.calls[0]?.[0] as PointerEvent;
+		expect(pointer_event.pointerId).toBe(2);
 		expect(pointer_event.offsetX).toBe(300);
 		expect(pointer_event.offsetY).toBe(200);
+		dom.remove();
+	});
+
+	it('touchcancel does not dispatch click to threlte dom', () => {
+		const { dom } = setup_threlte_dom();
+		const click_spy = vi.fn();
+		dom.addEventListener('click', click_spy);
+
+		const { container } = render(VirtualJoystick);
+		const move_zone = container.querySelector('.joystick-zone');
+		expect(move_zone).toBeTruthy();
+		if (!move_zone) return;
+
+		const t = make_touch(1, 100, 200, move_zone);
+		fire('touchstart', move_zone, [t], [t]);
+		fire('touchcancel', document, [t], []);
+
+		expect(click_spy).not.toHaveBeenCalled();
 		dom.remove();
 	});
 

@@ -63,11 +63,7 @@
 </script>
 
 <T.Group position={[SWITCH_X, SWITCH_Y, SWITCH_Z]}>
-	<T.Mesh
-		position.z={MOUNT_PLATE_Z}
-		onclick={fullscreen_switch_input.on_click}
-		rotation.x={FACE_ROTATION_X}
-	>
+	<T.Mesh position.z={MOUNT_PLATE_Z} rotation.x={FACE_ROTATION_X}>
 		<T.CylinderGeometry
 			args={[MOUNT_PLATE_RADIUS, MOUNT_PLATE_RADIUS, MOUNT_PLATE_DEPTH, HEX_FACES]}
 		/>
@@ -79,7 +75,7 @@
 			roughness={ROUGHNESS_HOUSING}
 		/>
 	</T.Mesh>
-	<T.Mesh onclick={fullscreen_switch_input.on_click} rotation.x={FACE_ROTATION_X}>
+	<T.Mesh rotation.x={FACE_ROTATION_X}>
 		<T.CylinderGeometry args={[BASE_RADIUS, BASE_RADIUS, BASE_DEPTH, HEX_FACES]} />
 		<T.MeshStandardMaterial
 			color={housing_color}
@@ -89,7 +85,7 @@
 			roughness={ROUGHNESS_HOUSING}
 		/>
 	</T.Mesh>
-	<T.Mesh position.z={BASE_HALF_DEPTH} onclick={fullscreen_switch_input.on_click}>
+	<T.Mesh position.z={BASE_HALF_DEPTH}>
 		<T.TorusGeometry args={[RING_RADIUS, RING_TUBE, RING_RADIAL, RING_TUBULAR]} />
 		<T.MeshStandardMaterial
 			color={current_color}
@@ -97,7 +93,7 @@
 			emissiveIntensity={ring_emissive}
 		/>
 	</T.Mesh>
-	<T.Mesh position.z={ORB_Z} onclick={fullscreen_switch_input.on_click}>
+	<T.Mesh position.z={ORB_Z}>
 		<T.SphereGeometry args={[ORB_RADIUS, ORB_SEGMENTS, ORB_SEGMENTS]} />
 		<T.MeshStandardMaterial
 			color={current_color}
@@ -110,7 +106,7 @@
 		<T.CircleGeometry args={[HIT_AREA_RADIUS, HIT_AREA_SEGMENTS]} />
 		<T.MeshBasicMaterial transparent={true} opacity={0} depthWrite={false} />
 	</T.Mesh>
-	<T.Mesh position.z={ORB_Z} onclick={fullscreen_switch_input.on_click}>
+	<T.Mesh position.z={ORB_Z}>
 		<T.SphereGeometry args={[LIGHT_HIT_RADIUS, LIGHT_HIT_SEGMENTS, LIGHT_HIT_SEGMENTS]} />
 		<T.MeshBasicMaterial transparent={true} opacity={0} depthWrite={false} />
 	</T.Mesh>

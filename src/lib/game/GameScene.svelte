@@ -10,6 +10,7 @@
 	import { game_state } from '$lib/game/state.svelte';
 	import { fonts } from '$lib/game/fonts';
 	import { fullscreen } from '$lib/game/fullscreen.svelte';
+	import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
 	import { loading } from '$lib/game/loading.svelte';
 	import { device } from '$lib/game/device';
 	import { session } from '$lib/game/session.svelte';
@@ -40,11 +41,13 @@
 
 	onMount(() => {
 		loading.set_step('loading_assets');
+		fullscreen_switch_input.set_container(container);
 		const cleanup_input = input.setup_listeners();
 		const cleanup_fullscreen = fullscreen.setup_listeners();
 		return function cleanup(): void {
 			cleanup_input();
 			cleanup_fullscreen();
+			fullscreen_switch_input.set_container(null);
 		};
 	});
 </script>

@@ -6,6 +6,7 @@ import { game_state } from '$lib/game/state.svelte';
 import { audio } from '$lib/game/audio';
 import { device } from '$lib/game/device';
 import { fullscreen } from '$lib/game/fullscreen.svelte';
+import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
 import { session } from '$lib/game/session.svelte';
 
 describe('GameScene', () => {
@@ -83,6 +84,14 @@ describe('GameScene', () => {
 		scene.click();
 		flushSync();
 		expect(container.querySelector('.click-hint')).toBeNull();
+	});
+
+	it('registers the game-scene container with fullscreen_switch_input on mount', () => {
+		const spy = vi.spyOn(fullscreen_switch_input, 'set_container');
+		const { container } = render(GameScene);
+		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
+		expect(scene).toBeTruthy();
+		expect(spy).toHaveBeenCalledWith(scene);
 	});
 
 	it('start_session does not request fullscreen on desktop devices but still inits audio', () => {

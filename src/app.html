@@ -26,11 +26,32 @@
 			}
 			#static-loading-overlay .brand {
 				margin: 0;
-				color: rgba(255, 255, 255, 0.85);
+				color: rgba(255, 255, 255, 0.75);
 				font-family: monospace;
-				font-size: 1.15rem;
-				letter-spacing: 0.06em;
+				font-size: 1rem;
+				letter-spacing: 1px;
 				line-height: 1.4;
+			}
+			#static-loading-overlay .game-block {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.3rem;
+				margin: 0.75rem 0;
+			}
+			#static-loading-overlay .game-title {
+				margin: 0;
+				color: rgba(255, 255, 255, 0.6);
+				font-family: monospace;
+				font-size: 1.1rem;
+				letter-spacing: 3px;
+			}
+			#static-loading-overlay .game-version {
+				margin: 0;
+				color: rgba(255, 255, 255, 0.35);
+				font-family: monospace;
+				font-size: 0.8rem;
+				letter-spacing: 2px;
 			}
 			#static-loading-overlay .label {
 				margin: 0;
@@ -113,6 +134,11 @@
 				</g>
 			</svg>
 			<p class="brand">Joshua Folkken</p>
+			<!-- game-block MUST stay in sync with messages.game_title and package.json#version -->
+			<div class="game-block">
+				<p class="game-title">SIMON</p>
+				<p class="game-version">v%sveltekit.env.PUBLIC_APP_VERSION%</p>
+			</div>
 			<p class="label">
 				<span class="status">DOWNLOADING...</span>
 				<span class="progress">0%</span>

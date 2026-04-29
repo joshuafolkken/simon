@@ -1,4 +1,9 @@
+import { readFileSync } from 'node:fs';
 import { test, expect, type Page } from '@playwright/test';
+
+const { version } = JSON.parse(
+	readFileSync(new URL('../../package.json', import.meta.url), 'utf-8')
+) as { version: string };
 
 const LOADING_OVERLAY_TIMEOUT_MS = 8000;
 const FULLSCREEN_NOT_CALLED_WAIT_MS = 200;
@@ -49,6 +54,18 @@ test('loading overlay displays the logo svg', async ({ page }) => {
 test('loading overlay displays Joshua Folkken below the logo', async ({ page }) => {
 	await page.goto('/');
 	await expect(page.locator('[data-testid="loading-overlay"] .brand')).toHaveText('Joshua Folkken');
+});
+
+test('loading overlay displays game title below the brand', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="loading-overlay"] .game-title')).toHaveText('SIMON');
+});
+
+test('loading overlay displays game version below the brand', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="loading-overlay"] .game-version')).toHaveText(
+		`v${version}`
+	);
 });
 
 test('loading overlay reaches 100% progress once the scene is ready', async ({ page }) => {

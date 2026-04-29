@@ -248,4 +248,35 @@ describe('VirtualJoystick touch handlers', () => {
 		expect(spy).not.toHaveBeenCalled();
 		dom.remove();
 	});
+
+	it('touchstart on jump button calls trigger_jump', () => {
+		const spy = vi.spyOn(input, 'trigger_jump');
+		const { container } = render(VirtualJoystick);
+		const jump_btn = container.querySelector<HTMLButtonElement>('[data-testid="jump-btn"]');
+		expect(jump_btn).toBeTruthy();
+		if (!jump_btn) return;
+
+		const t = make_touch(3, 300, 400, jump_btn);
+		fire('touchstart', jump_btn, [t], [t]);
+
+		expect(spy).toHaveBeenCalledOnce();
+	});
+
+	it('touchstart on jump button calls trigger_jump even while look zone is dragging', () => {
+		const spy = vi.spyOn(input, 'trigger_jump');
+		const { container } = render(VirtualJoystick);
+		const look_zone = container.querySelectorAll('.joystick-zone').item(1);
+		const jump_btn = container.querySelector<HTMLButtonElement>('[data-testid="jump-btn"]');
+		expect(look_zone).toBeTruthy();
+		expect(jump_btn).toBeTruthy();
+		if (!look_zone || !jump_btn) return;
+
+		const look_touch = make_touch(1, 300, 200, look_zone);
+		fire('touchstart', look_zone, [look_touch], [look_touch]);
+
+		const jump_touch = make_touch(2, 300, 400, jump_btn);
+		fire('touchstart', jump_btn, [jump_touch], [look_touch, jump_touch]);
+
+		expect(spy).toHaveBeenCalledOnce();
+	});
 });

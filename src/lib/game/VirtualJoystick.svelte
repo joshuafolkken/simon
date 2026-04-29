@@ -44,17 +44,23 @@
 		}
 	}
 
+	type DispatchCtx = { dom: HTMLElement; offset_x: number; offset_y: number };
+
+	function get_dispatch_ctx(x: number, y: number): DispatchCtx | null {
+		const dom = get_threlte_dom();
+		if (!dom) return null;
+		const { left, top } = dom.getBoundingClientRect();
+		return { dom, offset_x: x - left, offset_y: y - top };
+	}
+
 	function dispatch_pointer_down(
 		pointer_id: number,
 		is_primary: boolean,
 		x: number,
 		y: number
 	): void {
-		const dom = get_threlte_dom();
-		if (!dom) return;
-		const rect = dom.getBoundingClientRect();
-		const offset_x = x - rect.left;
-		const offset_y = y - rect.top;
+		const ctx = get_dispatch_ctx(x, y);
+		if (!ctx) return;
 		const opts = {
 			button: 0,
 			buttons: 1,
@@ -67,10 +73,10 @@
 		};
 		const move_ev = new PointerEvent('pointermove', opts);
 		const down_ev = new PointerEvent('pointerdown', opts);
-		override_offset(move_ev, offset_x, offset_y);
-		override_offset(down_ev, offset_x, offset_y);
-		dom.dispatchEvent(move_ev);
-		dom.dispatchEvent(down_ev);
+		override_offset(move_ev, ctx.offset_x, ctx.offset_y);
+		override_offset(down_ev, ctx.offset_x, ctx.offset_y);
+		ctx.dom.dispatchEvent(move_ev);
+		ctx.dom.dispatchEvent(down_ev);
 	}
 
 	function dispatch_pointer_up(
@@ -79,11 +85,8 @@
 		x: number,
 		y: number
 	): void {
-		const dom = get_threlte_dom();
-		if (!dom) return;
-		const rect = dom.getBoundingClientRect();
-		const offset_x = x - rect.left;
-		const offset_y = y - rect.top;
+		const ctx = get_dispatch_ctx(x, y);
+		if (!ctx) return;
 		const opts = {
 			button: 0,
 			buttons: 0,
@@ -97,12 +100,12 @@
 		const up_ev = new PointerEvent('pointerup', opts);
 		const click_ev = new MouseEvent('click', opts);
 		const leave_ev = new PointerEvent('pointerleave', opts);
-		override_offset(up_ev, offset_x, offset_y);
-		override_offset(click_ev, offset_x, offset_y);
-		override_offset(leave_ev, offset_x, offset_y);
-		dom.dispatchEvent(up_ev);
-		dom.dispatchEvent(click_ev);
-		dom.dispatchEvent(leave_ev);
+		override_offset(up_ev, ctx.offset_x, ctx.offset_y);
+		override_offset(click_ev, ctx.offset_x, ctx.offset_y);
+		override_offset(leave_ev, ctx.offset_x, ctx.offset_y);
+		ctx.dom.dispatchEvent(up_ev);
+		ctx.dom.dispatchEvent(click_ev);
+		ctx.dom.dispatchEvent(leave_ev);
 	}
 
 	function on_move_start(e: TouchEvent): void {

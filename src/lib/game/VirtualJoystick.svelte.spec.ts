@@ -24,14 +24,8 @@ function setup_threlte_dom(): { dom: HTMLDivElement; canvas: HTMLCanvasElement }
 describe('VirtualJoystick', () => {
 	it('renders jump button inside overlay but not inside any joystick zone', () => {
 		const { container } = render(VirtualJoystick);
-		const overlay = container.querySelector('.joystick-overlay');
-		expect(overlay).toBeTruthy();
-		if (!overlay) return;
-		expect(overlay.querySelector('[data-testid="jump-btn"]')).toBeTruthy();
-		const zones = container.querySelectorAll('.joystick-zone');
-		for (let i = 0; i < zones.length; i++) {
-			expect(zones[i]?.querySelector('[data-testid="jump-btn"]')).toBeNull();
-		}
+		expect(container.querySelector('.joystick-overlay [data-testid="jump-btn"]')).toBeTruthy();
+		expect(container.querySelector('.joystick-zone [data-testid="jump-btn"]')).toBeNull();
 	});
 
 	it('joystick-zone does not capture pointer events on non-touch devices', () => {

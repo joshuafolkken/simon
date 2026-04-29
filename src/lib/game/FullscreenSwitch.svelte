@@ -1,9 +1,6 @@
 <script lang="ts">
 	import { T } from '@threlte/core';
 	import { Text } from '@threlte/extras';
-	import { game_state } from '$lib/game/state.svelte';
-	import { fonts } from '$lib/game/fonts';
-	import { messages } from '$lib/messages/en';
 	import { fullscreen } from '$lib/game/fullscreen.svelte';
 	import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
 	import {
@@ -38,6 +35,12 @@
 		ORB_ROUGHNESS
 	} from '$lib/game/switch-config';
 
+	interface Props {
+		font: string;
+		font_size_multiplier: number;
+		label: string;
+	}
+
 	const SWITCH_X = 2.6;
 	const ACTIVE_COLOR = '#00ff88';
 	const INACTIVE_COLOR = '#006644';
@@ -50,16 +53,15 @@
 	const ACTIVE_ORB_EMISSIVE = 5.0;
 	const INACTIVE_ORB_EMISSIVE = 0.2;
 
+	let { font, font_size_multiplier, label }: Props = $props();
+
 	let is_active = $derived(fullscreen.is_active);
-	let current_font = $derived(fonts.get_font(game_state.is_cyber));
 	let current_color = $derived(is_active ? ACTIVE_COLOR : INACTIVE_COLOR);
 	let housing_color = $derived(is_active ? ACTIVE_HOUSING : INACTIVE_HOUSING);
 	let housing_emissive = $derived(is_active ? ACTIVE_HOUSING_EMISSIVE : INACTIVE_HOUSING_EMISSIVE);
 	let ring_emissive = $derived(is_active ? ACTIVE_RING_EMISSIVE : INACTIVE_RING_EMISSIVE);
 	let orb_emissive = $derived(is_active ? ACTIVE_ORB_EMISSIVE : INACTIVE_ORB_EMISSIVE);
-	let current_font_size = $derived(
-		LABEL_FONT_SIZE * fonts.get_font_size_multiplier(game_state.is_cyber)
-	);
+	let current_font_size = $derived(LABEL_FONT_SIZE * font_size_multiplier);
 </script>
 
 <T.Group position={[SWITCH_X, SWITCH_Y, SWITCH_Z]}>
@@ -112,8 +114,8 @@
 	</T.Mesh>
 	<T.Group position={[0, -LABEL_Y_OFFSET, LABEL_Z]}>
 		<Text
-			text={messages.fullscreen_switch_label}
-			font={current_font}
+			text={label}
+			{font}
 			fontSize={current_font_size}
 			color="#ffffff"
 			anchorX="center"

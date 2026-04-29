@@ -1,38 +1,47 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { Canvas } from '@threlte/core';
 	import { Suspense } from '@threlte/extras';
 	import { onMount } from 'svelte';
-	import GameSceneObjects from './GameSceneObjects.svelte';
 	import VirtualJoystick from './VirtualJoystick.svelte';
 	import { input } from '$lib/game/input.svelte';
 	import { audio } from '$lib/game/audio';
-	import { messages } from '$lib/messages/en';
-	import { game_state } from '$lib/game/state.svelte';
-	import { fonts } from '$lib/game/fonts';
 	import { fullscreen } from '$lib/game/fullscreen.svelte';
 	import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
 	import { loading } from '$lib/game/loading.svelte';
 	import { device } from '$lib/game/device';
-	import { session } from '$lib/game/session.svelte';
 
-	const CLICK_HINT_BASE_FONT_SIZE_REM = 1;
+	interface Props {
+		children?: Snippet;
+		overlay?: Snippet;
+		hint_text?: string;
+		hint_font_family?: string;
+		hint_font_size_rem?: number;
+		on_start?: () => void;
+	}
+
+	let {
+		children,
+		overlay,
+		hint_text = '',
+		hint_font_family,
+		hint_font_size_rem = 1,
+		on_start
+	}: Props = $props();
 
 	let container: HTMLElement;
+	let is_started = $state(false);
 	let is_dragging_look = $derived(input.is_dragging_look);
 	let drag_start_x = $derived(input.drag_start_x);
 	let drag_start_y = $derived(input.drag_start_y);
-	let is_cyber = $derived(game_state.is_cyber);
 	let is_pseudo_fullscreen = $derived(fullscreen.is_pseudo_fullscreen);
-	let click_hint_font_family = $derived(fonts.get_font_family(is_cyber));
-	let click_hint_font_size_rem = $derived(
-		CLICK_HINT_BASE_FONT_SIZE_REM * fonts.get_font_size_multiplier(is_cyber)
-	);
 
-	function start_session(): void {
-		if (session.is_session_started) return;
+	function start_game(): void {
+		if (is_started) return;
 		audio.init_audio();
 		if (container && device.is_touch_primary()) void fullscreen.request(container);
-		session.start_session();
+		is_started = true;
+		on_start?.();
 	}
 
 	function on_scene_loaded(): void {
@@ -57,25 +66,23 @@
 	class:pseudo-fullscreen={is_pseudo_fullscreen}
 	class:is-dragging-look={is_dragging_look}
 	bind:this={container}
-	onclick={start_session}
+	onclick={start_game}
 	data-testid="game-scene"
 >
-	{#if !session.is_session_started}
+	{#if !is_started}
 		<div
 			class="click-hint"
 			aria-live="polite"
-			style:font-family={click_hint_font_family}
-			style:font-size="{click_hint_font_size_rem}rem"
+			style:font-family={hint_font_family}
+			style:font-size="{hint_font_size_rem}rem"
 		>
-			{messages.click_to_play}
+			{hint_text}
 		</div>
 	{/if}
-	{#if is_cyber}
-		<div class="cyber-glow" data-testid="cyber-glow" aria-hidden="true"></div>
-	{/if}
+	{@render overlay?.()}
 	<Canvas shadows>
 		<Suspense onload={on_scene_loaded}>
-			<GameSceneObjects />
+			{@render children?.()}
 		</Suspense>
 	</Canvas>
 	<VirtualJoystick />
@@ -138,30 +145,5 @@
 		letter-spacing: 0.2em;
 		pointer-events: none;
 		z-index: 10;
-	}
-
-	.cyber-glow {
-		position: absolute;
-		inset: 0;
-		pointer-events: none;
-		z-index: 5;
-		background: radial-gradient(
-			ellipse at center,
-			rgba(255, 0, 255, 0.12) 0%,
-			rgba(100, 0, 255, 0.06) 50%,
-			transparent 70%
-		);
-		mix-blend-mode: screen;
-		animation: cyber-pulse 2s ease-in-out infinite;
-	}
-
-	@keyframes cyber-pulse {
-		0%,
-		100% {
-			opacity: 0.7;
-		}
-		50% {
-			opacity: 1;
-		}
 	}
 </style>

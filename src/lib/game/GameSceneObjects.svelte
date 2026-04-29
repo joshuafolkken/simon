@@ -4,16 +4,21 @@
 	import Room from './Room.svelte';
 	import Player from './Player.svelte';
 	import SimonBoard from './SimonBoard.svelte';
-	import CyberSwitch from './CyberSwitch.svelte';
-	import FullscreenSwitch from './FullscreenSwitch.svelte';
+	import Switch from './Switch.svelte';
 	import { game_state } from '$lib/game/state.svelte';
+	import { fullscreen } from '$lib/game/fullscreen.svelte';
 	import { make_pointer_compute } from '$lib/game/pointer-compute.js';
 	import { lighting } from '$lib/game/lighting';
 	import { fonts } from '$lib/game/fonts';
 	import { messages } from '$lib/messages/en';
 	import { ROOM_W, ROOM_D, ROOM_H } from '$lib/game/room-config';
+	import { CYBER_SWITCH_COLORS, FULLSCREEN_SWITCH_COLORS } from '$lib/game/switch-colors';
+	import { cyber_switch_input } from '$lib/game/cyber-switch-input';
+	import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
 
 	const POINT_LIGHT_Y = 2.5;
+	const CYBER_SWITCH_X = 1.6;
+	const FULLSCREEN_SWITCH_X = 2.6;
 	const NORMAL_BG = '#0d0d12';
 	const CYBER_BG = '#030318';
 	const TITLE_FONT_SIZE = 0.6;
@@ -52,9 +57,8 @@
 	let ambient_color = $derived(lighting.get_ambient_color(is_cyber));
 	let point_light_intensity = $derived(lighting.get_point_light_intensity(is_cyber));
 	let current_font = $derived(fonts.get_font(is_cyber));
-	let current_title_font_size = $derived(
-		TITLE_FONT_SIZE * fonts.get_font_size_multiplier(is_cyber)
-	);
+	let current_font_size_multiplier = $derived(fonts.get_font_size_multiplier(is_cyber));
+	let current_title_font_size = $derived(TITLE_FONT_SIZE * current_font_size_multiplier);
 	let floor_color = $derived(is_cyber ? CYBER_FLOOR_COLOR : FLOOR_COLOR);
 	let wall_color = $derived(is_cyber ? CYBER_WALL_COLOR : WALL_COLOR);
 	let ceiling_color = $derived(is_cyber ? CYBER_CEILING_COLOR : CEILING_COLOR);
@@ -122,9 +126,21 @@
 <Room width={ROOM_W} depth={ROOM_D} height={ROOM_H} {floor_color} {wall_color} {ceiling_color} />
 <Player />
 <SimonBoard />
-<CyberSwitch />
-<FullscreenSwitch
+<Switch
+	position_x={CYBER_SWITCH_X}
+	is_active={is_cyber}
+	label={messages.cyber_switch_label}
 	font={current_font}
-	font_size_multiplier={fonts.get_font_size_multiplier(is_cyber)}
+	font_size_multiplier={current_font_size_multiplier}
+	onclick={cyber_switch_input.on_click}
+	colors={CYBER_SWITCH_COLORS}
+/>
+<Switch
+	position_x={FULLSCREEN_SWITCH_X}
+	is_active={fullscreen.is_active}
 	label={messages.fullscreen_switch_label}
+	font={current_font}
+	font_size_multiplier={current_font_size_multiplier}
+	onclick={fullscreen_switch_input.on_click}
+	colors={FULLSCREEN_SWITCH_COLORS}
 />

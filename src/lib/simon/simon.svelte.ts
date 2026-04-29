@@ -1,15 +1,20 @@
 import { simon_audio } from './audio';
 import type { ButtonColor, SimonPhase } from './types';
 
-const COLORS: readonly ButtonColor[] = ['green', 'red', 'yellow', 'blue'];
-const STEP_MS_1_5 = 500;
-const STEP_MS_6_13 = 400;
-const STEP_MS_14_20 = 250;
-const STEP_MS_21_PLUS = 150;
-const ON_RATIO = 0.7;
-const OFF_RATIO = 0.3;
-const ERROR_BEEP_MS = 3000;
-const RESTART_DELAY_MS = 1000;
+const COLORS: readonly [ButtonColor, ButtonColor, ButtonColor, ButtonColor] = [
+	'green',
+	'red',
+	'yellow',
+	'blue'
+];
+export const STEP_MS_1_5 = 500;
+export const STEP_MS_6_13 = 400;
+export const STEP_MS_14_20 = 250;
+export const STEP_MS_21_PLUS = 150;
+export const ON_RATIO = 0.7;
+export const OFF_RATIO = 0.3;
+export const ERROR_BEEP_MS = 3000;
+export const RESTART_DELAY_MS = 1000;
 
 let phase = $state<SimonPhase>('idle');
 let sequence = $state<ButtonColor[]>([]);
@@ -33,9 +38,7 @@ function get_step_ms(len: number): number {
 
 function add_to_sequence(): void {
 	const index = Math.floor(Math.random() * COLORS.length);
-	const color = COLORS[index];
-	if (!color) return;
-	sequence.push(color);
+	sequence.push(COLORS[index] ?? COLORS[0]);
 }
 
 async function run_show(gen: number): Promise<void> {
@@ -89,6 +92,7 @@ function handle_wrong_press(): void {
 function start(): void {
 	if (phase === 'showing') return;
 	if (phase === 'player_input') return;
+	cancel_restart_timer();
 	phase = 'showing';
 	round = 1;
 	sequence = [];

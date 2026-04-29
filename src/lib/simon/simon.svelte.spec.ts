@@ -1,17 +1,19 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { simon } from '$lib/simon/simon.svelte';
+import {
+	simon,
+	STEP_MS_1_5,
+	ON_RATIO,
+	OFF_RATIO,
+	ERROR_BEEP_MS,
+	RESTART_DELAY_MS
+} from '$lib/simon/simon.svelte';
 import { simon_audio } from '$lib/simon/audio';
 import type { ButtonColor } from '$lib/simon/types';
 
 const ALL_COLORS: ButtonColor[] = ['green', 'red', 'yellow', 'blue'];
-const STEP_MS = 500;
-const ON_RATIO = 0.7;
-const OFF_RATIO = 0.3;
 const TONE_MS = 200;
-const ERROR_BEEP_MS = 3000;
-const RESTART_DELAY_MS = 1000;
-const ON_MS = STEP_MS * ON_RATIO;
-const OFF_MS = STEP_MS * OFF_RATIO;
+const ON_MS = STEP_MS_1_5 * ON_RATIO;
+const OFF_MS = STEP_MS_1_5 * OFF_RATIO;
 
 function wrong_color(color: ButtonColor): ButtonColor {
 	return ALL_COLORS.find((c) => c !== color) ?? 'red';
@@ -212,6 +214,29 @@ describe('simon FSM', () => {
 		simon.reset();
 		await vi.runAllTimersAsync();
 		expect(simon.phase).toBe('idle');
+	});
+
+	it('start() from round_complete before release resets game to round 1', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		expect(simon.phase).toBe('round_complete');
+		simon.start();
+		await vi.runAllTimersAsync();
+		expect(simon.phase).toBe('player_input');
+		expect(simon.round).toBe(1);
+		expect(simon.sequence).toHaveLength(1);
+	});
+
+	it('release after start() from round_complete does not schedule next round', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0)); // phase = round_complete, player still holding button
+		simon.start(); // restart — phase becomes showing
+		simon.release(); // release while showing — must not call schedule_next_round
+		await vi.advanceTimersByTimeAsync(RESTART_DELAY_MS);
+		expect(simon.round).toBe(1);
+		expect(simon.sequence).toHaveLength(1);
 	});
 
 	it('start() from gameover restarts the game', async () => {

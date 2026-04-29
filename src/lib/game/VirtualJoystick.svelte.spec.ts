@@ -310,6 +310,42 @@ describe('VirtualJoystick touch handlers', () => {
 		dom.remove();
 	});
 
+	it('touchcancel dispatches pointerup to threlte dom', () => {
+		const { dom } = setup_threlte_dom();
+		const spy = vi.fn();
+		dom.addEventListener('pointerup', spy);
+
+		const { container } = render(VirtualJoystick);
+		const move_zone = container.querySelector('.joystick-zone');
+		expect(move_zone).toBeTruthy();
+		if (!move_zone) return;
+
+		const t = make_touch(1, 100, 200, move_zone);
+		fire('touchstart', move_zone, [t], [t]);
+		fire('touchcancel', document, [t], []);
+
+		expect(spy).toHaveBeenCalledOnce();
+		dom.remove();
+	});
+
+	it('touchcancel dispatches pointerleave to threlte dom', () => {
+		const { dom } = setup_threlte_dom();
+		const spy = vi.fn();
+		dom.addEventListener('pointerleave', spy);
+
+		const { container } = render(VirtualJoystick);
+		const move_zone = container.querySelector('.joystick-zone');
+		expect(move_zone).toBeTruthy();
+		if (!move_zone) return;
+
+		const t = make_touch(1, 100, 200, move_zone);
+		fire('touchstart', move_zone, [t], [t]);
+		fire('touchcancel', document, [t], []);
+
+		expect(spy).toHaveBeenCalledOnce();
+		dom.remove();
+	});
+
 	it('tapping jump button does not dispatch to threlte dom', () => {
 		const { dom } = setup_threlte_dom();
 		const spy = vi.fn();

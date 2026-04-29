@@ -55,7 +55,7 @@ describe('VirtualJoystick touch handlers', () => {
 		delete (globalThis as typeof globalThis & { ontouchstart?: null }).ontouchstart;
 	});
 
-	it('dragging move zone calls set_joystick_move with normalized vector', () => {
+	it('dragging move zone calls set_joystick_move with normalized vector at max distance', () => {
 		const spy = vi.spyOn(input, 'set_joystick_move');
 		const { container } = render(VirtualJoystick);
 		const move_zone = container.querySelector('.joystick-zone');
@@ -70,6 +70,60 @@ describe('VirtualJoystick touch handlers', () => {
 		fire('touchmove', document, [t_move], [t_move]);
 
 		expect(spy).toHaveBeenCalledWith(1, 0);
+	});
+
+	it('movement within dead zone gives zero joystick output', () => {
+		const spy = vi.spyOn(input, 'set_joystick_move');
+		const { container } = render(VirtualJoystick);
+		const move_zone = container.querySelector('.joystick-zone');
+		expect(move_zone).toBeTruthy();
+		if (!move_zone) return;
+
+		const t_start = make_touch(1, 100, 200, move_zone);
+		fire('touchstart', move_zone, [t_start], [t_start]);
+
+		const MOVE_DEAD_ZONE = 6;
+		const t_move = make_touch(1, 100 + MOVE_DEAD_ZONE - 1, 200, move_zone);
+		fire('touchmove', document, [t_move], [t_move]);
+
+		expect(spy).toHaveBeenCalledWith(0, 0);
+	});
+
+	it('movement at dead zone boundary gives zero joystick output', () => {
+		const spy = vi.spyOn(input, 'set_joystick_move');
+		const { container } = render(VirtualJoystick);
+		const move_zone = container.querySelector('.joystick-zone');
+		expect(move_zone).toBeTruthy();
+		if (!move_zone) return;
+
+		const t_start = make_touch(1, 100, 200, move_zone);
+		fire('touchstart', move_zone, [t_start], [t_start]);
+
+		const MOVE_DEAD_ZONE = 6;
+		const t_move = make_touch(1, 100 + MOVE_DEAD_ZONE, 200, move_zone);
+		fire('touchmove', document, [t_move], [t_move]);
+
+		expect(spy).toHaveBeenCalledWith(0, 0);
+	});
+
+	it('movement beyond dead zone gives scaled output', () => {
+		const spy = vi.spyOn(input, 'set_joystick_move');
+		const { container } = render(VirtualJoystick);
+		const move_zone = container.querySelector('.joystick-zone');
+		expect(move_zone).toBeTruthy();
+		if (!move_zone) return;
+
+		const t_start = make_touch(1, 100, 200, move_zone);
+		fire('touchstart', move_zone, [t_start], [t_start]);
+
+		const MOVE_MAX_DIST = 40;
+		const MOVE_DEAD_ZONE = 6;
+		const mid = MOVE_DEAD_ZONE + (MOVE_MAX_DIST - MOVE_DEAD_ZONE) / 2;
+		const t_move = make_touch(1, 100 + mid, 200, move_zone);
+		fire('touchmove', document, [t_move], [t_move]);
+
+		const [dx] = spy.mock.calls.at(-1) ?? [0, 0];
+		expect(dx).toBeCloseTo(0.5);
 	});
 
 	it('first touchmove after look start applies reduced delta to soften browser-slop snap', () => {

@@ -31,7 +31,7 @@ describe('loading', () => {
 		loading.reset();
 
 		observer_disconnect = vi.fn();
-		(globalThis as Record<string, unknown>)[loading.OBSERVER_GLOBAL_KEY] = {
+		(globalThis as Record<symbol, unknown>)[loading.OBSERVER_GLOBAL_KEY] = {
 			disconnect: observer_disconnect
 		};
 	});
@@ -40,7 +40,7 @@ describe('loading', () => {
 		vi.useRealTimers();
 		loading.reset();
 		overlay_element.remove();
-		(globalThis as Record<string, unknown>)[loading.OBSERVER_GLOBAL_KEY] = undefined;
+		(globalThis as Record<symbol, unknown>)[loading.OBSERVER_GLOBAL_KEY] = undefined;
 	});
 
 	it('starts with the downloading step, label, and initial progress', () => {

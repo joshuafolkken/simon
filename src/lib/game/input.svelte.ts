@@ -1,3 +1,5 @@
+import { override_event_offset } from '$lib/game/override-event-offset';
+
 const MOUSE_SENSITIVITY = 0.004;
 const WHEEL_SENSITIVITY = 0.004;
 const MAX_PITCH = Math.PI / 2 - 0.01;
@@ -75,14 +77,7 @@ function override_offset_during_drag(event: Event): void {
 	if (!is_dragging_look) return;
 	if (!(event.target instanceof HTMLElement)) return;
 	const rect = event.target.getBoundingClientRect();
-	const offset_x = drag_start_x - rect.left;
-	const offset_y = drag_start_y - rect.top;
-	try {
-		Object.defineProperty(event, 'offsetX', { get: () => offset_x, configurable: true });
-		Object.defineProperty(event, 'offsetY', { get: () => offset_y, configurable: true });
-	} catch {
-		/* ignore browsers that disallow override */
-	}
+	override_event_offset(event, drag_start_x - rect.left, drag_start_y - rect.top);
 }
 
 function dispatch_synthetic_pointer_event(type: 'pointerdown' | 'pointerup'): void {

@@ -5,6 +5,7 @@
 	import Player from './Player.svelte';
 	import SimonBoard from './SimonBoard.svelte';
 	import CyberSwitch from './CyberSwitch.svelte';
+	import FullscreenSwitch from './FullscreenSwitch.svelte';
 	import { game_state } from '$lib/game/state.svelte';
 	import { make_pointer_compute } from '$lib/game/pointer-compute.js';
 	import { lighting } from '$lib/game/lighting';
@@ -111,3 +112,4 @@
 <Player />
 <SimonBoard />
 <CyberSwitch />
+<FullscreenSwitch />

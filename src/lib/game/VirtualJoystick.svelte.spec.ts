@@ -72,7 +72,7 @@ describe('VirtualJoystick touch handlers', () => {
 		expect(spy).toHaveBeenCalledWith(1, 0);
 	});
 
-	it('dragging look zone calls apply_look_delta', () => {
+	it('first touchmove after look start applies reduced delta to soften browser-slop snap', () => {
 		const spy = vi.spyOn(input, 'apply_look_delta');
 		const { container } = render(VirtualJoystick);
 		const look_zone = container.querySelectorAll('.joystick-zone').item(1);
@@ -82,11 +82,35 @@ describe('VirtualJoystick touch handlers', () => {
 		const t_start = make_touch(2, 300, 200, look_zone);
 		fire('touchstart', look_zone, [t_start], [t_start]);
 
-		const t_move = make_touch(2, 310, 190, look_zone);
-		fire('touchmove', document, [t_move], [t_move]);
+		const t_first = make_touch(2, 310, 190, look_zone);
+		fire('touchmove', document, [t_first], [t_first]);
 
 		expect(spy).toHaveBeenCalledOnce();
 		const [delta_yaw, delta_pitch] = spy.mock.calls[0] ?? [0, 0];
+		const TOUCH_LOOK_SENSITIVITY = 0.009;
+		const FIRST_MOVE_SENSITIVITY_FRACTION = 0.2;
+		expect(delta_yaw).toBeCloseTo(10 * TOUCH_LOOK_SENSITIVITY * FIRST_MOVE_SENSITIVITY_FRACTION);
+		expect(delta_pitch).toBeCloseTo(-10 * TOUCH_LOOK_SENSITIVITY * FIRST_MOVE_SENSITIVITY_FRACTION);
+	});
+
+	it('second touchmove after look start applies full-sensitivity delta', () => {
+		const spy = vi.spyOn(input, 'apply_look_delta');
+		const { container } = render(VirtualJoystick);
+		const look_zone = container.querySelectorAll('.joystick-zone').item(1);
+		expect(look_zone).toBeTruthy();
+		if (!look_zone) return;
+
+		const t_start = make_touch(2, 300, 200, look_zone);
+		fire('touchstart', look_zone, [t_start], [t_start]);
+
+		const t_first = make_touch(2, 310, 195, look_zone);
+		fire('touchmove', document, [t_first], [t_first]);
+
+		const t_second = make_touch(2, 320, 185, look_zone);
+		fire('touchmove', document, [t_second], [t_second]);
+
+		expect(spy).toHaveBeenCalledTimes(2);
+		const [delta_yaw, delta_pitch] = spy.mock.calls[1] ?? [0, 0];
 		const TOUCH_LOOK_SENSITIVITY = 0.009;
 		expect(delta_yaw).toBeCloseTo(10 * TOUCH_LOOK_SENSITIVITY);
 		expect(delta_pitch).toBeCloseTo(-10 * TOUCH_LOOK_SENSITIVITY);

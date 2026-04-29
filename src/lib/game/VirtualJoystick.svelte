@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { input } from '$lib/game/input.svelte';
 	import { messages } from '$lib/messages/en';
+	import { override_event_offset } from '$lib/game/override-event-offset';
 
 	let move_zone: HTMLElement;
 	let look_zone: HTMLElement;
@@ -38,15 +39,6 @@
 		return document.querySelector('canvas')?.parentElement ?? null;
 	}
 
-	function override_offset(event: Event, offset_x: number, offset_y: number): void {
-		try {
-			Object.defineProperty(event, 'offsetX', { get: () => offset_x, configurable: true });
-			Object.defineProperty(event, 'offsetY', { get: () => offset_y, configurable: true });
-		} catch {
-			/* ignore browsers that disallow override */
-		}
-	}
-
 	type DispatchCtx = { dom: HTMLElement; offset_x: number; offset_y: number };
 
 	function get_dispatch_ctx(x: number, y: number): DispatchCtx | null {
@@ -76,8 +68,8 @@
 		};
 		const move_ev = new PointerEvent('pointermove', opts);
 		const down_ev = new PointerEvent('pointerdown', opts);
-		override_offset(move_ev, ctx.offset_x, ctx.offset_y);
-		override_offset(down_ev, ctx.offset_x, ctx.offset_y);
+		override_event_offset(move_ev, ctx.offset_x, ctx.offset_y);
+		override_event_offset(down_ev, ctx.offset_x, ctx.offset_y);
 		ctx.dom.dispatchEvent(move_ev);
 		ctx.dom.dispatchEvent(down_ev);
 	}
@@ -103,9 +95,9 @@
 		const up_ev = new PointerEvent('pointerup', opts);
 		const click_ev = new MouseEvent('click', opts);
 		const leave_ev = new PointerEvent('pointerleave', opts);
-		override_offset(up_ev, ctx.offset_x, ctx.offset_y);
-		override_offset(click_ev, ctx.offset_x, ctx.offset_y);
-		override_offset(leave_ev, ctx.offset_x, ctx.offset_y);
+		override_event_offset(up_ev, ctx.offset_x, ctx.offset_y);
+		override_event_offset(click_ev, ctx.offset_x, ctx.offset_y);
+		override_event_offset(leave_ev, ctx.offset_x, ctx.offset_y);
 		ctx.dom.dispatchEvent(up_ev);
 		ctx.dom.dispatchEvent(click_ev);
 		ctx.dom.dispatchEvent(leave_ev);

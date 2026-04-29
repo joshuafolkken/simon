@@ -2,17 +2,15 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { flushSync } from 'svelte';
 import GameScene from './GameScene.svelte';
-import { game_state } from '$lib/game/state.svelte';
 import { audio } from '$lib/game/audio';
 import { device } from '$lib/game/device';
 import { fullscreen } from '$lib/game/fullscreen.svelte';
 import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
-import { session } from '$lib/game/session.svelte';
+
+const HINT = 'Click to play';
 
 describe('GameScene', () => {
 	afterEach(() => {
-		if (game_state.is_cyber) game_state.toggle_cyber();
-		session.reset_session();
 		vi.restoreAllMocks();
 	});
 
@@ -26,23 +24,57 @@ describe('GameScene', () => {
 		expect(container.querySelector('canvas')).toBeTruthy();
 	});
 
-	it('does not render cyber-glow when not in cyber mode', () => {
-		const { container } = render(GameScene);
-		expect(container.querySelector('[data-testid="cyber-glow"]')).toBeNull();
+	it('shows hint_text before the session starts', () => {
+		const { container } = render(GameScene, { props: { hint_text: HINT } });
+		expect(container.querySelector('.click-hint')?.textContent?.trim()).toBe(HINT);
 	});
 
-	it('shows the click-to-play hint before the user clicks', () => {
-		const { container } = render(GameScene);
+	it('hides the click-hint after the session starts', () => {
+		const { container } = render(GameScene, { props: { hint_text: HINT } });
+		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
+		expect(scene).toBeTruthy();
+		if (!scene) return;
 		expect(container.querySelector('.click-hint')).toBeTruthy();
+		scene.click();
+		flushSync();
+		expect(container.querySelector('.click-hint')).toBeNull();
 	});
 
-	it('renders cyber-glow overlay when cyber mode is active', () => {
-		game_state.toggle_cyber();
-		const { container } = render(GameScene);
-		expect(container.querySelector('[data-testid="cyber-glow"]')).toBeTruthy();
+	it('calls on_start callback when user first clicks', () => {
+		let called = false;
+		const { container } = render(GameScene, {
+			props: {
+				on_start: () => {
+					called = true;
+				}
+			}
+		});
+		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
+		expect(scene).toBeTruthy();
+		if (!scene) return;
+		scene.click();
+		expect(called).toBe(true);
 	});
 
-	it('start_session runs init_audio only once across multiple clicks', () => {
+	it('calls on_start only once across multiple clicks', () => {
+		let call_count = 0;
+		const { container } = render(GameScene, {
+			props: {
+				on_start: () => {
+					call_count++;
+				}
+			}
+		});
+		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
+		expect(scene).toBeTruthy();
+		if (!scene) return;
+		scene.click();
+		scene.click();
+		scene.click();
+		expect(call_count).toBe(1);
+	});
+
+	it('start_game runs init_audio only once across multiple clicks', () => {
 		const spy = vi.spyOn(audio, 'init_audio');
 		const { container } = render(GameScene);
 		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
@@ -54,7 +86,7 @@ describe('GameScene', () => {
 		expect(spy).toHaveBeenCalledTimes(1);
 	});
 
-	it('start_session requests fullscreen on touch-primary devices', () => {
+	it('start_game requests fullscreen on touch-primary devices', () => {
 		vi.spyOn(device, 'is_touch_primary').mockReturnValue(true);
 		const fullscreen_spy = vi.spyOn(fullscreen, 'request').mockResolvedValue();
 		const { container } = render(GameScene);
@@ -65,36 +97,7 @@ describe('GameScene', () => {
 		expect(fullscreen_spy).toHaveBeenCalledTimes(1);
 	});
 
-	it('clicking the scene flips session.is_session_started to true', () => {
-		expect(session.is_session_started).toBe(false);
-		const { container } = render(GameScene);
-		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
-		expect(scene).toBeTruthy();
-		if (!scene) return;
-		scene.click();
-		expect(session.is_session_started).toBe(true);
-	});
-
-	it('hides the click-hint after the session starts', () => {
-		const { container } = render(GameScene);
-		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
-		expect(scene).toBeTruthy();
-		if (!scene) return;
-		expect(container.querySelector('.click-hint')).toBeTruthy();
-		scene.click();
-		flushSync();
-		expect(container.querySelector('.click-hint')).toBeNull();
-	});
-
-	it('registers the game-scene container with fullscreen_switch_input on mount', () => {
-		const spy = vi.spyOn(fullscreen_switch_input, 'set_container');
-		const { container } = render(GameScene);
-		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
-		expect(scene).toBeTruthy();
-		expect(spy).toHaveBeenCalledWith(scene);
-	});
-
-	it('start_session does not request fullscreen on desktop devices but still inits audio', () => {
+	it('start_game does not request fullscreen on desktop devices but still inits audio', () => {
 		vi.spyOn(device, 'is_touch_primary').mockReturnValue(false);
 		const fullscreen_spy = vi.spyOn(fullscreen, 'request').mockResolvedValue();
 		const audio_spy = vi.spyOn(audio, 'init_audio');
@@ -105,5 +108,13 @@ describe('GameScene', () => {
 		scene.click();
 		expect(fullscreen_spy).not.toHaveBeenCalled();
 		expect(audio_spy).toHaveBeenCalledTimes(1);
+	});
+
+	it('registers the game-scene container with fullscreen_switch_input on mount', () => {
+		const spy = vi.spyOn(fullscreen_switch_input, 'set_container');
+		const { container } = render(GameScene);
+		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
+		expect(scene).toBeTruthy();
+		expect(spy).toHaveBeenCalledWith(scene);
 	});
 });

@@ -1,51 +1,55 @@
 <script lang="ts">
 	import { T } from '@threlte/core';
-	import { game_state } from '$lib/game/state.svelte';
-	import { ROOM_W, ROOM_D, ROOM_H, HALF_W, HALF_D } from '$lib/game/room-config';
-	const FLOOR_COLOR = '#3a2f2f';
-	const WALL_COLOR = '#4a4a5a';
-	const CEILING_COLOR = '#2a2a3a';
-	const CYBER_FLOOR_COLOR = '#0d2525';
-	const CYBER_WALL_COLOR = '#0a2035';
-	const CYBER_CEILING_COLOR = '#08082a';
 
-	let floor_color = $derived(game_state.is_cyber ? CYBER_FLOOR_COLOR : FLOOR_COLOR);
-	let wall_color = $derived(game_state.is_cyber ? CYBER_WALL_COLOR : WALL_COLOR);
-	let ceiling_color = $derived(game_state.is_cyber ? CYBER_CEILING_COLOR : CEILING_COLOR);
+	interface Props {
+		width: number;
+		depth: number;
+		height: number;
+		floor_color: string;
+		wall_color: string;
+		ceiling_color: string;
+	}
+
+	const HALF_DIVISOR = 2;
+
+	let { width, depth, height, floor_color, wall_color, ceiling_color }: Props = $props();
+	let half_w = $derived(width / HALF_DIVISOR);
+	let half_d = $derived(depth / HALF_DIVISOR);
+	let half_h = $derived(height / HALF_DIVISOR);
 </script>
 
 <!-- Floor -->
 <T.Mesh rotation.x={-Math.PI / 2} receiveShadow>
-	<T.PlaneGeometry args={[ROOM_W, ROOM_D]} />
+	<T.PlaneGeometry args={[width, depth]} />
 	<T.MeshStandardMaterial color={floor_color} roughness={0.9} />
 </T.Mesh>
 
 <!-- Ceiling -->
-<T.Mesh position.y={ROOM_H} rotation.x={Math.PI / 2} receiveShadow>
-	<T.PlaneGeometry args={[ROOM_W, ROOM_D]} />
+<T.Mesh position.y={height} rotation.x={Math.PI / 2} receiveShadow>
+	<T.PlaneGeometry args={[width, depth]} />
 	<T.MeshStandardMaterial color={ceiling_color} roughness={0.9} />
 </T.Mesh>
 
-<!-- Left wall mesh -->
-<T.Mesh position={[-HALF_W, ROOM_H / 2, 0]} rotation.y={Math.PI / 2} receiveShadow>
-	<T.PlaneGeometry args={[ROOM_D, ROOM_H]} />
+<!-- Left wall -->
+<T.Mesh position={[-half_w, half_h, 0]} rotation.y={Math.PI / 2} receiveShadow>
+	<T.PlaneGeometry args={[depth, height]} />
 	<T.MeshStandardMaterial color={wall_color} roughness={0.8} />
 </T.Mesh>
 
-<!-- Right wall mesh -->
-<T.Mesh position={[HALF_W, ROOM_H / 2, 0]} rotation.y={-Math.PI / 2} receiveShadow>
-	<T.PlaneGeometry args={[ROOM_D, ROOM_H]} />
+<!-- Right wall -->
+<T.Mesh position={[half_w, half_h, 0]} rotation.y={-Math.PI / 2} receiveShadow>
+	<T.PlaneGeometry args={[depth, height]} />
 	<T.MeshStandardMaterial color={wall_color} roughness={0.8} />
 </T.Mesh>
 
-<!-- Back wall mesh -->
-<T.Mesh position={[0, ROOM_H / 2, -HALF_D]} receiveShadow>
-	<T.PlaneGeometry args={[ROOM_W, ROOM_H]} />
+<!-- Back wall -->
+<T.Mesh position={[0, half_h, -half_d]} receiveShadow>
+	<T.PlaneGeometry args={[width, height]} />
 	<T.MeshStandardMaterial color={wall_color} roughness={0.8} />
 </T.Mesh>
 
-<!-- Front wall mesh -->
-<T.Mesh position={[0, ROOM_H / 2, HALF_D]} rotation.y={Math.PI} receiveShadow>
-	<T.PlaneGeometry args={[ROOM_W, ROOM_H]} />
+<!-- Front wall -->
+<T.Mesh position={[0, half_h, half_d]} rotation.y={Math.PI} receiveShadow>
+	<T.PlaneGeometry args={[width, height]} />
 	<T.MeshStandardMaterial color={wall_color} roughness={0.8} />
 </T.Mesh>

@@ -11,6 +11,7 @@
 	import { lighting } from '$lib/game/lighting';
 	import { fonts } from '$lib/game/fonts';
 	import { messages } from '$lib/messages/en';
+	import { ROOM_W, ROOM_D, ROOM_H } from '$lib/game/room-config';
 
 	const POINT_LIGHT_Y = 2.5;
 	const NORMAL_BG = '#0d0d12';
@@ -35,18 +36,28 @@
 	const NEON_MAGENTA = '#ff00ff';
 	const NEON_CYAN = '#00ffff';
 	const NEON_TUBE_ROTATION = Math.PI / 2;
+	const FLOOR_COLOR = '#3a2f2f';
+	const WALL_COLOR = '#4a4a5a';
+	const CEILING_COLOR = '#2a2a3a';
+	const CYBER_FLOOR_COLOR = '#0d2525';
+	const CYBER_WALL_COLOR = '#0a2035';
+	const CYBER_CEILING_COLOR = '#08082a';
 
 	const { camera } = useThrelte();
 	interactivity({ compute: make_pointer_compute(camera) });
 
-	let bg_color = $derived(game_state.is_cyber ? CYBER_BG : NORMAL_BG);
-	let ambient_intensity = $derived(lighting.get_ambient_intensity(game_state.is_cyber));
-	let ambient_color = $derived(lighting.get_ambient_color(game_state.is_cyber));
-	let point_light_intensity = $derived(lighting.get_point_light_intensity(game_state.is_cyber));
-	let current_font = $derived(fonts.get_font(game_state.is_cyber));
+	let is_cyber = $derived(game_state.is_cyber);
+	let bg_color = $derived(is_cyber ? CYBER_BG : NORMAL_BG);
+	let ambient_intensity = $derived(lighting.get_ambient_intensity(is_cyber));
+	let ambient_color = $derived(lighting.get_ambient_color(is_cyber));
+	let point_light_intensity = $derived(lighting.get_point_light_intensity(is_cyber));
+	let current_font = $derived(fonts.get_font(is_cyber));
 	let current_title_font_size = $derived(
-		TITLE_FONT_SIZE * fonts.get_font_size_multiplier(game_state.is_cyber)
+		TITLE_FONT_SIZE * fonts.get_font_size_multiplier(is_cyber)
 	);
+	let floor_color = $derived(is_cyber ? CYBER_FLOOR_COLOR : FLOOR_COLOR);
+	let wall_color = $derived(is_cyber ? CYBER_WALL_COLOR : WALL_COLOR);
+	let ceiling_color = $derived(is_cyber ? CYBER_CEILING_COLOR : CEILING_COLOR);
 	let title_y = $state(TITLE_Y);
 
 	function tick(): void {
@@ -59,7 +70,7 @@
 <T.Color attach="background" args={[bg_color]} />
 <T.AmbientLight intensity={ambient_intensity} color={ambient_color} />
 <T.PointLight position={[0, POINT_LIGHT_Y, 0]} intensity={point_light_intensity} castShadow />
-{#if game_state.is_cyber}
+{#if is_cyber}
 	<T.PointLight
 		position={[0, CYBER_ACCENT_Y, CYBER_ACCENT_Z]}
 		color={CYBER_ACCENT_COLOR}
@@ -108,8 +119,12 @@
 	/>
 </T.Group>
 
-<Room />
+<Room width={ROOM_W} depth={ROOM_D} height={ROOM_H} {floor_color} {wall_color} {ceiling_color} />
 <Player />
 <SimonBoard />
 <CyberSwitch />
-<FullscreenSwitch />
+<FullscreenSwitch
+	font={current_font}
+	font_size_multiplier={fonts.get_font_size_multiplier(is_cyber)}
+	label={messages.fullscreen_switch_label}
+/>

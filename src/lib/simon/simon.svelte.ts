@@ -18,7 +18,7 @@ export const RESTART_DELAY_MS = 1000;
 export const FLASH_BURST_ON_MS = 30;
 export const FLASH_BURST_OFF_MS = 20;
 export const FLASH_BURST_CYCLES = 4;
-export const FLASH_CASCADE_FWD_MS = 55;
+export const FLASH_CASCADE_FWD_MS = 65;
 export const FLASH_CASCADE_REV_MS = 40;
 export const FLASH_FINALE_MS = 320;
 

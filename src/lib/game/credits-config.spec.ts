@@ -85,7 +85,9 @@ describe('credits-config', () => {
 	});
 
 	it('includes DRAGON-STUDIO sound effect credit', () => {
+		expect(CREDITS_TEXT).toContain('Sound Effect by');
 		expect(CREDITS_TEXT).toContain('DRAGON-STUDIO');
+		expect(CREDITS_TEXT).toContain('from Pixabay');
 	});
 
 	it('includes sponsors section', () => {

@@ -71,7 +71,11 @@
 	] as const satisfies readonly ButtonConfig[];
 
 	function is_lit(color: ButtonColor): boolean {
-		return simon.active_color === color || simon.pressed_color === color;
+		return (
+			simon.active_color === color ||
+			simon.pressed_color === color ||
+			simon.flash_colors.includes(color)
+		);
 	}
 
 	function btn_lit(btn: ButtonConfig): string {
@@ -90,7 +94,7 @@
 
 	let center_text = $derived(get_center_text());
 	let emissive_intensity = $derived(
-		game_state.is_cyber ? CYBER_EMISSIVE_INTENSITY : EMISSIVE_INTENSITY
+		(game_state.is_cyber ? CYBER_EMISSIVE_INTENSITY : EMISSIVE_INTENSITY) * simon.flash_intensity
 	);
 	let current_font = $derived(fonts.get_font(game_state.is_cyber));
 	let current_font_size = $derived(FONT_SIZE * fonts.get_font_size_multiplier(game_state.is_cyber));

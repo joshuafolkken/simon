@@ -5,11 +5,12 @@
 	import { game_state } from '$lib/game/state.svelte';
 	import { fonts } from '$lib/game/fonts';
 	import { simon_board_input } from '$lib/game/simon-board-input';
+	import { SIMON_BOARD_Y, SIMON_BOARD_Z } from '$lib/game/simon-board-config';
 	import type { ButtonColor } from '$lib/simon/types';
 	import { messages } from '$lib/messages/en';
 
-	const BOARD_Y = 1.2;
-	const BOARD_Z = -4.8;
+	const BOARD_Y = SIMON_BOARD_Y;
+	const BOARD_Z = SIMON_BOARD_Z;
 
 	const INNER_RADIUS = 0.3;
 	const OUTER_RADIUS = 0.7;

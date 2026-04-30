@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { fullscreen_switch_input } from './fullscreen-switch-input';
 import { fullscreen } from '$lib/game/fullscreen.svelte';
 import { session } from '$lib/game/session.svelte';
+import { switch_audio } from '$lib/game/switch-audio';
 
 describe('fullscreen_switch_input', () => {
 	let container: HTMLElement;
@@ -13,6 +14,7 @@ describe('fullscreen_switch_input', () => {
 		container = document.createElement('div');
 		document.body.appendChild(container);
 		fullscreen_switch_input.set_container(container);
+		vi.spyOn(switch_audio, 'play_switch_click').mockImplementation(() => {});
 	});
 
 	afterEach(() => {
@@ -51,5 +53,27 @@ describe('fullscreen_switch_input', () => {
 		const exit_spy = vi.spyOn(fullscreen, 'exit').mockResolvedValue();
 		fullscreen_switch_input.on_click();
 		expect(exit_spy).toHaveBeenCalledTimes(1);
+	});
+
+	it('plays switch click sound when session is started and container is set', () => {
+		session.start_session();
+		const sound_spy = vi.spyOn(switch_audio, 'play_switch_click').mockImplementation(() => {});
+		vi.spyOn(fullscreen, 'request').mockResolvedValue();
+		fullscreen_switch_input.on_click();
+		expect(sound_spy).toHaveBeenCalledTimes(1);
+	});
+
+	it('does not play sound when session is not started', () => {
+		const spy = vi.spyOn(switch_audio, 'play_switch_click').mockImplementation(() => {});
+		fullscreen_switch_input.on_click();
+		expect(spy).not.toHaveBeenCalled();
+	});
+
+	it('does not play sound when container is not set', () => {
+		fullscreen_switch_input.set_container(null);
+		session.start_session();
+		const spy = vi.spyOn(switch_audio, 'play_switch_click').mockImplementation(() => {});
+		fullscreen_switch_input.on_click();
+		expect(spy).not.toHaveBeenCalled();
 	});
 });

@@ -1,35 +1,49 @@
-import { HALF_D } from '$lib/game/room-config';
+export type SwitchIconType = 'cyber' | 'fullscreen';
+export const SWITCH_ICON_TYPES: readonly SwitchIconType[] = ['cyber', 'fullscreen'];
 
 export const SWITCH_Y = 1.2;
-export const BASE_RADIUS = 0.32;
-export const BASE_DEPTH = 0.06;
-export const BASE_HALF_DEPTH = BASE_DEPTH / 2;
-export const SWITCH_Z = -(HALF_D - BASE_HALF_DEPTH);
-export const MOUNT_PLATE_RADIUS = 0.44;
-export const MOUNT_PLATE_DEPTH = 0.01;
-export const MOUNT_PLATE_HALF_DEPTH = MOUNT_PLATE_DEPTH / 2;
-export const MOUNT_PLATE_Z = -(BASE_HALF_DEPTH - MOUNT_PLATE_HALF_DEPTH);
-export const MOUNT_PLATE_EMISSIVE = 0.05;
-export const HEX_FACES = 6;
-export const RING_RADIUS = 0.26;
-export const RING_TUBE = 0.025;
-export const RING_RADIAL = 8;
-export const RING_TUBULAR = 48;
-export const ORB_RADIUS = 0.13;
-export const ORB_SEGMENTS = 16;
-export const ORB_EMBED = 0.5;
-export const ORB_Z = BASE_HALF_DEPTH + ORB_RADIUS * ORB_EMBED;
-export const HIT_AREA_RADIUS = MOUNT_PLATE_RADIUS;
-export const HIT_AREA_Z_OFFSET = 0.01;
-export const HIT_AREA_Z = ORB_Z + ORB_RADIUS + HIT_AREA_Z_OFFSET;
-export const HIT_AREA_SEGMENTS = 32;
-export const LIGHT_HIT_RADIUS_MULTIPLIER = 1.4;
-export const LIGHT_HIT_RADIUS = ORB_RADIUS * LIGHT_HIT_RADIUS_MULTIPLIER;
-export const LIGHT_HIT_SEGMENTS = 16;
+// 2x the score display wall distance: back wall=-5, score display=-4.65, distance=0.35, 2x=0.70
+export const SWITCH_Z = -4.3;
+
+export const PANEL_SIZE = 0.58;
+export const PANEL_HALF = PANEL_SIZE / 2;
+export const PANEL_DEPTH = 0.02;
+export const PANEL_OPACITY_ACTIVE = 0.18;
+export const PANEL_OPACITY_INACTIVE = 0.05;
+
+export const BORDER_THICKNESS = 0.018;
+export const BORDER_THICKNESS_HALF = BORDER_THICKNESS / 2;
+export const BORDER_DEPTH = 0.025;
+export const BORDER_POS = PANEL_HALF - BORDER_THICKNESS_HALF;
+
+export const CYBER_OUTER_RING_R = 0.22;
+export const CYBER_OUTER_RING_TUBE = 0.016;
+export const CYBER_INNER_RING_R = 0.14;
+export const CYBER_INNER_RING_TUBE = 0.011;
+export const CYBER_RING_RADIAL = 8;
+export const CYBER_RING_TUBULAR = 6;
+export const CYBER_INNER_RING_ROTATION = Math.PI / 6;
+export const CYBER_ORB_R = 0.045;
+export const CYBER_ORB_SEGMENTS = 12;
+export const CYBER_ICON_Z = 0.015;
+
+export const CORNER_ARM = 0.1;
+export const CORNER_ARM_HALF = CORNER_ARM / 2;
+export const CORNER_THICKNESS = 0.015;
+export const CORNER_DEPTH = 0.018;
+export const CORNER_POS = 0.18;
+export const CORNER_ARM_CENTER = CORNER_POS - CORNER_ARM_HALF;
+export const FULLSCREEN_ICON_Z = 0.015;
+
+export const HIT_AREA_W = PANEL_SIZE + 0.12;
+export const HIT_AREA_H = PANEL_SIZE + 0.12;
+export const HIT_AREA_DEPTH = 0.01;
+export const HIT_AREA_Z = 0.06;
+
 export const LABEL_FONT_SIZE = 0.1;
-export const LABEL_Y_OFFSET = 0.58;
+export const LABEL_Y_OFFSET = 0.47;
 export const LABEL_Z = 0.05;
-export const FACE_ROTATION_X = Math.PI / 2;
-export const METALNESS = 0.8;
-export const ROUGHNESS_HOUSING = 0.3;
-export const ORB_ROUGHNESS = 0.05;
+
+export const ACTIVE_LIGHT_Z = 0.5;
+export const ACTIVE_LIGHT_DISTANCE = 2.5;
+export const ACTIVE_LIGHT_INTENSITY = 2.5;

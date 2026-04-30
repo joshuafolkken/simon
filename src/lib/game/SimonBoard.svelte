@@ -8,6 +8,9 @@
 	import type { ButtonColor } from '$lib/simon/types';
 	import { messages } from '$lib/messages/en';
 
+	const BOARD_Y = 1.2;
+	const BOARD_Z = -4.8;
+
 	const INNER_RADIUS = 0.3;
 	const OUTER_RADIUS = 0.7;
 	const THETA_SEGMENTS = 32;
@@ -23,8 +26,6 @@
 	const FONT_SIZE = 0.08;
 	const EMISSIVE_INTENSITY = 0.8;
 	const CYBER_EMISSIVE_INTENSITY = 1.5;
-	const BOARD_Y = 1.2;
-	const BOARD_Z = -4.8;
 
 	interface ButtonConfig {
 		color: ButtonColor;

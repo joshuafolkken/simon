@@ -84,6 +84,12 @@ describe('credits-config', () => {
 		expect(CREDITS_TEXT).toContain('THANK YOU FOR PLAYING');
 	});
 
+	it('includes DRAGON-STUDIO sound effect credit', () => {
+		expect(CREDITS_TEXT).toContain('Sound Effect by');
+		expect(CREDITS_TEXT).toContain('DRAGON-STUDIO');
+		expect(CREDITS_TEXT).toContain('from Pixabay');
+	});
+
 	it('includes sponsors section', () => {
 		expect(CREDITS_TEXT).toContain('SPONSORS');
 		expect(CREDITS_TEXT).toContain('Incognito');

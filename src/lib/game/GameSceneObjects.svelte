@@ -133,6 +133,7 @@
 <Switch
 	position_x={CYBER_SWITCH_X}
 	is_active={is_cyber}
+	icon_type="cyber"
 	label={messages.cyber_switch_label}
 	font={current_font}
 	font_size_multiplier={current_font_size_multiplier}
@@ -142,6 +143,7 @@
 <Switch
 	position_x={FULLSCREEN_SWITCH_X}
 	is_active={fullscreen.is_active}
+	icon_type="fullscreen"
 	label={messages.fullscreen_switch_label}
 	font={current_font}
 	font_size_multiplier={current_font_size_multiplier}

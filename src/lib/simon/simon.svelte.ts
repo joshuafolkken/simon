@@ -15,6 +15,15 @@ export const ON_RATIO = 0.7;
 export const OFF_RATIO = 0.3;
 export const ERROR_BEEP_MS = 3000;
 export const RESTART_DELAY_MS = 1000;
+export const FLASH_BURST_ON_MS = 30;
+export const FLASH_BURST_OFF_MS = 20;
+export const FLASH_BURST_CYCLES = 4;
+export const FLASH_CASCADE_FWD_MS = 65;
+export const FLASH_CASCADE_REV_MS = 40;
+export const FLASH_FINALE_MS = 320;
+
+const FLASH_INTENSITY_BURST = 2.5;
+const FLASH_INTENSITY_FINALE = 4;
 
 let phase = $state<SimonPhase>('idle');
 let sequence = $state<ButtonColor[]>([]);
@@ -22,7 +31,10 @@ let position = $state(0);
 let active_color = $state<ButtonColor | null>(null);
 let pressed_color = $state<ButtonColor | null>(null);
 let round = $state(0);
+let flash_colors = $state<ButtonColor[]>([]);
+let flash_intensity = $state(1);
 let show_gen = 0;
+let flash_gen = 0;
 let restart_timer: ReturnType<typeof setTimeout> | null = null;
 
 function delay(ms: number): Promise<void> {
@@ -64,8 +76,69 @@ function cancel_restart_timer(): void {
 	restart_timer = null;
 }
 
+function cancel_flash(): void {
+	flash_gen += 1;
+	flash_colors = [];
+	flash_intensity = 1;
+}
+
+function play_all_tones(duration_ms: number): void {
+	for (const color of COLORS) {
+		simon_audio.play_tone(color, duration_ms);
+	}
+}
+
+async function flash_burst(gen: number): Promise<void> {
+	for (let i = 0; i < FLASH_BURST_CYCLES; i++) {
+		if (flash_gen !== gen) return;
+		flash_colors = [...COLORS];
+		flash_intensity = FLASH_INTENSITY_BURST;
+		play_all_tones(FLASH_BURST_ON_MS);
+		await delay(FLASH_BURST_ON_MS);
+		if (flash_gen !== gen) return;
+		flash_colors = [];
+		flash_intensity = 1;
+		await delay(FLASH_BURST_OFF_MS);
+	}
+}
+
+async function flash_cascade(gen: number): Promise<void> {
+	for (const color of COLORS) {
+		if (flash_gen !== gen) return;
+		flash_colors = [color];
+		flash_intensity = FLASH_INTENSITY_BURST;
+		simon_audio.play_tone(color, FLASH_CASCADE_FWD_MS);
+		await delay(FLASH_CASCADE_FWD_MS);
+	}
+	for (const color of [...COLORS].reverse()) {
+		if (flash_gen !== gen) return;
+		flash_colors = [color];
+		flash_intensity = FLASH_INTENSITY_BURST;
+		simon_audio.play_tone(color, FLASH_CASCADE_REV_MS);
+		await delay(FLASH_CASCADE_REV_MS);
+	}
+}
+
+async function flash_finale(gen: number): Promise<void> {
+	if (flash_gen !== gen) return;
+	flash_colors = [...COLORS];
+	flash_intensity = FLASH_INTENSITY_FINALE;
+	play_all_tones(FLASH_FINALE_MS);
+	await delay(FLASH_FINALE_MS);
+	if (flash_gen !== gen) return;
+	flash_colors = [];
+	flash_intensity = 1;
+}
+
+async function run_victory_flash(gen: number): Promise<void> {
+	await flash_burst(gen);
+	await flash_cascade(gen);
+	await flash_finale(gen);
+}
+
 function start_next_round(): void {
 	restart_timer = null;
+	cancel_flash();
 	round += 1;
 	add_to_sequence();
 	show_gen += 1;
@@ -74,7 +147,9 @@ function start_next_round(): void {
 
 function schedule_next_round(): void {
 	cancel_restart_timer();
+	cancel_flash();
 	phase = 'showing';
+	void run_victory_flash(flash_gen);
 	restart_timer = setTimeout(start_next_round, RESTART_DELAY_MS);
 }
 
@@ -122,6 +197,7 @@ function reset(): void {
 	show_gen += 1;
 	release();
 	cancel_restart_timer();
+	cancel_flash();
 	phase = 'idle';
 	sequence = [];
 	position = 0;
@@ -147,6 +223,12 @@ export const simon = {
 	},
 	get round() {
 		return round;
+	},
+	get flash_colors() {
+		return flash_colors;
+	},
+	get flash_intensity() {
+		return flash_intensity;
 	},
 	start,
 	press,

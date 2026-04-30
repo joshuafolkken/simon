@@ -141,7 +141,7 @@ const CREDITS_LINES = [
 	'Longinus',
 	'fish',
 	'Ejirou',
-	'',
+	'Satou',
 	'',
 	'',
 	'',

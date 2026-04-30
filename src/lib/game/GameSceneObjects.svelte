@@ -4,6 +4,7 @@
 	import Room from './Room.svelte';
 	import Player from './Player.svelte';
 	import SimonBoard from './SimonBoard.svelte';
+	import ScoreDisplay from './ScoreDisplay.svelte';
 	import Switch from './Switch.svelte';
 	import FloorCredits from './FloorCredits.svelte';
 	import { game_state } from '$lib/game/state.svelte';
@@ -128,6 +129,7 @@
 <FloorCredits />
 <Player />
 <SimonBoard />
+<ScoreDisplay />
 <Switch
 	position_x={CYBER_SWITCH_X}
 	is_active={is_cyber}

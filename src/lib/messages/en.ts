@@ -12,5 +12,8 @@ export const messages = {
 	loading_downloading: 'DOWNLOADING...',
 	loading_initializing: 'INITIALIZING...',
 	loading_loading_assets: 'LOADING ASSETS...',
-	loading_ready: 'READY'
+	loading_ready: 'READY',
+	score_high_score: 'HI',
+	score_current: 'SCORE',
+	score_round: 'RND'
 } as const;

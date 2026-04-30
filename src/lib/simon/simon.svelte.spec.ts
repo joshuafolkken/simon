@@ -5,7 +5,13 @@ import {
 	ON_RATIO,
 	OFF_RATIO,
 	ERROR_BEEP_MS,
-	RESTART_DELAY_MS
+	RESTART_DELAY_MS,
+	FLASH_BURST_ON_MS,
+	FLASH_BURST_OFF_MS,
+	FLASH_BURST_CYCLES,
+	FLASH_CASCADE_FWD_MS,
+	FLASH_CASCADE_REV_MS,
+	FLASH_FINALE_MS
 } from '$lib/simon/simon.svelte';
 import { simon_audio } from '$lib/simon/audio';
 import type { ButtonColor } from '$lib/simon/types';
@@ -285,5 +291,91 @@ describe('simon FSM', () => {
 		simon.press(seq_at(0));
 		simon.release();
 		expect(spy).toHaveBeenCalled();
+	});
+});
+
+describe('victory flash', () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+		simon.reset();
+	});
+
+	afterEach(() => {
+		vi.clearAllTimers();
+		vi.useRealTimers();
+		vi.restoreAllMocks();
+		simon.reset();
+	});
+
+	it('flash_colors is empty before any round completes', () => {
+		simon.start();
+		expect(simon.flash_colors).toHaveLength(0);
+	});
+
+	it('flash_colors contains all 4 colors immediately after release on round_complete', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		simon.release();
+		expect(simon.flash_colors).toHaveLength(4);
+		expect(simon.flash_colors).toEqual(expect.arrayContaining(ALL_COLORS));
+	});
+
+	it('flash_intensity is greater than 1 immediately after release on round_complete', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		simon.release();
+		expect(simon.flash_intensity).toBeGreaterThan(1);
+	});
+
+	it('play_tone is called for all colors during burst stage', async () => {
+		const spy = vi.spyOn(simon_audio, 'play_tone');
+		simon.start();
+		await vi.runAllTimersAsync();
+		spy.mockClear();
+		simon.press(seq_at(0));
+		simon.release();
+		const called_colors = spy.mock.calls.map((c) => c[0]);
+		expect(called_colors).toContain('green');
+		expect(called_colors).toContain('red');
+		expect(called_colors).toContain('yellow');
+		expect(called_colors).toContain('blue');
+	});
+
+	it('flash_colors and flash_intensity reset after full flash duration', async () => {
+		const flash_total_ms =
+			FLASH_BURST_CYCLES * (FLASH_BURST_ON_MS + FLASH_BURST_OFF_MS) +
+			ALL_COLORS.length * (FLASH_CASCADE_FWD_MS + FLASH_CASCADE_REV_MS) +
+			FLASH_FINALE_MS;
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		simon.release();
+		await vi.advanceTimersByTimeAsync(flash_total_ms + 10);
+		expect(simon.flash_colors).toHaveLength(0);
+		expect(simon.flash_intensity).toBe(1);
+	});
+
+	it('reset() clears flash_colors and flash_intensity immediately', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		simon.release();
+		expect(simon.flash_colors).toHaveLength(4);
+		simon.reset();
+		expect(simon.flash_colors).toHaveLength(0);
+		expect(simon.flash_intensity).toBe(1);
+	});
+
+	it('flash_colors and flash_intensity cleared when next round starts', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		simon.release();
+		expect(simon.flash_colors).toHaveLength(4);
+		await vi.advanceTimersByTimeAsync(RESTART_DELAY_MS);
+		expect(simon.flash_colors).toHaveLength(0);
+		expect(simon.flash_intensity).toBe(1);
 	});
 });

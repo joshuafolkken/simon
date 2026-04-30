@@ -1,4 +1,5 @@
 import { simon_audio } from './audio';
+import { score } from './score.svelte';
 import type { ButtonColor, SimonPhase } from './types';
 
 const COLORS: readonly [ButtonColor, ButtonColor, ButtonColor, ButtonColor] = [
@@ -36,6 +37,7 @@ let flash_intensity = $state(1);
 let show_gen = 0;
 let flash_gen = 0;
 let restart_timer: ReturnType<typeof setTimeout> | null = null;
+let input_start_ms = 0;
 
 function delay(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -67,6 +69,7 @@ async function run_show(gen: number): Promise<void> {
 		await delay(off_ms);
 	}
 	if (gen !== show_gen) return;
+	input_start_ms = Date.now();
 	phase = 'player_input';
 	position = 0;
 }
@@ -156,6 +159,7 @@ function schedule_next_round(): void {
 function handle_correct_press(): void {
 	position += 1;
 	if (position < sequence.length) return;
+	score.add_round_score(Date.now() - input_start_ms, sequence.length, round);
 	phase = 'round_complete';
 }
 
@@ -168,6 +172,7 @@ function start(): void {
 	if (phase === 'showing') return;
 	if (phase === 'player_input') return;
 	cancel_restart_timer();
+	score.reset();
 	phase = 'showing';
 	round = 1;
 	sequence = [];
@@ -198,10 +203,12 @@ function reset(): void {
 	release();
 	cancel_restart_timer();
 	cancel_flash();
+	score.reset();
 	phase = 'idle';
 	sequence = [];
 	position = 0;
 	active_color = null;
+	input_start_ms = 0;
 	round = 0;
 }
 

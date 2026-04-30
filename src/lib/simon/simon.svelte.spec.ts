@@ -13,6 +13,7 @@ import {
 	FLASH_CASCADE_REV_MS,
 	FLASH_FINALE_MS
 } from '$lib/simon/simon.svelte';
+import { score } from '$lib/simon/score.svelte';
 import { simon_audio } from '$lib/simon/audio';
 import type { ButtonColor } from '$lib/simon/types';
 
@@ -291,6 +292,52 @@ describe('simon FSM', () => {
 		simon.press(seq_at(0));
 		simon.release();
 		expect(spy).toHaveBeenCalled();
+	});
+});
+
+describe('score integration', () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+		simon.reset();
+	});
+
+	afterEach(() => {
+		vi.clearAllTimers();
+		vi.useRealTimers();
+		vi.restoreAllMocks();
+		simon.reset();
+	});
+
+	it('current_score increases after a round completes', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		expect(score.current_score).toBeGreaterThan(0);
+	});
+
+	it('current_score is 1000 when round 1 is cleared with ~0 elapsed time', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		expect(score.current_score).toBe(1_000);
+	});
+
+	it('current_score resets to 0 after simon.reset()', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		expect(score.current_score).toBeGreaterThan(0);
+		simon.reset();
+		expect(score.current_score).toBe(0);
+	});
+
+	it('current_score resets to 0 when a new game starts via simon.start()', async () => {
+		simon.start();
+		await vi.runAllTimersAsync();
+		simon.press(seq_at(0));
+		expect(score.current_score).toBeGreaterThan(0);
+		simon.start();
+		expect(score.current_score).toBe(0);
 	});
 });
 

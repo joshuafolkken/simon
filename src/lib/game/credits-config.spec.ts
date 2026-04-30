@@ -75,6 +75,11 @@ describe('credits-config', () => {
 		expect(CREDITS_TEXT).toContain('ESLint');
 	});
 
+	it('includes AI tools credit', () => {
+		expect(CREDITS_TEXT).toContain('Claude Code');
+		expect(CREDITS_TEXT).toContain('Sonnet 4.6');
+	});
+
 	it('ends with thank you message', () => {
 		expect(CREDITS_TEXT).toContain('THANK YOU FOR PLAYING');
 	});

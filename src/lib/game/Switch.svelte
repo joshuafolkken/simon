@@ -3,44 +3,8 @@
 	import { Text } from '@threlte/extras';
 	import { resolve_switch_colors } from '$lib/game/switch-colors';
 	import type { SwitchColors } from '$lib/game/switch-colors';
-	import type { SwitchIconType } from '$lib/game/switch-config';
-	import {
-		SWITCH_Y,
-		SWITCH_Z,
-		PANEL_SIZE,
-		PANEL_DEPTH,
-		PANEL_OPACITY_ACTIVE,
-		PANEL_OPACITY_INACTIVE,
-		BORDER_THICKNESS,
-		BORDER_DEPTH,
-		BORDER_POS,
-		CYBER_OUTER_RING_R,
-		CYBER_OUTER_RING_TUBE,
-		CYBER_INNER_RING_R,
-		CYBER_INNER_RING_TUBE,
-		CYBER_RING_RADIAL,
-		CYBER_RING_TUBULAR,
-		CYBER_INNER_RING_ROTATION,
-		CYBER_ORB_R,
-		CYBER_ORB_SEGMENTS,
-		CYBER_ICON_Z,
-		CORNER_ARM,
-		CORNER_THICKNESS,
-		CORNER_DEPTH,
-		CORNER_POS,
-		CORNER_ARM_CENTER,
-		FULLSCREEN_ICON_Z,
-		HIT_AREA_W,
-		HIT_AREA_H,
-		HIT_AREA_DEPTH,
-		HIT_AREA_Z,
-		LABEL_FONT_SIZE,
-		LABEL_Y_OFFSET,
-		LABEL_Z,
-		ACTIVE_LIGHT_Z,
-		ACTIVE_LIGHT_DISTANCE,
-		ACTIVE_LIGHT_INTENSITY
-	} from '$lib/game/switch-config';
+	import type { SwitchIconType, SwitchGeometry } from '$lib/game/switch-config';
+	import { DEFAULT_SWITCH_GEOMETRY } from '$lib/game/switch-config';
 
 	type CornerSign = -1 | 1;
 	type BarAxis = 'h' | 'v';
@@ -51,24 +15,26 @@
 		w: number;
 		h: number;
 	}
+	interface CornerGeom {
+		arm: number;
+		thickness: number;
+		pos: number;
+		arm_center: number;
+	}
 
-	function make_bar(sx: CornerSign, sy: CornerSign, axis: BarAxis): CornerBar {
+	function make_bar(sx: CornerSign, sy: CornerSign, axis: BarAxis, g: CornerGeom): CornerBar {
 		const is_h = axis === 'h';
 		return {
 			key: `${axis}${sx}${sy}`,
-			px: sx * (is_h ? CORNER_ARM_CENTER : CORNER_POS),
-			py: sy * (is_h ? CORNER_POS : CORNER_ARM_CENTER),
-			w: is_h ? CORNER_ARM : CORNER_THICKNESS,
-			h: is_h ? CORNER_THICKNESS : CORNER_ARM
+			px: sx * (is_h ? g.arm_center : g.pos),
+			py: sy * (is_h ? g.pos : g.arm_center),
+			w: is_h ? g.arm : g.thickness,
+			h: is_h ? g.thickness : g.arm
 		};
 	}
 
 	const CORNER_SIGNS: readonly CornerSign[] = [-1, 1];
-	const CORNER_BARS: readonly CornerBar[] = CORNER_SIGNS.flatMap(function (sx): CornerBar[] {
-		return CORNER_SIGNS.flatMap(function (sy): CornerBar[] {
-			return [make_bar(sx, sy, 'h'), make_bar(sx, sy, 'v')];
-		});
-	});
+	const HIT_AREA_PADDING = 0.12;
 
 	interface Props {
 		position_x: number;
@@ -79,6 +45,7 @@
 		font_size_multiplier: number;
 		onclick: () => void;
 		colors: SwitchColors;
+		geometry?: SwitchGeometry;
 	}
 
 	let {
@@ -89,18 +56,37 @@
 		font,
 		font_size_multiplier,
 		onclick,
-		colors
+		colors,
+		geometry = {}
 	}: Props = $props();
 
+	let geom: Required<SwitchGeometry> = $derived({ ...DEFAULT_SWITCH_GEOMETRY, ...geometry });
+	let border_pos = $derived(geom.panel_size / 2 - geom.border_thickness / 2);
+	let corner_geom: CornerGeom = $derived({
+		arm: geom.corner_arm,
+		thickness: geom.corner_thickness,
+		pos: geom.corner_pos,
+		arm_center: geom.corner_pos - geom.corner_arm / 2
+	});
+	let corner_bars = $derived(
+		CORNER_SIGNS.flatMap(function (sx) {
+			return CORNER_SIGNS.flatMap(function (sy) {
+				return [make_bar(sx, sy, 'h', corner_geom), make_bar(sx, sy, 'v', corner_geom)];
+			});
+		})
+	);
+	let hit_area_w = $derived(geom.panel_size + HIT_AREA_PADDING);
+	let hit_area_h = $derived(geom.panel_size + HIT_AREA_PADDING);
+
 	let resolved = $derived(resolve_switch_colors(colors, is_active));
-	let panel_opacity = $derived(is_active ? PANEL_OPACITY_ACTIVE : PANEL_OPACITY_INACTIVE);
-	let current_font_size = $derived(LABEL_FONT_SIZE * font_size_multiplier);
+	let panel_opacity = $derived(is_active ? geom.panel_opacity_active : geom.panel_opacity_inactive);
+	let current_font_size = $derived(geom.label_font_size * font_size_multiplier);
 </script>
 
-<T.Group position={[position_x, SWITCH_Y, SWITCH_Z]}>
+<T.Group position={[position_x, geom.switch_y, geom.switch_z]}>
 	<!-- Translucent holographic panel face -->
 	<T.Mesh>
-		<T.BoxGeometry args={[PANEL_SIZE, PANEL_SIZE, PANEL_DEPTH]} />
+		<T.BoxGeometry args={[geom.panel_size, geom.panel_size, geom.panel_depth]} />
 		<T.MeshStandardMaterial
 			color={resolved.current_color}
 			emissive={resolved.current_color}
@@ -112,16 +98,16 @@
 
 	<!-- Glowing border frame (top, bottom, left, right bars) -->
 	{#each [-1, 1] as side (side)}
-		<T.Mesh position={[0, side * BORDER_POS, 0]}>
-			<T.BoxGeometry args={[PANEL_SIZE, BORDER_THICKNESS, BORDER_DEPTH]} />
+		<T.Mesh position={[0, side * border_pos, 0]}>
+			<T.BoxGeometry args={[geom.panel_size, geom.border_thickness, geom.border_depth]} />
 			<T.MeshStandardMaterial
 				color={resolved.current_color}
 				emissive={resolved.current_color}
 				emissiveIntensity={resolved.ring_emissive}
 			/>
 		</T.Mesh>
-		<T.Mesh position={[side * BORDER_POS, 0, 0]}>
-			<T.BoxGeometry args={[BORDER_THICKNESS, PANEL_SIZE, BORDER_DEPTH]} />
+		<T.Mesh position={[side * border_pos, 0, 0]}>
+			<T.BoxGeometry args={[geom.border_thickness, geom.panel_size, geom.border_depth]} />
 			<T.MeshStandardMaterial
 				color={resolved.current_color}
 				emissive={resolved.current_color}
@@ -132,9 +118,14 @@
 
 	{#if icon_type === 'cyber'}
 		<!-- Outer hexagonal ring -->
-		<T.Mesh position.z={CYBER_ICON_Z}>
+		<T.Mesh position.z={geom.cyber_icon_z}>
 			<T.TorusGeometry
-				args={[CYBER_OUTER_RING_R, CYBER_OUTER_RING_TUBE, CYBER_RING_RADIAL, CYBER_RING_TUBULAR]}
+				args={[
+					geom.cyber_outer_ring_r,
+					geom.cyber_outer_ring_tube,
+					geom.cyber_ring_radial,
+					geom.cyber_ring_tubular
+				]}
 			/>
 			<T.MeshStandardMaterial
 				color={resolved.current_color}
@@ -143,9 +134,14 @@
 			/>
 		</T.Mesh>
 		<!-- Inner hexagonal ring rotated 30° -->
-		<T.Mesh position.z={CYBER_ICON_Z} rotation.z={CYBER_INNER_RING_ROTATION}>
+		<T.Mesh position.z={geom.cyber_icon_z} rotation.z={geom.cyber_inner_ring_rotation}>
 			<T.TorusGeometry
-				args={[CYBER_INNER_RING_R, CYBER_INNER_RING_TUBE, CYBER_RING_RADIAL, CYBER_RING_TUBULAR]}
+				args={[
+					geom.cyber_inner_ring_r,
+					geom.cyber_inner_ring_tube,
+					geom.cyber_ring_radial,
+					geom.cyber_ring_tubular
+				]}
 			/>
 			<T.MeshStandardMaterial
 				color={resolved.current_color}
@@ -154,8 +150,10 @@
 			/>
 		</T.Mesh>
 		<!-- Center orb -->
-		<T.Mesh position.z={CYBER_ICON_Z}>
-			<T.SphereGeometry args={[CYBER_ORB_R, CYBER_ORB_SEGMENTS, CYBER_ORB_SEGMENTS]} />
+		<T.Mesh position.z={geom.cyber_icon_z}>
+			<T.SphereGeometry
+				args={[geom.cyber_orb_r, geom.cyber_orb_segments, geom.cyber_orb_segments]}
+			/>
 			<T.MeshStandardMaterial
 				color={resolved.current_color}
 				emissive={resolved.current_color}
@@ -164,9 +162,9 @@
 		</T.Mesh>
 	{:else}
 		<!-- Fullscreen icon: 4 corner L-brackets -->
-		{#each CORNER_BARS as bar (bar.key)}
-			<T.Mesh position={[bar.px, bar.py, FULLSCREEN_ICON_Z]}>
-				<T.BoxGeometry args={[bar.w, bar.h, CORNER_DEPTH]} />
+		{#each corner_bars as bar (bar.key)}
+			<T.Mesh position={[bar.px, bar.py, geom.fullscreen_icon_z]}>
+				<T.BoxGeometry args={[bar.w, bar.h, geom.corner_depth]} />
 				<T.MeshStandardMaterial
 					color={resolved.current_color}
 					emissive={resolved.current_color}
@@ -179,21 +177,21 @@
 	<!-- Point light for active glow -->
 	{#if is_active}
 		<T.PointLight
-			position.z={ACTIVE_LIGHT_Z}
+			position.z={geom.active_light_z}
 			color={resolved.current_color}
-			intensity={ACTIVE_LIGHT_INTENSITY}
-			distance={ACTIVE_LIGHT_DISTANCE}
+			intensity={geom.active_light_intensity}
+			distance={geom.active_light_distance}
 		/>
 	{/if}
 
 	<!-- Invisible hit area for click detection -->
-	<T.Mesh position.z={HIT_AREA_Z} {onclick}>
-		<T.BoxGeometry args={[HIT_AREA_W, HIT_AREA_H, HIT_AREA_DEPTH]} />
+	<T.Mesh position.z={geom.hit_area_z} {onclick}>
+		<T.BoxGeometry args={[hit_area_w, hit_area_h, geom.hit_area_depth]} />
 		<T.MeshBasicMaterial transparent={true} opacity={0} depthWrite={false} />
 	</T.Mesh>
 
 	<!-- Label below panel -->
-	<T.Group position={[0, -LABEL_Y_OFFSET, LABEL_Z]}>
+	<T.Group position={[0, -geom.label_y_offset, geom.label_z]}>
 		<Text
 			text={label}
 			{font}

@@ -1,18 +1,28 @@
 <script lang="ts">
 	import { T } from '@threlte/core';
 
+	const DEFAULT_W = 10;
+	const DEFAULT_D = 10;
+	const DEFAULT_H = 3;
+	const HALF_DIVISOR = 2;
+
 	interface Props {
-		width: number;
-		depth: number;
-		height: number;
+		width?: number;
+		depth?: number;
+		height?: number;
 		floor_color: string;
 		wall_color: string;
 		ceiling_color: string;
 	}
 
-	const HALF_DIVISOR = 2;
-
-	let { width, depth, height, floor_color, wall_color, ceiling_color }: Props = $props();
+	let {
+		width = DEFAULT_W,
+		depth = DEFAULT_D,
+		height = DEFAULT_H,
+		floor_color,
+		wall_color,
+		ceiling_color
+	}: Props = $props();
 	let half_w = $derived(width / HALF_DIVISOR);
 	let half_d = $derived(depth / HALF_DIVISOR);
 	let half_h = $derived(height / HALF_DIVISOR);

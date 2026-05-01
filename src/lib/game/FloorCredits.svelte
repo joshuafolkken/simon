@@ -2,7 +2,6 @@
 	import { Text } from '@threlte/extras';
 	import { useTask } from '@threlte/core';
 	import { fonts } from '$lib/game/fonts';
-	import { game_state } from '$lib/game/state.svelte';
 	import {
 		CREDITS_FONT_SIZE,
 		CREDITS_LINE_HEIGHT,
@@ -12,14 +11,19 @@
 		CREDITS_SCROLL_START_Z,
 		CREDITS_GLOW_BLUR,
 		CREDITS_GLOW_OPACITY,
-		FLOOR_TEXT_ROTATION_X,
-		CREDITS_TEXT
+		FLOOR_TEXT_ROTATION_X
 	} from './credits-config';
 	import { advance_scroll } from './credits-scroll';
 
-	let is_cyber = $derived(game_state.is_cyber);
-	let current_font = $derived(fonts.get_font(is_cyber));
-	let color = $derived(is_cyber ? CREDITS_CYBER_COLOR : CREDITS_NORMAL_COLOR);
+	interface Props {
+		is_alt: boolean;
+		credits: string;
+	}
+
+	let { is_alt, credits }: Props = $props();
+
+	let current_font = $derived(fonts.get_font(is_alt));
+	let color = $derived(is_alt ? CREDITS_CYBER_COLOR : CREDITS_NORMAL_COLOR);
 	let scroll_z = $state(CREDITS_SCROLL_START_Z);
 
 	function tick(delta: number): void {
@@ -30,7 +34,7 @@
 </script>
 
 <Text
-	text={CREDITS_TEXT}
+	text={credits}
 	font={current_font}
 	fontSize={CREDITS_FONT_SIZE}
 	lineHeight={CREDITS_LINE_HEIGHT}

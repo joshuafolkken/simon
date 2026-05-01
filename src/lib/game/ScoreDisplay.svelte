@@ -1,15 +1,27 @@
 <script lang="ts">
 	import { T, useTask } from '@threlte/core';
 	import { Text } from '@threlte/extras';
-	import { score } from '$lib/simon/score.svelte';
-	import { game_state } from '$lib/game/state.svelte';
 	import { fonts } from '$lib/game/fonts';
-	import { SIMON_BOARD_Z } from '$lib/game/simon-board-config';
 	import { messages } from '$lib/messages/en';
 
+	export interface ScoreData {
+		high_score: number;
+		current_score: number;
+		is_new_high_score: boolean;
+		high_score_round: number;
+		last_cleared_round: number;
+		format_score: (value: number) => string;
+	}
+
+	interface Props {
+		score_data: ScoreData;
+		is_alt: boolean;
+		position_z: number;
+	}
+
+	let { score_data, is_alt, position_z }: Props = $props();
+
 	const DISPLAY_Y = 2.5;
-	const FLOAT_Z_OFFSET = 0.15;
-	const DISPLAY_Z = SIMON_BOARD_Z + FLOAT_Z_OFFSET;
 
 	const PANEL_W = 1.6;
 	const PANEL_H = 0.62;
@@ -49,9 +61,9 @@
 	let score_to = 0;
 	let score_anim_ms = 0;
 
-	let displayed_hi = $state(score.high_score);
-	let hi_from = score.high_score;
-	let hi_to = score.high_score;
+	let displayed_hi = $state(0);
+	let hi_from = 0;
+	let hi_to = 0;
 	let hi_anim_ms = 0;
 
 	function apply_anim(from: number, to: number, start_ms: number, now: number): number {
@@ -63,20 +75,20 @@
 	function tick(): void {
 		const now = Date.now();
 
-		if (score.current_score !== score_to) {
-			if (score.current_score < displayed_score) {
-				displayed_score = score.current_score;
-				score_from = score.current_score;
+		if (score_data.current_score !== score_to) {
+			if (score_data.current_score < displayed_score) {
+				displayed_score = score_data.current_score;
+				score_from = score_data.current_score;
 			} else {
 				score_from = displayed_score;
 				score_anim_ms = now;
 			}
-			score_to = score.current_score;
+			score_to = score_data.current_score;
 		}
 
-		if (score.high_score !== hi_to) {
+		if (score_data.high_score !== hi_to) {
 			hi_from = displayed_hi;
-			hi_to = score.high_score;
+			hi_to = score_data.high_score;
 			hi_anim_ms = now;
 		}
 
@@ -86,28 +98,27 @@
 
 	useTask(tick);
 
-	let is_cyber = $derived(game_state.is_cyber);
-	let current_font = $derived(fonts.get_font(is_cyber));
-	let font_size_multiplier = $derived(fonts.get_font_size_multiplier(is_cyber));
-	let panel_color = $derived(is_cyber ? CYBER_PANEL_COLOR : RETRO_PANEL_COLOR);
-	let panel_emissive = $derived(is_cyber ? CYBER_PANEL_EMISSIVE : RETRO_PANEL_EMISSIVE);
+	let current_font = $derived(fonts.get_font(is_alt));
+	let font_size_multiplier = $derived(fonts.get_font_size_multiplier(is_alt));
+	let panel_color = $derived(is_alt ? CYBER_PANEL_COLOR : RETRO_PANEL_COLOR);
+	let panel_emissive = $derived(is_alt ? CYBER_PANEL_EMISSIVE : RETRO_PANEL_EMISSIVE);
 	let panel_emissive_intensity = $derived(
-		is_cyber ? CYBER_PANEL_EMISSIVE_INTENSITY : RETRO_PANEL_EMISSIVE_INTENSITY
+		is_alt ? CYBER_PANEL_EMISSIVE_INTENSITY : RETRO_PANEL_EMISSIVE_INTENSITY
 	);
-	let label_color = $derived(is_cyber ? CYBER_LABEL_COLOR : RETRO_LABEL_COLOR);
-	let value_color = $derived(is_cyber ? CYBER_VALUE_COLOR : RETRO_VALUE_COLOR);
+	let label_color = $derived(is_alt ? CYBER_LABEL_COLOR : RETRO_LABEL_COLOR);
+	let value_color = $derived(is_alt ? CYBER_VALUE_COLOR : RETRO_VALUE_COLOR);
 	let label_font_size = $derived(LABEL_FONT_SIZE * font_size_multiplier);
 	let value_font_size = $derived(VALUE_FONT_SIZE * font_size_multiplier);
 	let round_font_size = $derived(ROUND_VALUE_FONT_SIZE * font_size_multiplier);
 
-	let hi_value_color = $derived(score.is_new_high_score ? NEW_HIGH_SCORE_COLOR : value_color);
-	let hi_score_text = $derived(score.format_score(displayed_hi));
-	let current_score_text = $derived(score.format_score(displayed_score));
-	let hi_round_text = $derived(String(score.high_score_round));
-	let round_text = $derived(String(score.last_cleared_round));
+	let hi_value_color = $derived(score_data.is_new_high_score ? NEW_HIGH_SCORE_COLOR : value_color);
+	let hi_score_text = $derived(score_data.format_score(displayed_hi));
+	let current_score_text = $derived(score_data.format_score(displayed_score));
+	let hi_round_text = $derived(String(score_data.high_score_round));
+	let round_text = $derived(String(score_data.last_cleared_round));
 </script>
 
-<T.Group position={[0, DISPLAY_Y, DISPLAY_Z]}>
+<T.Group position={[0, DISPLAY_Y, position_z]}>
 	<T.Mesh position.z={PANEL_Z_OFFSET}>
 		<T.PlaneGeometry args={[PANEL_W, PANEL_H]} />
 		<T.MeshStandardMaterial

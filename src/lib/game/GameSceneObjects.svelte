@@ -14,9 +14,12 @@
 	import { fonts } from '$lib/game/fonts';
 	import { messages } from '$lib/messages/en';
 	import { ROOM_W, ROOM_D, ROOM_H } from '$lib/game/room-config';
+	import { SIMON_BOARD_Z } from '$lib/game/simon-board-config';
 	import { CYBER_SWITCH_COLORS, FULLSCREEN_SWITCH_COLORS } from '$lib/game/switch-colors';
 	import { cyber_switch_input } from '$lib/game/cyber-switch-input';
 	import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
+	import { score } from '$lib/simon/score.svelte';
+	import { CREDITS_TEXT } from '$lib/game/credits-config';
 
 	const POINT_LIGHT_Y = 2.5;
 	const CYBER_SWITCH_X = 1.6;
@@ -49,6 +52,8 @@
 	const CYBER_FLOOR_COLOR = '#0d2525';
 	const CYBER_WALL_COLOR = '#0a2035';
 	const CYBER_CEILING_COLOR = '#08082a';
+	const SCORE_DISPLAY_Z_OFFSET = 0.15;
+	const SCORE_DISPLAY_Z = SIMON_BOARD_Z + SCORE_DISPLAY_Z_OFFSET;
 
 	const { camera } = useThrelte();
 	interactivity({ compute: make_pointer_compute(camera) });
@@ -64,6 +69,14 @@
 	let floor_color = $derived(is_cyber ? CYBER_FLOOR_COLOR : FLOOR_COLOR);
 	let wall_color = $derived(is_cyber ? CYBER_WALL_COLOR : WALL_COLOR);
 	let ceiling_color = $derived(is_cyber ? CYBER_CEILING_COLOR : CEILING_COLOR);
+	let score_data = $derived({
+		high_score: score.high_score,
+		current_score: score.current_score,
+		is_new_high_score: score.is_new_high_score,
+		high_score_round: score.high_score_round,
+		last_cleared_round: score.last_cleared_round,
+		format_score: score.format_score
+	});
 	let title_y = $state(TITLE_Y);
 
 	function tick(): void {
@@ -126,10 +139,10 @@
 </T.Group>
 
 <Room width={ROOM_W} depth={ROOM_D} height={ROOM_H} {floor_color} {wall_color} {ceiling_color} />
-<FloorCredits />
+<FloorCredits is_alt={is_cyber} credits={CREDITS_TEXT} />
 <Player />
 <SimonBoard />
-<ScoreDisplay />
+<ScoreDisplay {score_data} is_alt={is_cyber} position_z={SCORE_DISPLAY_Z} />
 <Switch
 	position_x={CYBER_SWITCH_X}
 	is_active={is_cyber}

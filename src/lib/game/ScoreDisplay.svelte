@@ -3,15 +3,7 @@
 	import { Text } from '@threlte/extras';
 	import { fonts } from '$lib/game/fonts';
 	import { messages } from '$lib/messages/en';
-
-	export interface ScoreData {
-		high_score: number;
-		current_score: number;
-		is_new_high_score: boolean;
-		high_score_round: number;
-		last_cleared_round: number;
-		format_score: (value: number) => string;
-	}
+	import type { ScoreData } from '$lib/game/score-display-types';
 
 	interface Props {
 		score_data: ScoreData;

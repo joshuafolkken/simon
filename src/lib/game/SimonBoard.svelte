@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { T } from '@threlte/core';
 	import { Text } from '@threlte/extras';
-	import { simon } from '$lib/simon/simon.svelte';
 	import { game_state } from '$lib/game/state.svelte';
 	import { fonts } from '$lib/game/fonts';
 	import { simon_board_input } from '$lib/game/simon-board-input';
 	import { BOARD_Y, BOARD_Z } from '$lib/game/board-config';
-	import type { ButtonColor } from '$lib/simon/types';
+	import type { ButtonColor, SimonBoardData } from '$lib/game/board-types';
 	import { messages } from '$lib/messages/en';
 
 	const INNER_RADIUS = 0.3;
@@ -32,6 +31,10 @@
 		dim_color: string;
 		cyber_lit_color: string;
 		cyber_dim_color: string;
+	}
+
+	interface Props {
+		simon_data: SimonBoardData;
 	}
 
 	const BUTTON_CONFIGS = [
@@ -69,11 +72,13 @@
 		}
 	] as const satisfies readonly ButtonConfig[];
 
+	let { simon_data }: Props = $props();
+
 	function is_lit(color: ButtonColor): boolean {
 		return (
-			simon.active_color === color ||
-			simon.pressed_color === color ||
-			simon.flash_colors.includes(color)
+			simon_data.active_color === color ||
+			simon_data.pressed_color === color ||
+			simon_data.flash_colors.includes(color)
 		);
 	}
 
@@ -86,14 +91,14 @@
 	}
 
 	function get_center_text(): string {
-		if (simon.phase === 'gameover') return messages.simon_gameover;
-		if (simon.round > 0) return `${messages.simon_round} ${simon.round}`;
+		if (simon_data.phase === 'gameover') return messages.simon_gameover;
+		if (simon_data.round > 0) return `${messages.simon_round} ${simon_data.round}`;
 		return messages.simon_start;
 	}
 
 	let center_text = $derived(get_center_text());
 	let emissive_intensity = $derived(
-		(game_state.is_alt ? CYBER_EMISSIVE_INTENSITY : EMISSIVE_INTENSITY) * simon.flash_intensity
+		(game_state.is_alt ? CYBER_EMISSIVE_INTENSITY : EMISSIVE_INTENSITY) * simon_data.flash_intensity
 	);
 	let current_font = $derived(fonts.get_font(game_state.is_alt));
 	let current_font_size = $derived(FONT_SIZE * fonts.get_font_size_multiplier(game_state.is_alt));

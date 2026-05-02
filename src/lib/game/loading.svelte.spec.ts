@@ -7,6 +7,12 @@ const ONE_MS_BEFORE_HIDE = loading.MIN_DISPLAY_MS - 1;
 const FIVE_SECONDS_MS = 5000;
 const SAMPLE_PROGRESS_VALUE = '47%';
 
+describe('OBSERVER_GLOBAL_KEY', () => {
+	it("equals '__loading_observer' to match the key used in app.html's inline script", () => {
+		expect(loading.OBSERVER_GLOBAL_KEY).toBe('__loading_observer');
+	});
+});
+
 describe('loading', () => {
 	let overlay_element: HTMLElement;
 	let status_element: HTMLSpanElement;
@@ -37,7 +43,7 @@ describe('loading', () => {
 		loading.reset();
 
 		observer_disconnect = vi.fn();
-		(globalThis as Record<symbol, unknown>)[loading.OBSERVER_GLOBAL_KEY] = {
+		(globalThis as Record<string, unknown>)[loading.OBSERVER_GLOBAL_KEY] = {
 			disconnect: observer_disconnect
 		};
 	});
@@ -46,7 +52,7 @@ describe('loading', () => {
 		vi.useRealTimers();
 		loading.reset();
 		overlay_element.remove();
-		(globalThis as Record<symbol, unknown>)[loading.OBSERVER_GLOBAL_KEY] = undefined;
+		(globalThis as Record<string, unknown>)[loading.OBSERVER_GLOBAL_KEY] = undefined;
 	});
 
 	it('starts with the downloading step, label, and initial progress', () => {

@@ -7,12 +7,11 @@
 	import ScoreDisplay from './ScoreDisplay.svelte';
 	import Switch from './Switch.svelte';
 	import FloorCredits from './FloorCredits.svelte';
-	import { game_state } from '$lib/game/state.svelte';
 	import { fullscreen } from '$lib/game/fullscreen.svelte';
 	import { make_pointer_compute } from '$lib/game/pointer-compute.js';
 	import { lighting } from '$lib/game/lighting';
 	import { fonts } from '$lib/game/fonts';
-	import { messages } from '$lib/messages/en';
+	import type { SceneKitMessages } from '$lib/game/scene-kit-types';
 	import { ROOM_W, ROOM_D, ROOM_H } from '$lib/game/room-config';
 	import { BOARD_Z } from '$lib/game/board-config';
 	import { CYBER_SWITCH_COLORS, FULLSCREEN_SWITCH_COLORS } from '$lib/game/switch-colors';
@@ -27,10 +26,20 @@
 		credits_text: string;
 		credits_start_z: number;
 		credits_end_z: number;
+		is_alt: boolean;
+		messages: SceneKitMessages;
 	}
 
-	let { game_board, score_data, game_phase, credits_text, credits_start_z, credits_end_z }: Props =
-		$props();
+	let {
+		game_board,
+		score_data,
+		game_phase,
+		credits_text,
+		credits_start_z,
+		credits_end_z,
+		is_alt,
+		messages
+	}: Props = $props();
 
 	const POINT_LIGHT_Y = 2.5;
 	const CYBER_SWITCH_X = 1.6;
@@ -68,7 +77,6 @@
 	const { camera } = useThrelte();
 	interactivity({ compute: make_pointer_compute(camera) });
 
-	let is_alt = $derived(game_state.is_alt);
 	let bg_color = $derived(is_alt ? CYBER_BG : NORMAL_BG);
 	let ambient_intensity = $derived(lighting.get_ambient_intensity(is_alt));
 	let ambient_color = $derived(lighting.get_ambient_color(is_alt));
@@ -149,7 +157,14 @@
 />
 <Player {game_phase} />
 {@render game_board()}
-<ScoreDisplay {score_data} {is_alt} position_z={SCORE_DISPLAY_Z} />
+<ScoreDisplay
+	{score_data}
+	{is_alt}
+	position_z={SCORE_DISPLAY_Z}
+	label_high_score={messages.score_label_high_score}
+	label_round={messages.score_label_round}
+	label_current={messages.score_label_current}
+/>
 <Switch
 	position_x={CYBER_SWITCH_X}
 	is_active={is_alt}

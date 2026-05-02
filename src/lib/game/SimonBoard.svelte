@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { T } from '@threlte/core';
 	import { Text } from '@threlte/extras';
-	import { game_state } from '$lib/game/state.svelte';
 	import { fonts } from '$lib/game/fonts';
 	import { simon_board_input } from '$lib/game/simon-board-input';
 	import { BOARD_Y, BOARD_Z } from '$lib/game/board-config';
 	import type { ButtonColor, SimonBoardData } from '$lib/game/board-types';
-	import { messages } from '$lib/messages/en';
 
 	const INNER_RADIUS = 0.3;
 	const OUTER_RADIUS = 0.7;
@@ -35,6 +33,10 @@
 
 	interface Props {
 		simon_data: SimonBoardData;
+		is_alt: boolean;
+		text_gameover: string;
+		text_round: string;
+		text_start: string;
 	}
 
 	const BUTTON_CONFIGS = [
@@ -72,7 +74,7 @@
 		}
 	] as const satisfies readonly ButtonConfig[];
 
-	let { simon_data }: Props = $props();
+	let { simon_data, is_alt, text_gameover, text_round, text_start }: Props = $props();
 
 	function is_lit(color: ButtonColor): boolean {
 		return (
@@ -83,25 +85,25 @@
 	}
 
 	function btn_lit(btn: ButtonConfig): string {
-		return game_state.is_alt ? btn.cyber_lit_color : btn.lit_color;
+		return is_alt ? btn.cyber_lit_color : btn.lit_color;
 	}
 
 	function btn_dim(btn: ButtonConfig): string {
-		return game_state.is_alt ? btn.cyber_dim_color : btn.dim_color;
+		return is_alt ? btn.cyber_dim_color : btn.dim_color;
 	}
 
 	function get_center_text(): string {
-		if (simon_data.phase === 'gameover') return messages.simon_gameover;
-		if (simon_data.round > 0) return `${messages.simon_round} ${simon_data.round}`;
-		return messages.simon_start;
+		if (simon_data.phase === 'gameover') return text_gameover;
+		if (simon_data.round > 0) return `${text_round} ${simon_data.round}`;
+		return text_start;
 	}
 
 	let center_text = $derived(get_center_text());
 	let emissive_intensity = $derived(
-		(game_state.is_alt ? CYBER_EMISSIVE_INTENSITY : EMISSIVE_INTENSITY) * simon_data.flash_intensity
+		(is_alt ? CYBER_EMISSIVE_INTENSITY : EMISSIVE_INTENSITY) * simon_data.flash_intensity
 	);
-	let current_font = $derived(fonts.get_font(game_state.is_alt));
-	let current_font_size = $derived(FONT_SIZE * fonts.get_font_size_multiplier(game_state.is_alt));
+	let current_font = $derived(fonts.get_font(is_alt));
+	let current_font_size = $derived(FONT_SIZE * fonts.get_font_size_multiplier(is_alt));
 </script>
 
 <T.Group position={[0, BOARD_Y, BOARD_Z]}>

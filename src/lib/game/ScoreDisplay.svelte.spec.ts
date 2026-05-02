@@ -18,17 +18,19 @@ function make_score_data(overrides: Partial<ScoreData> = {}): ScoreData {
 	};
 }
 
+const LABEL_PROPS = { label_high_score: 'HI', label_round: 'RND', label_current: 'SCORE' };
+
 describe('ScoreDisplay', () => {
 	it('renders without error in normal mode', () => {
 		const { container } = render(ScoreDisplay, {
-			props: { score_data: make_score_data(), is_alt: false, position_z: -4.65 }
+			props: { score_data: make_score_data(), is_alt: false, position_z: -4.65, ...LABEL_PROPS }
 		});
 		expect(container).toBeTruthy();
 	});
 
 	it('renders without error in alt mode', () => {
 		const { container } = render(ScoreDisplay, {
-			props: { score_data: make_score_data(), is_alt: true, position_z: -4.65 }
+			props: { score_data: make_score_data(), is_alt: true, position_z: -4.65, ...LABEL_PROPS }
 		});
 		expect(container).toBeTruthy();
 	});
@@ -38,7 +40,8 @@ describe('ScoreDisplay', () => {
 			props: {
 				score_data: make_score_data({ is_new_high_score: true }),
 				is_alt: false,
-				position_z: -4.65
+				position_z: -4.65,
+				...LABEL_PROPS
 			}
 		});
 		expect(container).toBeTruthy();
@@ -47,7 +50,12 @@ describe('ScoreDisplay', () => {
 	it('accepts custom format_score function via score_data', () => {
 		const format_score = vi.fn((v: number) => `${v} pts`);
 		render(ScoreDisplay, {
-			props: { score_data: make_score_data({ format_score }), is_alt: false, position_z: -4.65 }
+			props: {
+				score_data: make_score_data({ format_score }),
+				is_alt: false,
+				position_z: -4.65,
+				...LABEL_PROPS
+			}
 		});
 		expect(format_score).toBeDefined();
 	});

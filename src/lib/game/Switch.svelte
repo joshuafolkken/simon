@@ -4,7 +4,14 @@
 	import { resolve_switch_colors } from '$lib/game/switch-colors';
 	import type { SwitchColors } from '$lib/game/switch-colors';
 	import type { SwitchIconType, SwitchGeometry } from '$lib/game/switch-config';
-	import { DEFAULT_SWITCH_GEOMETRY } from '$lib/game/switch-config';
+	import {
+		DEFAULT_SWITCH_GEOMETRY,
+		FPS_BAR_1_H,
+		FPS_BAR_2_H,
+		FPS_BAR_3_H,
+		FPS_BAR_X_STEP,
+		FPS_BAR_BASE_Y
+	} from '$lib/game/switch-config';
 
 	type CornerSign = -1 | 1;
 	type BarAxis = 'h' | 'v';
@@ -33,8 +40,19 @@
 		};
 	}
 
+	interface FpsBar {
+		key: number;
+		x: number;
+		h: number;
+	}
+
 	const CORNER_SIGNS: readonly CornerSign[] = [-1, 1];
 	const HIT_AREA_PADDING = 0.12;
+	const FPS_BARS: readonly FpsBar[] = [
+		{ key: 0, x: -FPS_BAR_X_STEP, h: FPS_BAR_1_H },
+		{ key: 1, x: 0, h: FPS_BAR_2_H },
+		{ key: 2, x: FPS_BAR_X_STEP, h: FPS_BAR_3_H }
+	];
 
 	interface Props {
 		position_x: number;
@@ -46,6 +64,7 @@
 		onclick: () => void;
 		colors: SwitchColors;
 		geometry?: SwitchGeometry;
+		panel_text?: string | undefined;
 	}
 
 	let {
@@ -57,7 +76,8 @@
 		font_size_multiplier,
 		onclick,
 		colors,
-		geometry = {}
+		geometry = {},
+		panel_text = undefined
 	}: Props = $props();
 
 	let geom: Required<SwitchGeometry> = $derived({ ...DEFAULT_SWITCH_GEOMETRY, ...geometry });
@@ -81,6 +101,7 @@
 	let resolved = $derived(resolve_switch_colors(colors, is_active));
 	let panel_opacity = $derived(is_active ? geom.panel_opacity_active : geom.panel_opacity_inactive);
 	let current_font_size = $derived(geom.label_font_size * font_size_multiplier);
+	let current_panel_text_font_size = $derived(geom.panel_text_font_size * font_size_multiplier);
 </script>
 
 <T.Group position={[position_x, geom.switch_y, geom.switch_z]}>
@@ -160,6 +181,18 @@
 				emissiveIntensity={resolved.orb_emissive}
 			/>
 		</T.Mesh>
+	{:else if icon_type === 'fps'}
+		<!-- FPS icon: 3 ascending performance bars -->
+		{#each FPS_BARS as bar (bar.key)}
+			<T.Mesh position={[bar.x, FPS_BAR_BASE_Y + bar.h / 2, geom.fps_icon_z]}>
+				<T.BoxGeometry args={[geom.fps_bar_width, bar.h, geom.fps_bar_depth]} />
+				<T.MeshStandardMaterial
+					color={resolved.current_color}
+					emissive={resolved.current_color}
+					emissiveIntensity={resolved.ring_emissive}
+				/>
+			</T.Mesh>
+		{/each}
 	{:else}
 		<!-- Fullscreen icon: 4 corner L-brackets -->
 		{#each corner_bars as bar (bar.key)}
@@ -172,6 +205,20 @@
 				/>
 			</T.Mesh>
 		{/each}
+	{/if}
+
+	<!-- Optional text inside panel (e.g. FPS value) -->
+	{#if panel_text !== undefined}
+		<T.Group position={[0, geom.panel_text_y, geom.panel_text_z]}>
+			<Text
+				text={panel_text}
+				{font}
+				fontSize={current_panel_text_font_size}
+				color={resolved.current_color}
+				anchorX="center"
+				anchorY="middle"
+			/>
+		</T.Group>
 	{/if}
 
 	<!-- Point light for active glow -->

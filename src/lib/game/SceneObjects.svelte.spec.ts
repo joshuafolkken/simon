@@ -38,7 +38,8 @@ vi.mock('$lib/game/fonts', () => ({
 vi.mock('$lib/game/room-config', () => ({ ROOM_W: 10, ROOM_D: 10, ROOM_H: 5 }));
 vi.mock('$lib/game/switch-colors', () => ({
 	CYBER_SWITCH_COLORS: {},
-	FULLSCREEN_SWITCH_COLORS: {}
+	FULLSCREEN_SWITCH_COLORS: {},
+	FPS_SWITCH_COLORS: {}
 }));
 vi.mock('$lib/game/cyber-switch-input', () => ({
 	cyber_switch_input: { on_click: vi.fn() }
@@ -46,6 +47,13 @@ vi.mock('$lib/game/cyber-switch-input', () => ({
 vi.mock('$lib/game/fullscreen-switch-input', () => ({
 	fullscreen_switch_input: { on_click: vi.fn() }
 }));
+vi.mock('$lib/game/fps-switch-input', () => ({
+	fps_switch_input: { on_click: vi.fn() }
+}));
+vi.mock('$lib/game/fps.svelte', () => ({
+	fps: { is_fps_enabled: true, current_fps_text: '---', toggle: vi.fn() }
+}));
+vi.mock('./FpsDisplay.svelte', () => ({ default: function FpsDisplay() {} }));
 
 const MOCK_CREDITS_START_Z = 10;
 const MOCK_CREDITS_END_Z = -10;
@@ -55,13 +63,14 @@ const MOCK_SCORE_DATA: ScoreData = {
 	is_new_high_score: false,
 	high_score_round: 0,
 	last_cleared_round: 0,
-	format_score: (v: number) => String(v)
+	format_score: String
 };
 
 const MOCK_MESSAGES = {
 	game_title: 'SIMON',
 	cyber_switch_label: 'CYBER',
 	fullscreen_switch_label: 'FULLSCREEN',
+	fps_switch_label: 'FPS',
 	score_label_high_score: 'HI',
 	score_label_round: 'RND',
 	score_label_current: 'SCORE'

@@ -34,6 +34,7 @@
 		game_title: messages.game_title,
 		cyber_switch_label: messages.cyber_switch_label,
 		fullscreen_switch_label: messages.fullscreen_switch_label,
+		fps_switch_label: messages.fps_switch_label,
 		score_label_high_score: messages.score_high_score,
 		score_label_round: messages.score_round,
 		score_label_current: messages.score_current

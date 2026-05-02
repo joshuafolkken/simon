@@ -429,17 +429,25 @@ describe('victory flash', () => {
 });
 
 describe('create_simon isolation', () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.clearAllTimers();
+		vi.useRealTimers();
+		vi.restoreAllMocks();
+	});
+
 	it('two instances do not share phase state', () => {
 		const score_a = create_score();
 		const score_b = create_score();
 		const a = create_simon(score_a);
 		const b = create_simon(score_b);
-		vi.useFakeTimers();
 		a.start();
 		expect(a.phase).toBe('showing');
 		expect(b.phase).toBe('idle');
 		a.reset();
-		vi.useRealTimers();
 	});
 
 	it('two instances do not share sequence state', () => {
@@ -447,11 +455,9 @@ describe('create_simon isolation', () => {
 		const score_b = create_score();
 		const a = create_simon(score_a);
 		const b = create_simon(score_b);
-		vi.useFakeTimers();
 		a.start();
 		expect(a.sequence).toHaveLength(1);
 		expect(b.sequence).toHaveLength(0);
 		a.reset();
-		vi.useRealTimers();
 	});
 });

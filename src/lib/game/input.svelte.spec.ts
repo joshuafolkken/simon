@@ -437,13 +437,15 @@ describe('create_input isolation', () => {
 		expect(b.yaw).toBe(0);
 	});
 
-	it('two instances do not share keys state', () => {
-		const cleanup_a = create_input().setup_listeners();
+	it('cleaning up one instance does not detach the other instance listeners', () => {
+		const a = create_input();
 		const b = create_input();
+		const cleanup_a = a.setup_listeners();
 		const cleanup_b = b.setup_listeners();
-		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'w' }));
-		expect(b.keys.w).toBe(true);
 		cleanup_a();
+		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'w' }));
+		expect(a.keys.w).toBe(false);
+		expect(b.keys.w).toBe(true);
 		cleanup_b();
 	});
 });

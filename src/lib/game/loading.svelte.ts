@@ -3,7 +3,7 @@ const OVERLAY_ELEMENT_ID = 'static-loading-overlay';
 const OVERLAY_HIDDEN_CLASS = 'is-hidden';
 const STATUS_SELECTOR = '.status';
 const PROGRESS_SELECTOR = '.progress';
-const PROGRESS_CSS_VARIABLE = '--progress';
+const PROGRESSBAR_SELECTOR = '.bar';
 const READY_PROGRESS = '100%';
 const INITIAL_PROGRESS = '0%';
 const OBSERVER_GLOBAL_KEY = '__loading_observer';
@@ -45,9 +45,10 @@ function update_status_text(text: string): void {
 function set_progress(value: string): void {
 	const overlay = get_overlay_element();
 	if (!overlay) return;
-	overlay.style.setProperty(PROGRESS_CSS_VARIABLE, value);
 	const progress = overlay.querySelector<HTMLElement>(PROGRESS_SELECTOR);
 	if (progress) progress.textContent = value;
+	const bar = overlay.querySelector<HTMLProgressElement>(PROGRESSBAR_SELECTOR);
+	if (bar) bar.value = parseInt(value, 10);
 }
 
 function disconnect_observer(): void {
@@ -114,7 +115,7 @@ export const loading = {
 	OVERLAY_HIDDEN_CLASS,
 	STATUS_SELECTOR,
 	PROGRESS_SELECTOR,
-	PROGRESS_CSS_VARIABLE,
+	PROGRESSBAR_SELECTOR,
 	OBSERVER_GLOBAL_KEY,
 	READY_PROGRESS,
 	INITIAL_PROGRESS

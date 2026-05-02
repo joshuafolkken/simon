@@ -5,7 +5,10 @@ import { messages } from '$lib/messages/en';
 const HALF_MIN_DISPLAY_MS = loading.MIN_DISPLAY_MS / 2;
 const ONE_MS_BEFORE_HIDE = loading.MIN_DISPLAY_MS - 1;
 const FIVE_SECONDS_MS = 5000;
-const SAMPLE_PROGRESS_VALUE = '47%';
+const SAMPLE_PROGRESS_TEXT = '47%';
+const SAMPLE_PROGRESS_VALUE = 47;
+const INITIAL_PROGRESS_VALUE = 0;
+const READY_PROGRESS_VALUE = 100;
 
 describe('OBSERVER_GLOBAL_KEY', () => {
 	it("equals '__loading_observer' to match the key used in app.html's inline script", () => {
@@ -17,6 +20,7 @@ describe('loading', () => {
 	let overlay_element: HTMLElement;
 	let status_element: HTMLSpanElement;
 	let progress_element: HTMLSpanElement;
+	let bar_element: HTMLProgressElement;
 	let observer_disconnect: ReturnType<typeof vi.fn>;
 
 	beforeEach(() => {
@@ -29,15 +33,19 @@ describe('loading', () => {
 		});
 		overlay_element = document.createElement('output');
 		overlay_element.id = loading.OVERLAY_ELEMENT_ID;
-		overlay_element.style.setProperty(loading.PROGRESS_CSS_VARIABLE, loading.INITIAL_PROGRESS);
 		status_element = document.createElement('span');
 		status_element.className = loading.STATUS_SELECTOR.replace('.', '');
 		status_element.textContent = messages.loading_downloading;
 		progress_element = document.createElement('span');
 		progress_element.className = loading.PROGRESS_SELECTOR.replace('.', '');
 		progress_element.textContent = loading.INITIAL_PROGRESS;
+		bar_element = document.createElement('progress');
+		bar_element.className = loading.PROGRESSBAR_SELECTOR.replace('.', '');
+		bar_element.value = INITIAL_PROGRESS_VALUE;
+		bar_element.max = READY_PROGRESS_VALUE;
 		overlay_element.appendChild(status_element);
 		overlay_element.appendChild(progress_element);
+		overlay_element.appendChild(bar_element);
 		document.body.appendChild(overlay_element);
 
 		loading.reset();
@@ -60,9 +68,7 @@ describe('loading', () => {
 		expect(loading.current_step).toBe('downloading');
 		expect(status_element.textContent).toBe(messages.loading_downloading);
 		expect(progress_element.textContent).toBe(loading.INITIAL_PROGRESS);
-		expect(overlay_element.style.getPropertyValue(loading.PROGRESS_CSS_VARIABLE)).toBe(
-			loading.INITIAL_PROGRESS
-		);
+		expect(bar_element.value).toBe(INITIAL_PROGRESS_VALUE);
 		expect(overlay_element.classList.contains(loading.OVERLAY_HIDDEN_CLASS)).toBe(false);
 	});
 
@@ -79,13 +85,11 @@ describe('loading', () => {
 	});
 
 	it('does not modify progress when set_step is called for non-ready steps', () => {
-		overlay_element.style.setProperty(loading.PROGRESS_CSS_VARIABLE, SAMPLE_PROGRESS_VALUE);
-		progress_element.textContent = SAMPLE_PROGRESS_VALUE;
+		bar_element.value = SAMPLE_PROGRESS_VALUE;
+		progress_element.textContent = SAMPLE_PROGRESS_TEXT;
 		loading.set_step('initializing');
-		expect(overlay_element.style.getPropertyValue(loading.PROGRESS_CSS_VARIABLE)).toBe(
-			SAMPLE_PROGRESS_VALUE
-		);
-		expect(progress_element.textContent).toBe(SAMPLE_PROGRESS_VALUE);
+		expect(bar_element.value).toBe(SAMPLE_PROGRESS_VALUE);
+		expect(progress_element.textContent).toBe(SAMPLE_PROGRESS_TEXT);
 	});
 
 	it('disconnects the active observer on reset', () => {
@@ -98,9 +102,7 @@ describe('loading', () => {
 		expect(loading.current_step).toBe('ready');
 		expect(status_element.textContent).toBe(messages.loading_ready);
 		expect(progress_element.textContent).toBe(loading.READY_PROGRESS);
-		expect(overlay_element.style.getPropertyValue(loading.PROGRESS_CSS_VARIABLE)).toBe(
-			loading.READY_PROGRESS
-		);
+		expect(bar_element.value).toBe(READY_PROGRESS_VALUE);
 		expect(observer_disconnect).toHaveBeenCalledTimes(1);
 	});
 
@@ -144,9 +146,7 @@ describe('loading', () => {
 		expect(loading.current_step).toBe('downloading');
 		expect(status_element.textContent).toBe(messages.loading_downloading);
 		expect(progress_element.textContent).toBe(loading.INITIAL_PROGRESS);
-		expect(overlay_element.style.getPropertyValue(loading.PROGRESS_CSS_VARIABLE)).toBe(
-			loading.INITIAL_PROGRESS
-		);
+		expect(bar_element.value).toBe(INITIAL_PROGRESS_VALUE);
 		expect(overlay_element.classList.contains(loading.OVERLAY_HIDDEN_CLASS)).toBe(false);
 
 		loading.mark_ready();

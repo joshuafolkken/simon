@@ -19,6 +19,8 @@
 		hint_font_size_rem?: number;
 		on_start?: () => void;
 		label_jump: string;
+		label_game: string;
+		label_game_started: string;
 	}
 
 	let {
@@ -28,7 +30,9 @@
 		hint_font_family,
 		hint_font_size_rem = 1,
 		on_start,
-		label_jump
+		label_jump,
+		label_game,
+		label_game_started
 	}: Props = $props();
 
 	let container: HTMLElement;
@@ -37,6 +41,7 @@
 	let drag_start_x = $derived(input.drag_start_x);
 	let drag_start_y = $derived(input.drag_start_y);
 	let is_pseudo_fullscreen = $derived(fullscreen.is_pseudo_fullscreen);
+	let game_status = $derived(is_started ? label_game_started : '');
 
 	function start_game(): void {
 		if (is_started) return;
@@ -44,6 +49,12 @@
 		if (container && device.is_touch_primary()) void fullscreen.request(container);
 		is_started = true;
 		on_start?.();
+	}
+
+	function on_key_down(event: KeyboardEvent): void {
+		if (event.key !== 'Enter' && event.key !== ' ') return;
+		event.preventDefault();
+		start_game();
 	}
 
 	function on_scene_loaded(): void {
@@ -63,14 +74,21 @@
 	});
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
 	class="game-container"
 	class:pseudo-fullscreen={is_pseudo_fullscreen}
 	class:is-dragging-look={is_dragging_look}
 	bind:this={container}
+	role="application"
+	tabindex="0"
+	aria-label={label_game}
 	onclick={start_game}
+	onkeydown={on_key_down}
 	data-testid="game-scene"
 >
+	<div role="status" class="sr-only">{game_status}</div>
 	{#if !is_started}
 		<div
 			class="click-hint"

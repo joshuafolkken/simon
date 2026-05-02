@@ -4,7 +4,7 @@ import { version } from '../package.json';
 const APP_VERSION_PLACEHOLDER = '__APP_VERSION__';
 const CSP_POLICY = [
 	"default-src 'self'",
-	"script-src 'self' 'unsafe-inline'",
+	"script-src 'self' 'unsafe-inline' blob:",
 	"style-src 'self' 'unsafe-inline'",
 	"img-src 'self' data: blob:",
 	"media-src 'self' blob:",

@@ -1,11 +1,12 @@
 <script lang="ts">
 	import SceneObjects from './SceneObjects.svelte';
-	import SimonBoard from './SimonBoard.svelte';
+	import SimonBoard from '$lib/simon/SimonBoard.svelte';
 	import { simon } from '$lib/simon/simon.svelte';
 	import { score } from '$lib/simon/score.svelte';
 	import { game_state } from '$lib/game/state.svelte';
 	import { messages } from '$lib/messages/en';
 	import type { SceneKitMessages } from '$lib/game/scene-kit-types';
+	import { BOARD_Z } from '$lib/simon/board-config';
 	import { CREDITS_TEXT, CREDITS_SCROLL_START_Z, CREDITS_SCROLL_END_Z } from '$lib/simon/credits';
 
 	let score_data = $derived({
@@ -25,6 +26,9 @@
 		flash_intensity: simon.flash_intensity
 	});
 
+	const SCORE_DISPLAY_Z_OFFSET = 0.15;
+	const SCORE_DISPLAY_Z = BOARD_Z + SCORE_DISPLAY_Z_OFFSET;
+
 	let is_alt = $derived(game_state.is_alt);
 	const kit_messages: SceneKitMessages = {
 		game_title: messages.game_title,
@@ -40,6 +44,7 @@
 	{score_data}
 	{is_alt}
 	messages={kit_messages}
+	score_display_z={SCORE_DISPLAY_Z}
 	game_phase={simon.phase}
 	credits_text={CREDITS_TEXT}
 	credits_start_z={CREDITS_SCROLL_START_Z}

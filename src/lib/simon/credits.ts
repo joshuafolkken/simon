@@ -144,6 +144,7 @@ const CREDITS_LINES = [
 	'fish',
 	'Ejirou',
 	'Satou',
+	'@pirategamesdev',
 	'',
 	'',
 	'',

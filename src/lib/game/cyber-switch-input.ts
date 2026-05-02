@@ -5,7 +5,7 @@ import { switch_audio } from '$lib/game/switch-audio';
 function on_click(): void {
 	if (!session.is_session_started) return;
 	switch_audio.play_switch_click();
-	game_state.toggle_cyber();
+	game_state.toggle_alt();
 }
 
 export const cyber_switch_input = { on_click };

@@ -24,7 +24,7 @@ function create_osc_graph(freq: number): OscGraph | null {
 	osc.connect(gain);
 	gain.connect(ctx.destination);
 	osc.frequency.setValueAtTime(freq, ctx.currentTime);
-	osc.type = game_state.is_cyber ? CYBER_WAVE : NORMAL_WAVE;
+	osc.type = game_state.is_alt ? CYBER_WAVE : NORMAL_WAVE;
 	gain.gain.setValueAtTime(GAIN_VALUE, ctx.currentTime);
 	return { osc, gain, ctx };
 }
@@ -52,7 +52,7 @@ function play_raw_tone(freq: number, duration_ms: number): void {
 	if (!nodes) return;
 	const { osc, gain, ctx } = nodes;
 	const duration_s = duration_ms / MS_PER_SECOND;
-	if (game_state.is_cyber) {
+	if (game_state.is_alt) {
 		gain.gain.exponentialRampToValueAtTime(GAIN_FLOOR, ctx.currentTime + duration_s);
 	}
 	osc.start(ctx.currentTime);
@@ -60,13 +60,13 @@ function play_raw_tone(freq: number, duration_ms: number): void {
 }
 
 function start_tone(color: ButtonColor): void {
-	const is_cyber = game_state.is_cyber;
-	start_tone_raw(is_cyber ? CYBER_FREQ[color] : FREQ[color]);
+	const is_alt = game_state.is_alt;
+	start_tone_raw(is_alt ? CYBER_FREQ[color] : FREQ[color]);
 }
 
 function play_tone(color: ButtonColor, duration_ms: number): void {
-	const is_cyber = game_state.is_cyber;
-	play_raw_tone(is_cyber ? CYBER_FREQ[color] : FREQ[color], duration_ms);
+	const is_alt = game_state.is_alt;
+	play_raw_tone(is_alt ? CYBER_FREQ[color] : FREQ[color], duration_ms);
 }
 
 function play_error_tone(duration_ms: number): void {

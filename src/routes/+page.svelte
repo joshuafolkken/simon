@@ -8,10 +8,10 @@
 
 	const CLICK_HINT_BASE_FONT_SIZE_REM = 1;
 
-	let is_cyber = $derived(game_state.is_cyber);
-	let hint_font_family = $derived(fonts.get_font_family(is_cyber));
+	let is_alt = $derived(game_state.is_alt);
+	let hint_font_family = $derived(fonts.get_font_family(is_alt));
 	let hint_font_size_rem = $derived(
-		CLICK_HINT_BASE_FONT_SIZE_REM * fonts.get_font_size_multiplier(is_cyber)
+		CLICK_HINT_BASE_FONT_SIZE_REM * fonts.get_font_size_multiplier(is_alt)
 	);
 </script>
 
@@ -22,7 +22,7 @@
 	on_start={session.start_session}
 >
 	{#snippet overlay()}
-		{#if is_cyber}
+		{#if is_alt}
 			<div class="cyber-glow" data-testid="cyber-glow" aria-hidden="true"></div>
 		{/if}
 	{/snippet}

@@ -5,11 +5,11 @@ import { game_state } from '$lib/game/state.svelte';
 
 describe('Home page', () => {
 	beforeEach(() => {
-		if (game_state.is_cyber) game_state.toggle_cyber();
+		if (game_state.is_alt) game_state.toggle_alt();
 	});
 
 	afterEach(() => {
-		if (game_state.is_cyber) game_state.toggle_cyber();
+		if (game_state.is_alt) game_state.toggle_alt();
 	});
 
 	it('does not render cyber-glow in normal mode', () => {
@@ -18,7 +18,7 @@ describe('Home page', () => {
 	});
 
 	it('renders cyber-glow overlay when cyber mode is active', () => {
-		game_state.toggle_cyber();
+		game_state.toggle_alt();
 		const { container } = render(Page);
 		expect(container.querySelector('[data-testid="cyber-glow"]')).toBeTruthy();
 	});

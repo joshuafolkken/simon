@@ -1,5 +1,3 @@
-import { messages } from '$lib/messages/en';
-
 const MIN_DISPLAY_MS = 3000;
 const OVERLAY_ELEMENT_ID = 'static-loading-overlay';
 const OVERLAY_HIDDEN_CLASS = 'is-hidden';
@@ -12,20 +10,25 @@ const OBSERVER_GLOBAL_KEY: unique symbol = Symbol('loading_observer');
 
 type LoadingStep = 'downloading' | 'initializing' | 'loading_assets' | 'ready';
 
-const STEP_MESSAGES: Record<LoadingStep, string> = {
-	downloading: messages.loading_downloading,
-	initializing: messages.loading_initializing,
-	loading_assets: messages.loading_loading_assets,
-	ready: messages.loading_ready
-};
+export type StepMessages = Record<LoadingStep, string>;
 
 interface LoadingObserver {
 	disconnect(): void;
 }
 
+let step_messages: StepMessages = {
+	downloading: '',
+	initializing: '',
+	loading_assets: '',
+	ready: ''
+};
 let is_visible = $state(true);
 let current_step = $state<LoadingStep>('downloading');
 let hide_timer_id: ReturnType<typeof setTimeout> | null = null;
+
+function configure(messages: StepMessages): void {
+	step_messages = messages;
+}
 
 function get_overlay_element(): HTMLElement | null {
 	if (typeof document === 'undefined') return null;
@@ -68,7 +71,7 @@ function show_overlay_element(): void {
 
 function set_step(step: LoadingStep): void {
 	current_step = step;
-	update_status_text(STEP_MESSAGES[step]);
+	update_status_text(step_messages[step]);
 }
 
 function mark_ready(): void {
@@ -102,6 +105,7 @@ export const loading = {
 	get current_step() {
 		return current_step;
 	},
+	configure,
 	set_step,
 	mark_ready,
 	reset,

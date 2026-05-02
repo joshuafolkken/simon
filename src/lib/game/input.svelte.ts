@@ -152,6 +152,16 @@ type ListenerSpec = {
 const PASSIVE_FALSE: AddEventListenerOptions = { passive: false };
 const CAPTURE: AddEventListenerOptions = { capture: true };
 
+function make_drag_override_specs(): ListenerSpec[] {
+	const handler = override_offset_during_drag;
+	return [
+		{ target: document, type: 'pointerdown', handler, options: CAPTURE },
+		{ target: document, type: 'pointerup', handler, options: CAPTURE },
+		{ target: document, type: 'pointermove', handler, options: CAPTURE },
+		{ target: document, type: 'click', handler, options: CAPTURE }
+	];
+}
+
 function get_listener_specs(): readonly ListenerSpec[] {
 	return [
 		{ target: document, type: 'mousedown', handler: on_mouse_down as EventListener },
@@ -172,20 +182,7 @@ function get_listener_specs(): readonly ListenerSpec[] {
 		{ target: document, type: 'wheel', handler: on_wheel as EventListener, options: PASSIVE_FALSE },
 		{ target: document, type: 'contextmenu', handler: on_context_menu as EventListener },
 		{ target: document, type: 'pointerlockchange', handler: on_pointer_lock_change },
-		{
-			target: document,
-			type: 'pointerdown',
-			handler: override_offset_during_drag,
-			options: CAPTURE
-		},
-		{ target: document, type: 'pointerup', handler: override_offset_during_drag, options: CAPTURE },
-		{
-			target: document,
-			type: 'pointermove',
-			handler: override_offset_during_drag,
-			options: CAPTURE
-		},
-		{ target: document, type: 'click', handler: override_offset_during_drag, options: CAPTURE },
+		...make_drag_override_specs(),
 		{ target: document, type: 'keydown', handler: handle_keydown as EventListener },
 		{ target: document, type: 'keyup', handler: handle_keyup as EventListener },
 		{ target: globalThis, type: 'blur', handler: reset_transient_input }

@@ -1,13 +1,8 @@
 import { simon_audio } from './audio';
-import { score } from './score.svelte';
+import { score as default_score, type ScoreInstance } from './score.svelte';
 import type { ButtonColor, SimonPhase } from './types';
 
-const COLORS: readonly [ButtonColor, ButtonColor, ButtonColor, ButtonColor] = [
-	'green',
-	'red',
-	'yellow',
-	'blue'
-];
+const COLORS: readonly ButtonColor[] = ['green', 'red', 'yellow', 'blue'];
 export const STEP_MS_1_5 = 500;
 export const STEP_MS_6_13 = 400;
 export const STEP_MS_14_20 = 250;
@@ -26,18 +21,22 @@ export const FLASH_FINALE_MS = 320;
 const FLASH_INTENSITY_BURST = 2.5;
 const FLASH_INTENSITY_FINALE = 4;
 
-let phase = $state<SimonPhase>('idle');
-let sequence = $state<ButtonColor[]>([]);
-let position = $state(0);
-let active_color = $state<ButtonColor | null>(null);
-let pressed_color = $state<ButtonColor | null>(null);
-let round = $state(0);
-let flash_colors = $state<ButtonColor[]>([]);
-let flash_intensity = $state(1);
-let show_gen = 0;
-let flash_gen = 0;
-let restart_timer: ReturnType<typeof setTimeout> | null = null;
-let input_start_ms = 0;
+type SimonState = {
+	phase: SimonPhase;
+	sequence: ButtonColor[];
+	position: number;
+	active_color: ButtonColor | null;
+	pressed_color: ButtonColor | null;
+	round: number;
+	flash_colors: ButtonColor[];
+	flash_intensity: number;
+};
+type SimonTimers = {
+	show_gen: number;
+	flash_gen: number;
+	restart_timer: ReturnType<typeof setTimeout> | null;
+	input_start_ms: number;
+};
 
 function delay(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -50,195 +49,216 @@ function get_step_ms(len: number): number {
 	return STEP_MS_21_PLUS;
 }
 
-function add_to_sequence(): void {
+const FALLBACK_COLOR: ButtonColor = 'green';
+
+function add_to_sequence(s: SimonState): void {
 	const index = Math.floor(Math.random() * COLORS.length);
-	sequence.push(COLORS[index] ?? COLORS[0]);
+	s.sequence.push(COLORS[index] ?? FALLBACK_COLOR);
 }
 
-async function run_show(gen: number): Promise<void> {
-	const step_ms = get_step_ms(sequence.length);
-	const on_ms = step_ms * ON_RATIO;
-	const off_ms = step_ms * OFF_RATIO;
-	for (const color of sequence) {
-		if (gen !== show_gen) return;
-		active_color = color;
-		simon_audio.play_tone(color, on_ms);
-		await delay(on_ms);
-		if (gen !== show_gen) return;
-		active_color = null;
-		await delay(off_ms);
-	}
-	if (gen !== show_gen) return;
-	input_start_ms = Date.now();
-	phase = 'player_input';
-	position = 0;
+function cancel_restart_timer(t: SimonTimers): void {
+	if (t.restart_timer !== null) clearTimeout(t.restart_timer);
+	t.restart_timer = null;
 }
 
-function cancel_restart_timer(): void {
-	if (restart_timer !== null) clearTimeout(restart_timer);
-	restart_timer = null;
-}
-
-function cancel_flash(): void {
-	flash_gen += 1;
-	flash_colors = [];
-	flash_intensity = 1;
+function cancel_flash(s: SimonState, t: SimonTimers): void {
+	t.flash_gen += 1;
+	s.flash_colors = [];
+	s.flash_intensity = 1;
 }
 
 function play_all_tones(duration_ms: number): void {
-	for (const color of COLORS) {
-		simon_audio.play_tone(color, duration_ms);
-	}
+	for (const color of COLORS) simon_audio.play_tone(color, duration_ms);
 }
 
-async function flash_burst(gen: number): Promise<void> {
+async function run_show(s: SimonState, t: SimonTimers, gen: number): Promise<void> {
+	const step_ms = get_step_ms(s.sequence.length);
+	const on_ms = step_ms * ON_RATIO;
+	const off_ms = step_ms * OFF_RATIO;
+	for (const color of s.sequence) {
+		if (gen !== t.show_gen) return;
+		s.active_color = color;
+		simon_audio.play_tone(color, on_ms);
+		await delay(on_ms);
+		if (gen !== t.show_gen) return;
+		s.active_color = null;
+		await delay(off_ms);
+	}
+	if (gen !== t.show_gen) return;
+	t.input_start_ms = Date.now();
+	s.phase = 'player_input';
+	s.position = 0;
+}
+
+async function flash_burst(s: SimonState, t: SimonTimers, gen: number): Promise<void> {
 	for (let i = 0; i < FLASH_BURST_CYCLES; i++) {
-		if (flash_gen !== gen) return;
-		flash_colors = [...COLORS];
-		flash_intensity = FLASH_INTENSITY_BURST;
+		if (t.flash_gen !== gen) return;
+		s.flash_colors = [...COLORS];
+		s.flash_intensity = FLASH_INTENSITY_BURST;
 		play_all_tones(FLASH_BURST_ON_MS);
 		await delay(FLASH_BURST_ON_MS);
-		if (flash_gen !== gen) return;
-		flash_colors = [];
-		flash_intensity = 1;
+		if (t.flash_gen !== gen) return;
+		s.flash_colors = [];
+		s.flash_intensity = 1;
 		await delay(FLASH_BURST_OFF_MS);
 	}
 }
 
-async function flash_cascade(gen: number): Promise<void> {
+async function flash_cascade(s: SimonState, t: SimonTimers, gen: number): Promise<void> {
 	for (const color of COLORS) {
-		if (flash_gen !== gen) return;
-		flash_colors = [color];
-		flash_intensity = FLASH_INTENSITY_BURST;
+		if (t.flash_gen !== gen) return;
+		s.flash_colors = [color];
+		s.flash_intensity = FLASH_INTENSITY_BURST;
 		simon_audio.play_tone(color, FLASH_CASCADE_FWD_MS);
 		await delay(FLASH_CASCADE_FWD_MS);
 	}
 	for (const color of [...COLORS].reverse()) {
-		if (flash_gen !== gen) return;
-		flash_colors = [color];
-		flash_intensity = FLASH_INTENSITY_BURST;
+		if (t.flash_gen !== gen) return;
+		s.flash_colors = [color];
+		s.flash_intensity = FLASH_INTENSITY_BURST;
 		simon_audio.play_tone(color, FLASH_CASCADE_REV_MS);
 		await delay(FLASH_CASCADE_REV_MS);
 	}
 }
 
-async function flash_finale(gen: number): Promise<void> {
-	if (flash_gen !== gen) return;
-	flash_colors = [...COLORS];
-	flash_intensity = FLASH_INTENSITY_FINALE;
+async function flash_finale(s: SimonState, t: SimonTimers, gen: number): Promise<void> {
+	if (t.flash_gen !== gen) return;
+	s.flash_colors = [...COLORS];
+	s.flash_intensity = FLASH_INTENSITY_FINALE;
 	play_all_tones(FLASH_FINALE_MS);
 	await delay(FLASH_FINALE_MS);
-	if (flash_gen !== gen) return;
-	flash_colors = [];
-	flash_intensity = 1;
+	if (t.flash_gen !== gen) return;
+	s.flash_colors = [];
+	s.flash_intensity = 1;
 }
 
-async function run_victory_flash(gen: number): Promise<void> {
-	await flash_burst(gen);
-	await flash_cascade(gen);
-	await flash_finale(gen);
+async function run_victory_flash(s: SimonState, t: SimonTimers, gen: number): Promise<void> {
+	await flash_burst(s, t, gen);
+	await flash_cascade(s, t, gen);
+	await flash_finale(s, t, gen);
 }
 
-function start_next_round(): void {
-	restart_timer = null;
-	cancel_flash();
-	round += 1;
-	add_to_sequence();
-	show_gen += 1;
-	void run_show(show_gen);
+function start_next_round(s: SimonState, t: SimonTimers): void {
+	t.restart_timer = null;
+	cancel_flash(s, t);
+	s.round += 1;
+	add_to_sequence(s);
+	t.show_gen += 1;
+	void run_show(s, t, t.show_gen);
 }
 
-function schedule_next_round(): void {
-	cancel_restart_timer();
-	cancel_flash();
-	phase = 'showing';
-	void run_victory_flash(flash_gen);
-	restart_timer = setTimeout(start_next_round, RESTART_DELAY_MS);
+function schedule_next_round(s: SimonState, t: SimonTimers): void {
+	cancel_restart_timer(t);
+	cancel_flash(s, t);
+	s.phase = 'showing';
+	void run_victory_flash(s, t, t.flash_gen);
+	t.restart_timer = setTimeout(() => start_next_round(s, t), RESTART_DELAY_MS);
 }
 
-function handle_correct_press(): void {
-	position += 1;
-	if (position < sequence.length) return;
-	score.add_round_score(Date.now() - input_start_ms, sequence.length, round);
-	phase = 'round_complete';
+function handle_correct_press(s: SimonState, t: SimonTimers, score: ScoreInstance): void {
+	s.position += 1;
+	if (s.position < s.sequence.length) return;
+	score.add_round_score(Date.now() - t.input_start_ms, s.sequence.length, s.round);
+	s.phase = 'round_complete';
 }
 
-function handle_wrong_press(): void {
-	simon_audio.play_error_tone(ERROR_BEEP_MS);
-	phase = 'gameover';
-}
-
-function start(): void {
-	if (phase === 'showing') return;
-	if (phase === 'player_input') return;
-	cancel_restart_timer();
+function start_simon(s: SimonState, t: SimonTimers, score: ScoreInstance): void {
+	if (s.phase === 'showing' || s.phase === 'player_input') return;
+	cancel_restart_timer(t);
 	score.reset();
-	phase = 'showing';
-	round = 1;
-	sequence = [];
-	add_to_sequence();
-	show_gen += 1;
-	void run_show(show_gen);
+	s.phase = 'showing';
+	s.round = 1;
+	s.sequence = [];
+	add_to_sequence(s);
+	t.show_gen += 1;
+	void run_show(s, t, t.show_gen);
 }
 
-function release(): void {
+function release_simon(s: SimonState, t: SimonTimers): void {
 	simon_audio.stop_tone();
-	pressed_color = null;
-	if (phase === 'round_complete') schedule_next_round();
+	s.pressed_color = null;
+	if (s.phase === 'round_complete') schedule_next_round(s, t);
 }
 
-function press(color: ButtonColor): void {
-	if (phase !== 'player_input') return;
-	pressed_color = color;
+function press_simon(
+	s: SimonState,
+	t: SimonTimers,
+	score: ScoreInstance,
+	color: ButtonColor
+): void {
+	if (s.phase !== 'player_input') return;
+	s.pressed_color = color;
 	simon_audio.start_tone(color);
-	if (color === sequence[position]) {
-		handle_correct_press();
+	if (color === s.sequence[s.position]) {
+		handle_correct_press(s, t, score);
 	} else {
-		handle_wrong_press();
+		simon_audio.play_error_tone(ERROR_BEEP_MS);
+		s.phase = 'gameover';
 	}
 }
 
-function reset(): void {
-	show_gen += 1;
-	release();
-	cancel_restart_timer();
-	cancel_flash();
+function reset_simon(s: SimonState, t: SimonTimers, score: ScoreInstance): void {
+	t.show_gen += 1;
+	release_simon(s, t);
+	cancel_restart_timer(t);
+	cancel_flash(s, t);
 	score.reset();
-	phase = 'idle';
-	sequence = [];
-	position = 0;
-	active_color = null;
-	input_start_ms = 0;
-	round = 0;
+	s.phase = 'idle';
+	s.sequence = [];
+	s.position = 0;
+	s.active_color = null;
+	t.input_start_ms = 0;
+	s.round = 0;
 }
 
-export const simon = {
-	get phase() {
-		return phase;
-	},
-	get sequence() {
-		return sequence;
-	},
-	get position() {
-		return position;
-	},
-	get active_color() {
-		return active_color;
-	},
-	get pressed_color() {
-		return pressed_color;
-	},
-	get round() {
-		return round;
-	},
-	get flash_colors() {
-		return flash_colors;
-	},
-	get flash_intensity() {
-		return flash_intensity;
-	},
-	start,
-	press,
-	release,
-	reset
-};
+function make_simon_api(s: SimonState, t: SimonTimers, score: ScoreInstance) {
+	return {
+		get phase() {
+			return s.phase;
+		},
+		get sequence() {
+			return s.sequence;
+		},
+		get position() {
+			return s.position;
+		},
+		get active_color() {
+			return s.active_color;
+		},
+		get pressed_color() {
+			return s.pressed_color;
+		},
+		get round() {
+			return s.round;
+		},
+		get flash_colors() {
+			return s.flash_colors;
+		},
+		get flash_intensity() {
+			return s.flash_intensity;
+		},
+		start: (): void => start_simon(s, t, score),
+		press: (color: ButtonColor): void => press_simon(s, t, score, color),
+		release: (): void => release_simon(s, t),
+		reset: (): void => reset_simon(s, t, score)
+	};
+}
+
+export function create_simon(score: ScoreInstance) {
+	const s = $state<SimonState>({
+		phase: 'idle',
+		sequence: [],
+		position: 0,
+		active_color: null,
+		pressed_color: null,
+		round: 0,
+		flash_colors: [],
+		flash_intensity: 1
+	});
+	const t: SimonTimers = { show_gen: 0, flash_gen: 0, restart_timer: null, input_start_ms: 0 };
+	return make_simon_api(s, t, score);
+}
+
+export type SimonInstance = ReturnType<typeof create_simon>;
+
+export const simon = create_simon(default_score);

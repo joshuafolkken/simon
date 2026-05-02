@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { loading } from '$lib/game/loading.svelte';
+import { loading, create_loading } from '$lib/game/loading.svelte';
 import { messages } from '$lib/messages/en';
 
 const HALF_MIN_DISPLAY_MS = loading.MIN_DISPLAY_MS / 2;
@@ -154,5 +154,28 @@ describe('loading', () => {
 		vi.advanceTimersByTime(FIVE_SECONDS_MS);
 		expect(loading.is_visible).toBe(true);
 		expect(overlay_element.classList.contains(loading.OVERLAY_HIDDEN_CLASS)).toBe(false);
+	});
+});
+
+describe('create_loading isolation', () => {
+	it('two instances do not share is_visible state', () => {
+		vi.useFakeTimers();
+		const a = create_loading();
+		const b = create_loading();
+		a.mark_ready();
+		vi.advanceTimersByTime(loading.MIN_DISPLAY_MS);
+		expect(a.is_visible).toBe(false);
+		expect(b.is_visible).toBe(true);
+		vi.useRealTimers();
+	});
+
+	it('two instances do not share current_step state', () => {
+		const a = create_loading();
+		const b = create_loading();
+		a.configure({ downloading: 'd', initializing: 'i', loading_assets: 'l', ready: 'r' });
+		b.configure({ downloading: 'd', initializing: 'i', loading_assets: 'l', ready: 'r' });
+		a.set_step('initializing');
+		expect(a.current_step).toBe('initializing');
+		expect(b.current_step).toBe('downloading');
 	});
 });

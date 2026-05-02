@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { fullscreen } from '$lib/game/fullscreen.svelte';
+import { fullscreen, create_fullscreen } from '$lib/game/fullscreen.svelte';
 
 describe('fullscreen', () => {
 	let cleanup: () => void;
@@ -99,5 +99,18 @@ describe('fullscreen', () => {
 		await fullscreen.request(el);
 		expect(webkit_spy).toHaveBeenCalledTimes(1);
 		expect(fullscreen.is_pseudo_fullscreen).toBe(false);
+	});
+});
+
+describe('create_fullscreen isolation', () => {
+	it('two instances do not share is_pseudo_fullscreen state', async () => {
+		const a = create_fullscreen();
+		const b = create_fullscreen();
+		const el = document.createElement('div');
+		Object.defineProperty(el, 'requestFullscreen', { value: undefined, configurable: true });
+		Object.defineProperty(el, 'webkitRequestFullscreen', { value: undefined, configurable: true });
+		await a.request(el);
+		expect(a.is_pseudo_fullscreen).toBe(true);
+		expect(b.is_pseudo_fullscreen).toBe(false);
 	});
 });

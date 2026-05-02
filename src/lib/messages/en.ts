@@ -15,5 +15,7 @@ export const messages = {
 	loading_ready: 'READY',
 	score_high_score: 'HI',
 	score_current: 'SCORE',
-	score_round: 'RND'
+	score_round: 'RND',
+	game_application_label: 'Simon game',
+	game_started_announcement: 'Game started'
 } as const;

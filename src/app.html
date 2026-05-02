@@ -78,20 +78,24 @@
 			#static-loading-overlay .bar {
 				width: 240px;
 				height: 4px;
+				border: none;
+				border-radius: 2px;
+				display: block;
+				appearance: none;
+				background: rgba(255, 255, 255, 0.1);
+			}
+			#static-loading-overlay .bar::-webkit-progress-bar {
 				background: rgba(255, 255, 255, 0.1);
 				border-radius: 2px;
-				overflow: hidden;
-				position: relative;
 			}
-			#static-loading-overlay .bar-fill {
-				position: absolute;
-				left: 0;
-				top: 0;
-				height: 100%;
-				width: var(--progress, 0%);
+			#static-loading-overlay .bar::-webkit-progress-value {
 				background: rgba(255, 255, 255, 0.6);
 				border-radius: 2px;
 				transition: width 0.4s ease-out;
+			}
+			#static-loading-overlay .bar::-moz-progress-bar {
+				background: rgba(255, 255, 255, 0.6);
+				border-radius: 2px;
 			}
 		</style>
 		%sveltekit.head%
@@ -102,12 +106,7 @@
 			The literal below MUST stay in sync with messages.loading_downloading in src/lib/messages/en.ts.
 			The inline SVG MUST stay in sync with src/lib/components/Logo.svelte.
 		-->
-		<output
-			id="static-loading-overlay"
-			data-testid="loading-overlay"
-			aria-live="polite"
-			style="--progress: 0%"
-		>
+		<output id="static-loading-overlay" data-testid="loading-overlay" aria-live="polite">
 			<svg
 				class="logo"
 				xmlns="http://www.w3.org/2000/svg"
@@ -142,17 +141,21 @@
 				<p class="game-version">v__APP_VERSION__</p>
 			</div>
 			<p class="label">
-				<span class="status">DOWNLOADING...</span>
+				<span id="loading-status" class="status">DOWNLOADING...</span>
 				<span class="progress">0%</span>
 			</p>
-			<div class="bar" aria-hidden="true">
-				<div class="bar-fill"></div>
-			</div>
+			<progress
+				class="bar"
+				value="0"
+				max="100"
+				tabindex="-1"
+				aria-labelledby="loading-status"
+			></progress>
 		</output>
 		<script>
 			/*
 				Pseudo download-progress tracker. Watches resource entries via PerformanceObserver,
-				accumulates bytes and file count, and updates the overlay's --progress CSS variable
+				accumulates bytes and file count, and updates the <progress> bar value
 				and .progress text. The Svelte loading module disconnects this observer on mark_ready
 				and snaps the value to 100% — see src/lib/game/loading.svelte.ts.
 			*/
@@ -184,9 +187,10 @@
 					if (!overlay) return;
 					var pct = compute_pct();
 					var value = pct + '%';
-					overlay.style.setProperty('--progress', value);
 					var progress_el = overlay.querySelector('.progress');
 					if (progress_el) progress_el.textContent = value;
+					var bar_el = overlay.querySelector('.bar');
+					if (bar_el) bar_el.value = pct;
 				}
 
 				if (globalThis.performance && performance.getEntriesByType) {

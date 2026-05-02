@@ -8,6 +8,7 @@ const { version } = JSON.parse(
 const LOADING_OVERLAY_TIMEOUT_MS = 8000;
 const FULLSCREEN_NOT_CALLED_WAIT_MS = 200;
 const TOUCH_PRIMARY_QUERY = '(hover: none) and (pointer: coarse)';
+const READY_PROGRESS_VALUE = 100;
 
 async function stub_touch_primary(page: Page, is_touch: boolean): Promise<void> {
 	await page.addInitScript(
@@ -198,4 +199,47 @@ test('pseudo-fullscreen class is applied when native API is unavailable on touch
 	});
 
 	await expect(page.locator('[data-testid="game-scene"]')).toHaveClass(/pseudo-fullscreen/);
+});
+
+test('game scene has role="application" for screen reader keyboard pass-through', async ({
+	page
+}) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="game-scene"]')).toHaveAttribute('role', 'application');
+});
+
+test('game scene can be started with Enter key after focusing via Tab', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="game-scene"]')).toBeVisible();
+	await page.keyboard.press('Tab');
+	await page.keyboard.press('Enter');
+	await expect(page.locator('.click-hint')).toHaveCount(0);
+});
+
+test('game scene can be started with Space key after focusing via Tab', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="game-scene"]')).toBeVisible();
+	await page.keyboard.press('Tab');
+	await page.keyboard.press('Space');
+	await expect(page.locator('.click-hint')).toHaveCount(0);
+});
+
+test('loading overlay uses native progress element for accessible progress', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="loading-overlay"] progress.bar')).toBeVisible();
+	await expect(page.locator('[data-testid="loading-overlay"] progress.bar')).toHaveAttribute(
+		'max',
+		'100'
+	);
+});
+
+test('loading overlay progress element reaches 100 when the scene is ready', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.locator('[data-testid="loading-overlay"] progress.bar')).toHaveJSProperty(
+		'value',
+		READY_PROGRESS_VALUE,
+		{
+			timeout: LOADING_OVERLAY_TIMEOUT_MS
+		}
+	);
 });

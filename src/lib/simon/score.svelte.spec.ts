@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { score } from '$lib/simon/score.svelte';
+import { score, create_score } from '$lib/simon/score.svelte';
 
 const ROUND_1 = 1;
 const ROUND_5 = 5;
@@ -246,5 +246,15 @@ describe('score', () => {
 			score.add_round_score(ELAPSED_100S, SEQ_1, ROUND_1);
 			expect(score.high_score_round).toBe(saved_round);
 		});
+	});
+});
+
+describe('create_score isolation', () => {
+	it('two instances do not share current_score state', () => {
+		const a = create_score();
+		const b = create_score();
+		a.add_round_score(ELAPSED_0, SEQ_1, ROUND_1);
+		expect(a.current_score).toBeGreaterThan(0);
+		expect(b.current_score).toBe(0);
 	});
 });

@@ -1,6 +1,7 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
 	simon,
+	create_simon,
 	STEP_MS_1_5,
 	ON_RATIO,
 	OFF_RATIO,
@@ -13,7 +14,7 @@ import {
 	FLASH_CASCADE_REV_MS,
 	FLASH_FINALE_MS
 } from '$lib/simon/simon.svelte';
-import { score } from '$lib/simon/score.svelte';
+import { score, create_score } from '$lib/simon/score.svelte';
 import { simon_audio } from '$lib/simon/audio';
 import type { ButtonColor } from '$lib/simon/types';
 
@@ -424,5 +425,33 @@ describe('victory flash', () => {
 		await vi.advanceTimersByTimeAsync(RESTART_DELAY_MS);
 		expect(simon.flash_colors).toHaveLength(0);
 		expect(simon.flash_intensity).toBe(1);
+	});
+});
+
+describe('create_simon isolation', () => {
+	it('two instances do not share phase state', () => {
+		const score_a = create_score();
+		const score_b = create_score();
+		const a = create_simon(score_a);
+		const b = create_simon(score_b);
+		vi.useFakeTimers();
+		a.start();
+		expect(a.phase).toBe('showing');
+		expect(b.phase).toBe('idle');
+		a.reset();
+		vi.useRealTimers();
+	});
+
+	it('two instances do not share sequence state', () => {
+		const score_a = create_score();
+		const score_b = create_score();
+		const a = create_simon(score_a);
+		const b = create_simon(score_b);
+		vi.useFakeTimers();
+		a.start();
+		expect(a.sequence).toHaveLength(1);
+		expect(b.sequence).toHaveLength(0);
+		a.reset();
+		vi.useRealTimers();
 	});
 });

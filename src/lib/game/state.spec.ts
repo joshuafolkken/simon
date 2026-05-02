@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { game_state } from './state.svelte';
+import { game_state, create_game_state } from './state.svelte';
 
 describe('game_state', () => {
 	beforeEach(() => {
@@ -25,5 +25,15 @@ describe('game_state', () => {
 		game_state.toggle_alt();
 		game_state.return_to_title();
 		expect(game_state.is_alt).toBe(true);
+	});
+});
+
+describe('create_game_state isolation', () => {
+	it('two instances do not share is_alt state', () => {
+		const a = create_game_state();
+		const b = create_game_state();
+		a.toggle_alt();
+		expect(a.is_alt).toBe(false);
+		expect(b.is_alt).toBe(true);
 	});
 });

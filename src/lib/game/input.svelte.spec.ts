@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { input } from '$lib/game/input.svelte';
+import { input, create_input } from '$lib/game/input.svelte';
 
 const RIGHT_BUTTON = 2;
 const LEFT_BUTTON = 0;
@@ -425,5 +425,25 @@ describe('input', () => {
 		globalThis.dispatchEvent(new Event('blur'));
 		expect(input.is_sprinting).toBe(false);
 		expect(input.is_jump_requested).toBe(false);
+	});
+});
+
+describe('create_input isolation', () => {
+	it('two instances do not share yaw state', () => {
+		const a = create_input();
+		const b = create_input();
+		a.apply_look_delta(-0.5, 0);
+		expect(a.yaw).toBe(0.5);
+		expect(b.yaw).toBe(0);
+	});
+
+	it('two instances do not share keys state', () => {
+		const cleanup_a = create_input().setup_listeners();
+		const b = create_input();
+		const cleanup_b = b.setup_listeners();
+		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'w' }));
+		expect(b.keys.w).toBe(true);
+		cleanup_a();
+		cleanup_b();
 	});
 });

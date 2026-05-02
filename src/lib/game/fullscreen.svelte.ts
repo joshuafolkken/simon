@@ -8,17 +8,11 @@ declare global {
 	}
 }
 
-let is_pseudo_fullscreen = $state(false);
-let is_native_fullscreen = $state(false);
-let active_cleanup: (() => void) | null = null;
+type FullscreenState = { is_pseudo_fullscreen: boolean; is_native_fullscreen: boolean };
+type FullscreenRefs = { active_cleanup: (() => void) | null };
 
 function get_native_fullscreen_element(): Element | null {
 	return document.fullscreenElement ?? document.webkitFullscreenElement ?? null;
-}
-
-function on_fullscreen_change(): void {
-	is_native_fullscreen = get_native_fullscreen_element() !== null;
-	if (is_native_fullscreen) is_pseudo_fullscreen = false;
 }
 
 async function call_native_request(el: HTMLElement): Promise<boolean> {
@@ -32,12 +26,6 @@ async function call_native_request(el: HTMLElement): Promise<boolean> {
 	}
 }
 
-async function request(el: HTMLElement): Promise<void> {
-	if (is_native_fullscreen || is_pseudo_fullscreen) return;
-	const did_succeed = await call_native_request(el);
-	if (!did_succeed) is_pseudo_fullscreen = true;
-}
-
 async function call_native_exit(): Promise<void> {
 	const fn = document.exitFullscreen ?? document.webkitExitFullscreen;
 	if (typeof fn !== 'function') return;
@@ -48,40 +36,61 @@ async function call_native_exit(): Promise<void> {
 	}
 }
 
-async function exit(): Promise<void> {
-	if (is_pseudo_fullscreen) {
-		is_pseudo_fullscreen = false;
+function update_native_flag(s: FullscreenState): void {
+	s.is_native_fullscreen = get_native_fullscreen_element() !== null;
+	if (s.is_native_fullscreen) s.is_pseudo_fullscreen = false;
+}
+
+async function request_fullscreen(s: FullscreenState, el: HTMLElement): Promise<void> {
+	if (s.is_native_fullscreen || s.is_pseudo_fullscreen) return;
+	const did_succeed = await call_native_request(el);
+	if (!did_succeed) s.is_pseudo_fullscreen = true;
+}
+
+async function exit_fullscreen(s: FullscreenState): Promise<void> {
+	if (s.is_pseudo_fullscreen) {
+		s.is_pseudo_fullscreen = false;
 		return;
 	}
-	if (is_native_fullscreen) await call_native_exit();
+	if (s.is_native_fullscreen) await call_native_exit();
 }
 
-function setup_listeners(): () => void {
-	if (active_cleanup) return active_cleanup;
-	on_fullscreen_change();
-	document.addEventListener('fullscreenchange', on_fullscreen_change);
-	document.addEventListener('webkitfullscreenchange', on_fullscreen_change);
-	active_cleanup = function cleanup(): void {
-		document.removeEventListener('fullscreenchange', on_fullscreen_change);
-		document.removeEventListener('webkitfullscreenchange', on_fullscreen_change);
-		active_cleanup = null;
-		is_native_fullscreen = false;
-		is_pseudo_fullscreen = false;
+function setup_fullscreen_listeners(s: FullscreenState, refs: FullscreenRefs): () => void {
+	if (refs.active_cleanup) return refs.active_cleanup;
+	const handler = (): void => update_native_flag(s);
+	update_native_flag(s);
+	document.addEventListener('fullscreenchange', handler);
+	document.addEventListener('webkitfullscreenchange', handler);
+	const cleanup = function cleanup(): void {
+		document.removeEventListener('fullscreenchange', handler);
+		document.removeEventListener('webkitfullscreenchange', handler);
+		refs.active_cleanup = null;
+		s.is_native_fullscreen = false;
+		s.is_pseudo_fullscreen = false;
 	};
-	return active_cleanup;
+	refs.active_cleanup = cleanup;
+	return cleanup;
 }
 
-export const fullscreen = {
-	get is_pseudo_fullscreen() {
-		return is_pseudo_fullscreen;
-	},
-	get is_native_fullscreen() {
-		return is_native_fullscreen;
-	},
-	get is_active() {
-		return is_native_fullscreen || is_pseudo_fullscreen;
-	},
-	request,
-	exit,
-	setup_listeners
-};
+export function create_fullscreen() {
+	const s = $state<FullscreenState>({ is_pseudo_fullscreen: false, is_native_fullscreen: false });
+	const refs: FullscreenRefs = { active_cleanup: null };
+	return {
+		get is_pseudo_fullscreen() {
+			return s.is_pseudo_fullscreen;
+		},
+		get is_native_fullscreen() {
+			return s.is_native_fullscreen;
+		},
+		get is_active() {
+			return s.is_native_fullscreen || s.is_pseudo_fullscreen;
+		},
+		request: (el: HTMLElement): Promise<void> => request_fullscreen(s, el),
+		exit: (): Promise<void> => exit_fullscreen(s),
+		setup_listeners: (): (() => void) => setup_fullscreen_listeners(s, refs)
+	};
+}
+
+export type FullscreenInstance = ReturnType<typeof create_fullscreen>;
+
+export const fullscreen = create_fullscreen();

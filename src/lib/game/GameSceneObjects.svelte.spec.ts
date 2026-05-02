@@ -3,7 +3,8 @@ import { render } from 'vitest-browser-svelte';
 import GameSceneObjects from './GameSceneObjects.svelte';
 
 vi.mock('./SceneObjects.svelte', () => ({ default: function SceneObjects() {} }));
-vi.mock('./SimonBoard.svelte', () => ({ default: function SimonBoard() {} }));
+vi.mock('$lib/simon/SimonBoard.svelte', () => ({ default: function SimonBoard() {} }));
+vi.mock('$lib/simon/board-config', () => ({ BOARD_Z: -4.8 }));
 vi.mock('$lib/game/state.svelte', () => ({ game_state: { is_alt: false } }));
 vi.mock('$lib/messages/en', () => ({
 	messages: {

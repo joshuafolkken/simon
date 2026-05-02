@@ -1,6 +1,6 @@
 import { session } from '$lib/game/session.svelte';
 import { pointer_button } from '$lib/game/pointer-button';
-import type { ButtonColor } from '$lib/game/board-types';
+import type { ButtonColor } from './board-types';
 
 type BoardCallbacks = {
 	on_press: (color: ButtonColor) => void;

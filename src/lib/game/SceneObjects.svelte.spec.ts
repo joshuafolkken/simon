@@ -36,7 +36,6 @@ vi.mock('$lib/game/fonts', () => ({
 	}
 }));
 vi.mock('$lib/game/room-config', () => ({ ROOM_W: 10, ROOM_D: 10, ROOM_H: 5 }));
-vi.mock('$lib/game/board-config', () => ({ BOARD_Z: -3 }));
 vi.mock('$lib/game/switch-colors', () => ({
 	CYBER_SWITCH_COLORS: {},
 	FULLSCREEN_SWITCH_COLORS: {}
@@ -68,6 +67,8 @@ const MOCK_MESSAGES = {
 	score_label_current: 'SCORE'
 };
 
+const MOCK_SCORE_DISPLAY_Z = -4.65;
+
 function make_props(game_board: ReturnType<typeof createRawSnippet>) {
 	return {
 		game_board,
@@ -77,7 +78,8 @@ function make_props(game_board: ReturnType<typeof createRawSnippet>) {
 		credits_start_z: MOCK_CREDITS_START_Z,
 		credits_end_z: MOCK_CREDITS_END_Z,
 		is_alt: false,
-		messages: MOCK_MESSAGES
+		messages: MOCK_MESSAGES,
+		score_display_z: MOCK_SCORE_DISPLAY_Z
 	};
 }
 

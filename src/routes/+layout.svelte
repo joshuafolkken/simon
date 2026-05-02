@@ -4,7 +4,7 @@
 	import click_url from '$lib/assets/sound/dragon-studio-distorted-electronic-click-472367.opus';
 	import { loading } from '$lib/game/loading.svelte';
 	import { switch_audio } from '$lib/game/switch-audio';
-	import { simon_board_input } from '$lib/game/simon-board-input';
+	import { simon_board_input } from '$lib/simon/simon-board-input';
 	import { cyber_switch_input } from '$lib/game/cyber-switch-input';
 	import { simon } from '$lib/simon/simon.svelte';
 	import { game_state } from '$lib/game/state.svelte';

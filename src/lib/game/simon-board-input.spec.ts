@@ -1,66 +1,70 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { simon_board_input } from './simon-board-input';
 import { session } from './session.svelte';
-import { simon } from '$lib/simon/simon.svelte';
+import type { ButtonColor } from '$lib/simon/types';
 
 const LEFT_BUTTON = 0;
 const RIGHT_BUTTON = 2;
 
 describe('simon_board_input', () => {
+	let press_mock: ReturnType<typeof vi.fn<(color: ButtonColor) => void>>;
+	let release_mock: ReturnType<typeof vi.fn<() => void>>;
+	let start_mock: ReturnType<typeof vi.fn<() => void>>;
+
 	beforeEach(() => {
 		session.reset_session();
-		vi.restoreAllMocks();
+		press_mock = vi.fn<(color: ButtonColor) => void>();
+		release_mock = vi.fn<() => void>();
+		start_mock = vi.fn<() => void>();
+		simon_board_input.configure({
+			on_press: press_mock,
+			on_release: release_mock,
+			on_start: start_mock
+		});
 	});
 
 	describe('on_button_pointer_down', () => {
-		it('does not call simon.press when session is not started', () => {
-			const spy = vi.spyOn(simon, 'press').mockImplementation(() => {});
+		it('does not call on_press when session is not started', () => {
 			simon_board_input.on_button_pointer_down({ nativeEvent: { button: LEFT_BUTTON } }, 'green');
-			expect(spy).not.toHaveBeenCalled();
+			expect(press_mock).not.toHaveBeenCalled();
 		});
 
-		it('calls simon.press once session has started', () => {
+		it('calls on_press once session has started', () => {
 			session.start_session();
-			const spy = vi.spyOn(simon, 'press').mockImplementation(() => {});
 			simon_board_input.on_button_pointer_down({ nativeEvent: { button: LEFT_BUTTON } }, 'red');
-			expect(spy).toHaveBeenCalledWith('red');
+			expect(press_mock).toHaveBeenCalledWith('red');
 		});
 
-		it('does not call simon.press for non-left click even after session started', () => {
+		it('does not call on_press for non-left click even after session started', () => {
 			session.start_session();
-			const spy = vi.spyOn(simon, 'press').mockImplementation(() => {});
 			simon_board_input.on_button_pointer_down({ nativeEvent: { button: RIGHT_BUTTON } }, 'blue');
-			expect(spy).not.toHaveBeenCalled();
+			expect(press_mock).not.toHaveBeenCalled();
 		});
 	});
 
 	describe('on_button_release', () => {
-		it('does not call simon.release when session is not started', () => {
-			const spy = vi.spyOn(simon, 'release').mockImplementation(() => {});
+		it('does not call on_release when session is not started', () => {
 			simon_board_input.on_button_release();
-			expect(spy).not.toHaveBeenCalled();
+			expect(release_mock).not.toHaveBeenCalled();
 		});
 
-		it('calls simon.release once session has started', () => {
+		it('calls on_release once session has started', () => {
 			session.start_session();
-			const spy = vi.spyOn(simon, 'release').mockImplementation(() => {});
 			simon_board_input.on_button_release();
-			expect(spy).toHaveBeenCalledTimes(1);
+			expect(release_mock).toHaveBeenCalledTimes(1);
 		});
 	});
 
 	describe('on_center_click', () => {
-		it('does not call simon.start when session is not started', () => {
-			const spy = vi.spyOn(simon, 'start').mockImplementation(() => {});
+		it('does not call on_start when session is not started', () => {
 			simon_board_input.on_center_click();
-			expect(spy).not.toHaveBeenCalled();
+			expect(start_mock).not.toHaveBeenCalled();
 		});
 
-		it('calls simon.start once session has started', () => {
+		it('calls on_start once session has started', () => {
 			session.start_session();
-			const spy = vi.spyOn(simon, 'start').mockImplementation(() => {});
 			simon_board_input.on_center_click();
-			expect(spy).toHaveBeenCalledTimes(1);
+			expect(start_mock).toHaveBeenCalledTimes(1);
 		});
 	});
 });

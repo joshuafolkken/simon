@@ -6,7 +6,7 @@ const PROGRESS_SELECTOR = '.progress';
 const PROGRESS_CSS_VARIABLE = '--progress';
 const READY_PROGRESS = '100%';
 const INITIAL_PROGRESS = '0%';
-const OBSERVER_GLOBAL_KEY: unique symbol = Symbol('loading_observer');
+const OBSERVER_GLOBAL_KEY = '__loading_observer';
 
 type LoadingStep = 'downloading' | 'initializing' | 'loading_assets' | 'ready';
 
@@ -51,7 +51,7 @@ function set_progress(value: string): void {
 }
 
 function disconnect_observer(): void {
-	const scope = globalThis as Record<symbol, unknown>;
+	const scope = globalThis as Record<string, unknown>;
 	const observer = scope[OBSERVER_GLOBAL_KEY] as LoadingObserver | undefined;
 	if (observer && typeof observer.disconnect === 'function') {
 		observer.disconnect();

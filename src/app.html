@@ -204,6 +204,7 @@
 						update_overlay();
 					});
 					observer.observe({ type: 'resource' });
+					// Key must match OBSERVER_GLOBAL_KEY in src/lib/game/loading.svelte.ts
 					globalThis.__loading_observer = observer;
 				} catch (error) {
 					console.warn('Loading progress observer unavailable:', error);

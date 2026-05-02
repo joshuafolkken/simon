@@ -3,6 +3,7 @@ export const messages = {
 	press_start: 'PRESS START',
 	cyber_switch_label: 'CYBER',
 	fullscreen_switch_label: 'FULLSCREEN',
+	fps_switch_label: 'FPS',
 	click_to_play: 'CLICK TO PLAY',
 	simon_start: 'START',
 	simon_round: 'ROUND',

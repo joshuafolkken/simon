@@ -3,7 +3,7 @@
 	import { Text } from '@threlte/extras';
 	import { fonts } from '$lib/game/fonts';
 	import { simon_board_input } from './simon-board-input';
-	import { BOARD_Y, BOARD_Z } from './board-config';
+	import { BOARD_Y, BOARD_Z, BOARD_LABEL_Z } from './board-config';
 	import type { ButtonColor, SimonBoardData } from './types';
 
 	const INNER_RADIUS = 0.3;
@@ -16,7 +16,6 @@
 	const THETA_LENGTH = Math.PI / 2 - BUTTON_GAP * 2;
 	const BACKING_RADIUS = 0.85;
 	const CENTER_RADIUS = 0.22;
-	const LABEL_Z = 0.02;
 	const BACKING_Z = -0.01;
 	const FONT_SIZE = 0.08;
 	const EMISSIVE_INTENSITY = 0.8;
@@ -140,7 +139,7 @@
 		<T.MeshStandardMaterial color="#222222" roughness={0.5} />
 	</T.Mesh>
 
-	<T.Group position={[0, 0, LABEL_Z]}>
+	<T.Group position={[0, 0, BOARD_LABEL_Z]}>
 		<Text
 			text={center_text}
 			font={current_font}

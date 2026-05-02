@@ -6,24 +6,24 @@ describe('game_state', () => {
 		game_state.return_to_title();
 	});
 
-	it('starts with cyber mode on', () => {
-		expect(game_state.is_cyber).toBe(true);
+	it('starts with alt mode on', () => {
+		expect(game_state.is_alt).toBe(true);
 	});
 
-	it('toggles cyber mode off', () => {
-		game_state.toggle_cyber();
-		expect(game_state.is_cyber).toBe(false);
+	it('toggles alt mode off', () => {
+		game_state.toggle_alt();
+		expect(game_state.is_alt).toBe(false);
 	});
 
-	it('toggles cyber mode on again', () => {
-		game_state.toggle_cyber();
-		game_state.toggle_cyber();
-		expect(game_state.is_cyber).toBe(true);
+	it('toggles alt mode on again', () => {
+		game_state.toggle_alt();
+		game_state.toggle_alt();
+		expect(game_state.is_alt).toBe(true);
 	});
 
-	it('resets cyber mode to default (on) on return_to_title', () => {
-		game_state.toggle_cyber();
+	it('resets alt mode to default (on) on return_to_title', () => {
+		game_state.toggle_alt();
 		game_state.return_to_title();
-		expect(game_state.is_cyber).toBe(true);
+		expect(game_state.is_alt).toBe(true);
 	});
 });

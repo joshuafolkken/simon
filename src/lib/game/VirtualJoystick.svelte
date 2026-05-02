@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { input } from '$lib/game/input.svelte';
-	import { override_event_offset } from '$lib/game/override-event-offset';
+	import { joystick_dispatch } from '$lib/game/joystick-dispatch';
 
 	interface Props {
 		label_jump: string;
@@ -39,88 +39,6 @@
 		return Math.max(min, Math.min(max, v));
 	}
 
-	type DispatchCtx = { dom: HTMLElement; offset_x: number; offset_y: number };
-
-	function get_dispatch_ctx(x: number, y: number): DispatchCtx | null {
-		const dom = document.querySelector('canvas')?.parentElement;
-		if (!dom) return null;
-		const { left, top } = dom.getBoundingClientRect();
-		return { dom, offset_x: x - left, offset_y: y - top };
-	}
-
-	function build_event_opts(
-		pointer_id: number,
-		is_primary: boolean,
-		x: number,
-		y: number
-	): PointerEventInit {
-		return {
-			button: 0,
-			buttons: 0,
-			isPrimary: is_primary,
-			pointerId: pointer_id,
-			clientX: x,
-			clientY: y,
-			bubbles: true,
-			cancelable: true
-		};
-	}
-
-	function dispatch_pointer_down(
-		pointer_id: number,
-		is_primary: boolean,
-		x: number,
-		y: number
-	): void {
-		const ctx = get_dispatch_ctx(x, y);
-		if (!ctx) return;
-		const opts = build_event_opts(pointer_id, is_primary, x, y);
-		opts.buttons = 1;
-		const move_ev = new PointerEvent('pointermove', opts);
-		const down_ev = new PointerEvent('pointerdown', opts);
-		override_event_offset(move_ev, ctx.offset_x, ctx.offset_y);
-		override_event_offset(down_ev, ctx.offset_x, ctx.offset_y);
-		ctx.dom.dispatchEvent(move_ev);
-		ctx.dom.dispatchEvent(down_ev);
-	}
-
-	function dispatch_pointer_up(
-		pointer_id: number,
-		is_primary: boolean,
-		x: number,
-		y: number
-	): void {
-		const ctx = get_dispatch_ctx(x, y);
-		if (!ctx) return;
-		const opts = build_event_opts(pointer_id, is_primary, x, y);
-		const up_ev = new PointerEvent('pointerup', opts);
-		const click_ev = new MouseEvent('click', opts);
-		const leave_ev = new PointerEvent('pointerleave', opts);
-		override_event_offset(up_ev, ctx.offset_x, ctx.offset_y);
-		override_event_offset(click_ev, ctx.offset_x, ctx.offset_y);
-		override_event_offset(leave_ev, ctx.offset_x, ctx.offset_y);
-		ctx.dom.dispatchEvent(up_ev);
-		ctx.dom.dispatchEvent(click_ev);
-		ctx.dom.dispatchEvent(leave_ev);
-	}
-
-	function dispatch_pointer_cancel(
-		pointer_id: number,
-		is_primary: boolean,
-		x: number,
-		y: number
-	): void {
-		const ctx = get_dispatch_ctx(x, y);
-		if (!ctx) return;
-		const opts = build_event_opts(pointer_id, is_primary, x, y);
-		const up_ev = new PointerEvent('pointerup', opts);
-		const leave_ev = new PointerEvent('pointerleave', opts);
-		override_event_offset(up_ev, ctx.offset_x, ctx.offset_y);
-		override_event_offset(leave_ev, ctx.offset_x, ctx.offset_y);
-		ctx.dom.dispatchEvent(up_ev);
-		ctx.dom.dispatchEvent(leave_ev);
-	}
-
 	function on_move_start(e: TouchEvent): void {
 		if (move_touch_id !== null) return;
 		const t = e.changedTouches[0];
@@ -128,7 +46,12 @@
 		move_touch_id = t.identifier;
 		move_start_x = t.clientX;
 		move_start_y = t.clientY;
-		dispatch_pointer_down(t.identifier, look_touch_id === null, t.clientX, t.clientY);
+		joystick_dispatch.dispatch_pointer_down(
+			t.identifier,
+			look_touch_id === null,
+			t.clientX,
+			t.clientY
+		);
 	}
 
 	function on_look_start(e: TouchEvent): void {
@@ -142,7 +65,12 @@
 		look_start_x = t.clientX;
 		look_start_y = t.clientY;
 		look_is_first_move = true;
-		dispatch_pointer_down(t.identifier, move_touch_id === null, t.clientX, t.clientY);
+		joystick_dispatch.dispatch_pointer_down(
+			t.identifier,
+			move_touch_id === null,
+			t.clientX,
+			t.clientY
+		);
 	}
 
 	function apply_dead_zone(raw: number): number {
@@ -185,23 +113,43 @@
 	function on_move_touch_end(ptr_id: number): void {
 		move_touch_id = null;
 		input.set_joystick_move(0, 0);
-		dispatch_pointer_up(ptr_id, look_touch_id === null, move_start_x, move_start_y);
+		joystick_dispatch.dispatch_pointer_up(
+			ptr_id,
+			look_touch_id === null,
+			move_start_x,
+			move_start_y
+		);
 	}
 
 	function on_look_touch_end(ptr_id: number): void {
 		look_touch_id = null;
-		dispatch_pointer_up(ptr_id, move_touch_id === null, look_start_x, look_start_y);
+		joystick_dispatch.dispatch_pointer_up(
+			ptr_id,
+			move_touch_id === null,
+			look_start_x,
+			look_start_y
+		);
 	}
 
 	function cancel_touch_by_id(id: number): void {
 		if (id === move_touch_id) {
 			move_touch_id = null;
 			input.set_joystick_move(0, 0);
-			dispatch_pointer_cancel(id, look_touch_id === null, move_start_x, move_start_y);
+			joystick_dispatch.dispatch_pointer_cancel(
+				id,
+				look_touch_id === null,
+				move_start_x,
+				move_start_y
+			);
 		}
 		if (id === look_touch_id) {
 			look_touch_id = null;
-			dispatch_pointer_cancel(id, move_touch_id === null, look_start_x, look_start_y);
+			joystick_dispatch.dispatch_pointer_cancel(
+				id,
+				move_touch_id === null,
+				look_start_x,
+				look_start_y
+			);
 		}
 	}
 

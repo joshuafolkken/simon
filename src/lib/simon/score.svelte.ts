@@ -36,64 +36,96 @@ function save_high_score(value: number, round: number): void {
 	}
 }
 
-const loaded = load_stored_data();
-let current_score = $state(0);
-let high_score = $state(loaded.score);
-let high_score_round = $state(loaded.round);
-let is_new_high_score = $state(false);
-let last_cleared_round = $state(0);
-
-function calculate_time_coefficient(elapsed_ms: number, sequence_length: number): number {
+export function calculate_time_coefficient(elapsed_ms: number, sequence_length: number): number {
 	const avg_s = elapsed_ms / 1000 / sequence_length;
 	return Math.max(MIN_TIME_COEFF, 1 - avg_s * TIME_COEFF_DECAY);
 }
 
-function calculate_round_score(elapsed_ms: number, sequence_length: number, round: number): number {
+export function calculate_round_score(
+	elapsed_ms: number,
+	sequence_length: number,
+	round: number
+): number {
 	return Math.round(BASE_SCORE * calculate_time_coefficient(elapsed_ms, sequence_length) * round);
 }
 
-function format_score(value: number): string {
+export function format_score(value: number): string {
 	return SCORE_FORMATTER.format(value);
 }
 
-function add_round_score(elapsed_ms: number, sequence_length: number, round: number): void {
-	current_score += calculate_round_score(elapsed_ms, sequence_length, round);
-	last_cleared_round = round;
-	if (current_score > high_score) {
-		high_score = current_score;
-		high_score_round = round;
-		is_new_high_score = true;
-		save_high_score(high_score, round);
-	}
-}
-
-function reset(): void {
-	current_score = 0;
-	is_new_high_score = false;
-	last_cleared_round = 0;
-}
-
-export const score = {
-	get current_score(): number {
-		return current_score;
-	},
-	get high_score(): number {
-		return high_score;
-	},
-	get high_score_round(): number {
-		return high_score_round;
-	},
-	get is_new_high_score(): boolean {
-		return is_new_high_score;
-	},
-	get last_cleared_round(): number {
-		return last_cleared_round;
-	},
-	add_round_score,
-	reset,
-	format_score,
-	calculate_time_coefficient,
-	calculate_round_score,
-	compute_check,
-	load_stored_data
+type ScoreState = {
+	current_score: number;
+	high_score: number;
+	high_score_round: number;
+	is_new_high_score: boolean;
+	last_cleared_round: number;
 };
+
+function maybe_update_high_score(s: ScoreState, round: number): void {
+	if (s.current_score <= s.high_score) return;
+	s.high_score = s.current_score;
+	s.high_score_round = round;
+	s.is_new_high_score = true;
+	save_high_score(s.high_score, round);
+}
+
+function add_round_score_impl(
+	s: ScoreState,
+	elapsed_ms: number,
+	sequence_length: number,
+	round: number
+): void {
+	s.current_score += calculate_round_score(elapsed_ms, sequence_length, round);
+	s.last_cleared_round = round;
+	maybe_update_high_score(s, round);
+}
+
+function reset_score_impl(s: ScoreState): void {
+	s.current_score = 0;
+	s.is_new_high_score = false;
+	s.last_cleared_round = 0;
+}
+
+function make_score_api(s: ScoreState) {
+	return {
+		get current_score(): number {
+			return s.current_score;
+		},
+		get high_score(): number {
+			return s.high_score;
+		},
+		get high_score_round(): number {
+			return s.high_score_round;
+		},
+		get is_new_high_score(): boolean {
+			return s.is_new_high_score;
+		},
+		get last_cleared_round(): number {
+			return s.last_cleared_round;
+		},
+		add_round_score: (elapsed_ms: number, sequence_length: number, round: number): void =>
+			add_round_score_impl(s, elapsed_ms, sequence_length, round),
+		reset: (): void => reset_score_impl(s),
+		format_score,
+		calculate_time_coefficient,
+		calculate_round_score,
+		compute_check,
+		load_stored_data
+	};
+}
+
+export function create_score() {
+	const loaded = load_stored_data();
+	const s = $state<ScoreState>({
+		current_score: 0,
+		high_score: loaded.score,
+		high_score_round: loaded.round,
+		is_new_high_score: false,
+		last_cleared_round: 0
+	});
+	return make_score_api(s);
+}
+
+export type ScoreInstance = ReturnType<typeof create_score>;
+
+export const score = create_score();

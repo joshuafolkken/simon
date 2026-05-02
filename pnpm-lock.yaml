@@ -979,11 +979,6 @@ packages:
     peerDependencies:
       '@playwright/test': '>=1.0.0'
       svelte: '>=5.0.0'
-    peerDependenciesMeta:
-      '@playwright/test':
-        optional: true
-      svelte:
-        optional: true
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -3067,8 +3062,8 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
-  zod@4.3.6:
-    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+  zod@4.4.1:
+    resolution: {integrity: sha512-a6ENMBBGZBsnlSebQ/eKCguSBeGKSf4O7BPnqVPmYGtpBYI7VSqoVqw+QcB7kPRjbqPwhYTpFbVj/RqNz/CT0Q==}
 
 snapshots:
 
@@ -3658,13 +3653,12 @@ snapshots:
 
   '@joshuafolkken/kit@0.117.0(@playwright/test@1.59.1)(svelte@5.55.5(@typescript-eslint/types@8.59.0))':
     dependencies:
+      '@playwright/test': 1.59.1
       js-yaml: 4.1.1
       strip-json-comments: 5.0.3
-      tsx: 4.21.0
-      zod: 4.3.6
-    optionalDependencies:
-      '@playwright/test': 1.59.1
       svelte: 5.55.5(@typescript-eslint/types@8.59.0)
+      tsx: 4.21.0
+      zod: 4.4.1
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -5722,4 +5716,4 @@ snapshots:
 
   zod@3.25.76: {}
 
-  zod@4.3.6: {}
+  zod@4.4.1: {}

@@ -39,10 +39,23 @@ export const CYBER_SWITCH_COLORS: SwitchColors = {
 	inactive_housing: '#001122',
 	active_housing_emissive: 0.4,
 	inactive_housing_emissive: 0.15,
-	active_ring_emissive: 4.0,
+	active_ring_emissive: 4,
 	inactive_ring_emissive: 0.8,
-	active_orb_emissive: 5.0,
+	active_orb_emissive: 5,
 	inactive_orb_emissive: 0.6
+};
+
+export const FPS_SWITCH_COLORS: SwitchColors = {
+	active: '#ffdd00',
+	inactive: '#665500',
+	active_housing: '#1a1400',
+	inactive_housing: '#0d0a00',
+	active_housing_emissive: 0.4,
+	inactive_housing_emissive: 0.05,
+	active_ring_emissive: 4,
+	inactive_ring_emissive: 0.3,
+	active_orb_emissive: 5,
+	inactive_orb_emissive: 0.2
 };
 
 export const FULLSCREEN_SWITCH_COLORS: SwitchColors = {
@@ -52,8 +65,8 @@ export const FULLSCREEN_SWITCH_COLORS: SwitchColors = {
 	inactive_housing: '#001a0e',
 	active_housing_emissive: 0.4,
 	inactive_housing_emissive: 0.05,
-	active_ring_emissive: 4.0,
+	active_ring_emissive: 4,
 	inactive_ring_emissive: 0.3,
-	active_orb_emissive: 5.0,
+	active_orb_emissive: 5,
 	inactive_orb_emissive: 0.2
 };

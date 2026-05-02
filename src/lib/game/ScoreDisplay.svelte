@@ -2,6 +2,7 @@
 	import { T, useTask } from '@threlte/core';
 	import { Text } from '@threlte/extras';
 	import { fonts } from '$lib/game/fonts';
+	import { SCORE_TEXT_Z } from '$lib/game/score-display-config';
 	import type { ScoreData } from '$lib/simon/score-display-types';
 
 	interface Props {
@@ -38,7 +39,6 @@
 
 	const LABEL_FONT_SIZE = 0.055;
 	const VALUE_FONT_SIZE = 0.1;
-	const TEXT_Z = 0.01;
 
 	const HI_LABEL_Y = 0.2;
 	const HI_VALUE_Y = 0.07;
@@ -133,7 +133,7 @@
 		anchorX="center"
 		anchorY="middle"
 		position.y={HI_LABEL_Y}
-		position.z={TEXT_Z}
+		position.z={SCORE_TEXT_Z}
 	/>
 	<Text
 		text={label_round}
@@ -144,7 +144,7 @@
 		anchorY="middle"
 		position.x={ROUND_X}
 		position.y={HI_LABEL_Y}
-		position.z={TEXT_Z}
+		position.z={SCORE_TEXT_Z}
 	/>
 	<Text
 		text={hi_score_text}
@@ -154,7 +154,7 @@
 		anchorX="center"
 		anchorY="middle"
 		position.y={HI_VALUE_Y}
-		position.z={TEXT_Z}
+		position.z={SCORE_TEXT_Z}
 	/>
 	<Text
 		text={hi_round_text}
@@ -165,7 +165,7 @@
 		anchorY="middle"
 		position.x={ROUND_X}
 		position.y={HI_VALUE_Y}
-		position.z={TEXT_Z}
+		position.z={SCORE_TEXT_Z}
 	/>
 
 	<Text
@@ -176,7 +176,7 @@
 		anchorX="center"
 		anchorY="middle"
 		position.y={SCORE_LABEL_Y}
-		position.z={TEXT_Z}
+		position.z={SCORE_TEXT_Z}
 	/>
 	<Text
 		text={current_score_text}
@@ -186,7 +186,7 @@
 		anchorX="center"
 		anchorY="middle"
 		position.y={SCORE_VALUE_Y}
-		position.z={TEXT_Z}
+		position.z={SCORE_TEXT_Z}
 	/>
 	<Text
 		text={round_text}
@@ -197,6 +197,6 @@
 		anchorY="middle"
 		position.x={ROUND_X}
 		position.y={ROUND_VALUE_Y}
-		position.z={TEXT_Z}
+		position.z={SCORE_TEXT_Z}
 	/>
 </T.Group>

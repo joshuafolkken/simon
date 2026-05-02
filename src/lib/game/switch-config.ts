@@ -1,7 +1,8 @@
-export type SwitchIconType = 'cyber' | 'fullscreen';
-export const SWITCH_ICON_TYPES: readonly SwitchIconType[] = ['cyber', 'fullscreen'];
+export type SwitchIconType = 'cyber' | 'fullscreen' | 'fps';
+export const SWITCH_ICON_TYPES: readonly SwitchIconType[] = ['cyber', 'fullscreen', 'fps'];
 
 export const SWITCH_Y = 1.2;
+export const FPS_SWITCH_Y = 2.2;
 // 2x the score display wall distance: back wall=-5, score display=-4.65, distance=0.35, 2x=0.70
 export const SWITCH_Z = -4.3;
 
@@ -35,13 +36,26 @@ export const CORNER_POS = 0.18;
 export const CORNER_ARM_CENTER = CORNER_POS - CORNER_ARM_HALF;
 export const FULLSCREEN_ICON_Z = 0.015;
 
+export const FPS_ICON_Z = 0.015;
+export const FPS_BAR_WIDTH = 0.06;
+export const FPS_BAR_DEPTH = 0.015;
+export const FPS_BAR_BASE_Y = -0.08;
+export const FPS_BAR_1_H = 0.12;
+export const FPS_BAR_2_H = 0.2;
+export const FPS_BAR_3_H = 0.28;
+export const FPS_BAR_X_STEP = 0.1;
+export const PANEL_TEXT_Y = (FPS_BAR_BASE_Y - PANEL_HALF) / 2;
+export const PANEL_TEXT_Z = 0.05;
+export const PANEL_TEXT_FONT_SIZE = 0.09;
+
 export const HIT_AREA_W = PANEL_SIZE + 0.12;
 export const HIT_AREA_H = PANEL_SIZE + 0.12;
 export const HIT_AREA_DEPTH = 0.01;
 export const HIT_AREA_Z = 0.06;
 
 export const LABEL_FONT_SIZE = 0.1;
-export const LABEL_Y_OFFSET = 0.47;
+export const LABEL_GAP = 0.12;
+export const LABEL_Y_OFFSET = PANEL_HALF + LABEL_GAP;
 export const LABEL_Z = 0.05;
 
 export const ACTIVE_LIGHT_Z = 0.5;
@@ -72,6 +86,12 @@ export interface SwitchGeometry {
 	corner_depth?: number;
 	corner_pos?: number;
 	fullscreen_icon_z?: number;
+	fps_icon_z?: number;
+	fps_bar_width?: number;
+	fps_bar_depth?: number;
+	panel_text_y?: number;
+	panel_text_z?: number;
+	panel_text_font_size?: number;
 	hit_area_depth?: number;
 	hit_area_z?: number;
 	label_font_size?: number;
@@ -106,6 +126,12 @@ export const DEFAULT_SWITCH_GEOMETRY: Required<SwitchGeometry> = {
 	corner_depth: CORNER_DEPTH,
 	corner_pos: CORNER_POS,
 	fullscreen_icon_z: FULLSCREEN_ICON_Z,
+	fps_icon_z: FPS_ICON_Z,
+	fps_bar_width: FPS_BAR_WIDTH,
+	fps_bar_depth: FPS_BAR_DEPTH,
+	panel_text_y: PANEL_TEXT_Y,
+	panel_text_z: PANEL_TEXT_Z,
+	panel_text_font_size: PANEL_TEXT_FONT_SIZE,
 	hit_area_depth: HIT_AREA_DEPTH,
 	hit_area_z: HIT_AREA_Z,
 	label_font_size: LABEL_FONT_SIZE,

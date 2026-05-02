@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
 	SWITCH_ICON_TYPES,
 	SWITCH_Y,
+	FPS_SWITCH_Y,
 	SWITCH_Z,
 	BORDER_POS,
 	PANEL_SIZE,
@@ -14,6 +15,12 @@ import {
 	CYBER_RING_TUBULAR,
 	HIT_AREA_Z,
 	LABEL_FONT_SIZE,
+	LABEL_Y_OFFSET,
+	LABEL_Z,
+	PANEL_HALF,
+	PANEL_TEXT_Y,
+	PANEL_TEXT_Z,
+	PANEL_TEXT_FONT_SIZE,
 	DEFAULT_SWITCH_GEOMETRY
 } from './switch-config.js';
 
@@ -26,8 +33,50 @@ describe('SWITCH_ICON_TYPES', () => {
 		expect(SWITCH_ICON_TYPES).toContain('fullscreen');
 	});
 
-	it('has exactly two entries', () => {
-		expect(SWITCH_ICON_TYPES).toHaveLength(2);
+	it('includes fps', () => {
+		expect(SWITCH_ICON_TYPES).toContain('fps');
+	});
+
+	it('has exactly three entries', () => {
+		expect(SWITCH_ICON_TYPES).toHaveLength(3);
+	});
+});
+
+describe('FPS_SWITCH_Y', () => {
+	it('is above the default SWITCH_Y', () => {
+		expect(FPS_SWITCH_Y).toBeGreaterThan(SWITCH_Y);
+	});
+
+	it('label clears the top of the CYBER button (no overlap)', () => {
+		const fps_label_y = FPS_SWITCH_Y - LABEL_Y_OFFSET;
+		const cyber_top_y = SWITCH_Y + PANEL_HALF;
+		expect(fps_label_y).toBeGreaterThan(cyber_top_y);
+	});
+});
+
+describe('PANEL_TEXT_Y', () => {
+	it('is negative (positioned inside panel below bars)', () => {
+		expect(PANEL_TEXT_Y).toBeLessThan(0);
+	});
+
+	it('is above the panel bottom edge', () => {
+		expect(PANEL_TEXT_Y).toBeGreaterThan(-PANEL_HALF);
+	});
+
+	it('is below the bar base (in the empty space)', () => {
+		expect(PANEL_TEXT_Y).toBeLessThan(0);
+	});
+
+	it('DEFAULT_SWITCH_GEOMETRY panel_text_y matches constant', () => {
+		expect(DEFAULT_SWITCH_GEOMETRY.panel_text_y).toBeCloseTo(PANEL_TEXT_Y);
+	});
+
+	it('DEFAULT_SWITCH_GEOMETRY panel_text_font_size matches constant', () => {
+		expect(DEFAULT_SWITCH_GEOMETRY.panel_text_font_size).toBe(PANEL_TEXT_FONT_SIZE);
+	});
+
+	it('panel_text_z matches label_z (floats at same depth as label)', () => {
+		expect(PANEL_TEXT_Z).toBe(LABEL_Z);
 	});
 });
 

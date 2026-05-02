@@ -6,6 +6,7 @@
 	import Player from './player/Player.svelte';
 	import ScoreDisplay from './ScoreDisplay.svelte';
 	import Switch from './Switch.svelte';
+	import FpsDisplay from './FpsDisplay.svelte';
 	import FloorCredits from './FloorCredits.svelte';
 	import { fullscreen } from '$lib/game/fullscreen.svelte';
 	import { make_pointer_compute } from '$lib/game/pointer-compute.js';
@@ -13,9 +14,16 @@
 	import { fonts } from '$lib/game/fonts';
 	import type { SceneObjectsMessages } from '$lib/game/scene-objects-messages';
 	import { ROOM_W, ROOM_D, ROOM_H } from '$lib/game/room-config';
-	import { CYBER_SWITCH_COLORS, FULLSCREEN_SWITCH_COLORS } from '$lib/game/switch-colors';
+	import {
+		CYBER_SWITCH_COLORS,
+		FULLSCREEN_SWITCH_COLORS,
+		FPS_SWITCH_COLORS
+	} from '$lib/game/switch-colors';
+	import { FPS_SWITCH_Y } from '$lib/game/switch-config';
 	import { cyber_switch_input } from '$lib/game/cyber-switch-input';
 	import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
+	import { fps_switch_input } from '$lib/game/fps-switch-input';
+	import { fps } from '$lib/game/fps.svelte';
 	import type { ScoreData } from '$lib/simon/score-display-types';
 
 	interface Props {
@@ -163,6 +171,19 @@
 	label_round={messages.score_label_round}
 	label_current={messages.score_label_current}
 />
+<Switch
+	position_x={CYBER_SWITCH_X}
+	is_active={fps.is_fps_enabled}
+	icon_type="fps"
+	label={messages.fps_switch_label}
+	font={current_font}
+	font_size_multiplier={current_font_size_multiplier}
+	onclick={fps_switch_input.on_click}
+	colors={FPS_SWITCH_COLORS}
+	geometry={{ switch_y: FPS_SWITCH_Y }}
+	panel_text={fps.current_fps_text}
+/>
+<FpsDisplay />
 <Switch
 	position_x={CYBER_SWITCH_X}
 	is_active={is_alt}

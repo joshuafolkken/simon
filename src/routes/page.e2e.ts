@@ -294,3 +294,16 @@ test('high score persists in localStorage across page reload', async ({ page }) 
 	expect(round_val).toBe(String(SAMPLE_HIGH_ROUND));
 	expect(check_val).toBe(String(stored_check));
 });
+
+test('game scene loads without shadow-related WebGL errors', async ({ page }) => {
+	const errors: string[] = [];
+	page.on('pageerror', (err) => errors.push(err.message));
+	await page.goto('/');
+	await expect(page.locator('[data-testid="loading-overlay"]')).toBeHidden({
+		timeout: LOADING_OVERLAY_TIMEOUT_MS
+	});
+	const webgl_errors = errors.filter(
+		(e) => e.toLowerCase().includes('shadow') || e.toLowerCase().includes('webgl')
+	);
+	expect(webgl_errors).toHaveLength(0);
+});

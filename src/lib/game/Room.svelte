@@ -29,37 +29,37 @@
 </script>
 
 <!-- Floor -->
-<T.Mesh rotation.x={-Math.PI / 2} receiveShadow>
+<T.Mesh rotation.x={-Math.PI / 2}>
 	<T.PlaneGeometry args={[width, depth]} />
 	<T.MeshStandardMaterial color={floor_color} roughness={0.9} />
 </T.Mesh>
 
 <!-- Ceiling -->
-<T.Mesh position.y={height} rotation.x={Math.PI / 2} receiveShadow>
+<T.Mesh position.y={height} rotation.x={Math.PI / 2}>
 	<T.PlaneGeometry args={[width, depth]} />
 	<T.MeshStandardMaterial color={ceiling_color} roughness={0.9} />
 </T.Mesh>
 
 <!-- Left wall -->
-<T.Mesh position={[-half_w, half_h, 0]} rotation.y={Math.PI / 2} receiveShadow>
+<T.Mesh position={[-half_w, half_h, 0]} rotation.y={Math.PI / 2}>
 	<T.PlaneGeometry args={[depth, height]} />
 	<T.MeshStandardMaterial color={wall_color} roughness={0.8} />
 </T.Mesh>
 
 <!-- Right wall -->
-<T.Mesh position={[half_w, half_h, 0]} rotation.y={-Math.PI / 2} receiveShadow>
+<T.Mesh position={[half_w, half_h, 0]} rotation.y={-Math.PI / 2}>
 	<T.PlaneGeometry args={[depth, height]} />
 	<T.MeshStandardMaterial color={wall_color} roughness={0.8} />
 </T.Mesh>
 
 <!-- Back wall -->
-<T.Mesh position={[0, half_h, -half_d]} receiveShadow>
+<T.Mesh position={[0, half_h, -half_d]}>
 	<T.PlaneGeometry args={[width, height]} />
 	<T.MeshStandardMaterial color={wall_color} roughness={0.8} />
 </T.Mesh>
 
 <!-- Front wall -->
-<T.Mesh position={[0, half_h, half_d]} rotation.y={Math.PI} receiveShadow>
+<T.Mesh position={[0, half_h, half_d]} rotation.y={Math.PI}>
 	<T.PlaneGeometry args={[width, height]} />
 	<T.MeshStandardMaterial color={wall_color} roughness={0.8} />
 </T.Mesh>

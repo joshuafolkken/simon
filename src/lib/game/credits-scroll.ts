@@ -1,10 +1,11 @@
-import {
-	CREDITS_SCROLL_SPEED,
-	CREDITS_SCROLL_START_Z,
-	CREDITS_SCROLL_END_Z
-} from './credits-config';
+import { CREDITS_SCROLL_SPEED } from './credits-config';
 
-export function advance_scroll(current_z: number, delta: number): number {
+export function advance_scroll(
+	current_z: number,
+	delta: number,
+	start_z: number,
+	end_z: number
+): number {
 	const next_z = current_z - CREDITS_SCROLL_SPEED * delta;
-	return next_z < CREDITS_SCROLL_END_Z ? CREDITS_SCROLL_START_Z : next_z;
+	return next_z < end_z ? start_z : next_z;
 }

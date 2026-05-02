@@ -19,7 +19,7 @@
 	import { cyber_switch_input } from '$lib/game/cyber-switch-input';
 	import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
 	import { score } from '$lib/simon/score.svelte';
-	import { CREDITS_TEXT } from '$lib/game/credits-config';
+	import { CREDITS_TEXT, CREDITS_SCROLL_START_Z, CREDITS_SCROLL_END_Z } from '$lib/simon/credits';
 
 	const POINT_LIGHT_Y = 2.5;
 	const CYBER_SWITCH_X = 1.6;
@@ -139,7 +139,12 @@
 </T.Group>
 
 <Room width={ROOM_W} depth={ROOM_D} height={ROOM_H} {floor_color} {wall_color} {ceiling_color} />
-<FloorCredits {is_alt} credits={CREDITS_TEXT} />
+<FloorCredits
+	{is_alt}
+	credits={CREDITS_TEXT}
+	scroll_start_z={CREDITS_SCROLL_START_Z}
+	scroll_end_z={CREDITS_SCROLL_END_Z}
+/>
 <Player />
 <SimonBoard />
 <ScoreDisplay {score_data} {is_alt} position_z={SCORE_DISPLAY_Z} />

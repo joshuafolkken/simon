@@ -28,5 +28,8 @@
 	let { children } = $props();
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<svelte:head>
+	<title>{messages.game_title}</title>
+	<link rel="icon" href={favicon} />
+</svelte:head>
 {@render children()}

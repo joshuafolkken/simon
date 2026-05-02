@@ -18,6 +18,7 @@
 	import { CYBER_SWITCH_COLORS, FULLSCREEN_SWITCH_COLORS } from '$lib/game/switch-colors';
 	import { cyber_switch_input } from '$lib/game/cyber-switch-input';
 	import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
+	import { simon } from '$lib/simon/simon.svelte';
 	import { score } from '$lib/simon/score.svelte';
 	import { CREDITS_TEXT, CREDITS_SCROLL_START_Z, CREDITS_SCROLL_END_Z } from '$lib/simon/credits';
 
@@ -76,6 +77,14 @@
 		high_score_round: score.high_score_round,
 		last_cleared_round: score.last_cleared_round,
 		format_score: score.format_score
+	});
+	let simon_data = $derived({
+		active_color: simon.active_color,
+		pressed_color: simon.pressed_color,
+		phase: simon.phase,
+		round: simon.round,
+		flash_colors: simon.flash_colors,
+		flash_intensity: simon.flash_intensity
 	});
 	let title_y = $state(TITLE_Y);
 
@@ -145,8 +154,8 @@
 	scroll_start_z={CREDITS_SCROLL_START_Z}
 	scroll_end_z={CREDITS_SCROLL_END_Z}
 />
-<Player />
-<SimonBoard />
+<Player game_phase={simon.phase} />
+<SimonBoard {simon_data} />
 <ScoreDisplay {score_data} {is_alt} position_z={SCORE_DISPLAY_Z} />
 <Switch
 	position_x={CYBER_SWITCH_X}

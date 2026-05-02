@@ -5,7 +5,6 @@
 	import { player_jump } from '$lib/game/player-jump';
 	import { player_step } from '$lib/game/player-step';
 	import { camera_shake } from '$lib/game/camera-shake.svelte';
-	import { simon } from '$lib/simon/simon.svelte';
 
 	const SPAWN_X = 0;
 	const SPAWN_Y = 1;
@@ -16,6 +15,13 @@
 	const FAR_PLANE = 50;
 	const JOYSTICK_LOOK_SPEED = 2;
 	const GAMEOVER_SHAKE_STRENGTH = 1.0;
+	const GAMEOVER_PHASE = 'gameover';
+
+	interface Props {
+		game_phase: string;
+	}
+
+	let { game_phase }: Props = $props();
 
 	let pos_x = $state(SPAWN_X);
 	let pos_y = $state(SPAWN_Y);
@@ -28,7 +34,7 @@
 	let shake_roll = $state(0);
 
 	$effect(() => {
-		if (simon.phase === 'gameover') camera_shake.trigger(GAMEOVER_SHAKE_STRENGTH);
+		if (game_phase === GAMEOVER_PHASE) camera_shake.trigger(GAMEOVER_SHAKE_STRENGTH);
 	});
 
 	function get_axis_input(): { forward: number; strafe: number } {

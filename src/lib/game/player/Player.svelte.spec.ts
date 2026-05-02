@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import Player from './Player.svelte';
-import { camera_shake } from '$lib/game/camera-shake.svelte';
+import { camera_shake } from '$lib/game/player/camera-shake.svelte';
 
 vi.mock('@threlte/core', () => ({ T: {}, useTask: vi.fn() }));
 vi.mock('$lib/game/input.svelte', () => ({
@@ -18,15 +18,15 @@ vi.mock('$lib/game/input.svelte', () => ({
 		set_joystick_look: vi.fn()
 	}
 }));
-vi.mock('$lib/game/player-bounds', () => ({
+vi.mock('$lib/game/player/player-bounds', () => ({
 	player_bounds: { clamp_to_room: vi.fn((x: number, z: number) => ({ x, z })) }
 }));
-vi.mock('$lib/game/player-jump', () => ({
+vi.mock('$lib/game/player/player-jump', () => ({
 	player_jump: {
 		step_jump: vi.fn(() => ({ jump_consumed: false, new_vel_y: 0, new_pos_y: 1 }))
 	}
 }));
-vi.mock('$lib/game/player-step', () => ({
+vi.mock('$lib/game/player/player-step', () => ({
 	player_step: {
 		compute_velocity_after_look: vi.fn(() => ({
 			look_consumed: false,
@@ -36,7 +36,7 @@ vi.mock('$lib/game/player-step', () => ({
 		}))
 	}
 }));
-vi.mock('$lib/game/camera-shake.svelte', () => ({
+vi.mock('$lib/game/player/camera-shake.svelte', () => ({
 	camera_shake: {
 		trigger: vi.fn(),
 		step: vi.fn(),

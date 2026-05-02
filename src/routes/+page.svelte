@@ -1,6 +1,6 @@
 <script lang="ts">
 	import GameScene from '$lib/game/GameScene.svelte';
-	import GameSceneObjects from '$lib/simon/GameSceneObjects.svelte';
+	import SimonScene from '$lib/simon/SimonScene.svelte';
 	import { game_state } from '$lib/game/state.svelte';
 	import { fonts } from '$lib/game/fonts';
 	import { messages } from '$lib/messages/en';
@@ -27,7 +27,7 @@
 			<div class="cyber-glow" data-testid="cyber-glow" aria-hidden="true"></div>
 		{/if}
 	{/snippet}
-	<GameSceneObjects />
+	<SimonScene />
 </GameScene>
 
 <style>

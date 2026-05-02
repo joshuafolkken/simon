@@ -1,4 +1,4 @@
-import { player_speed } from '$lib/game/player-speed';
+import { player_speed } from '$lib/game/player/player-speed';
 
 type VelocityInput = {
 	yaw: number;

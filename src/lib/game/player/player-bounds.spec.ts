@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { player_bounds } from '$lib/game/player-bounds';
+import { player_bounds } from '$lib/game/player/player-bounds';
 
 describe('player_bounds', () => {
 	it('does not clamp position inside the room', () => {

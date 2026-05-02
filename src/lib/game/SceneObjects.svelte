@@ -3,7 +3,7 @@
 	import { T, useThrelte, useTask } from '@threlte/core';
 	import { interactivity, Text } from '@threlte/extras';
 	import Room from './Room.svelte';
-	import Player from './Player.svelte';
+	import Player from './player/Player.svelte';
 	import ScoreDisplay from './ScoreDisplay.svelte';
 	import Switch from './Switch.svelte';
 	import FloorCredits from './FloorCredits.svelte';
@@ -11,12 +11,12 @@
 	import { make_pointer_compute } from '$lib/game/pointer-compute.js';
 	import { lighting } from '$lib/game/lighting';
 	import { fonts } from '$lib/game/fonts';
-	import type { SceneKitMessages } from '$lib/game/scene-kit-types';
+	import type { SceneObjectsMessages } from '$lib/game/scene-objects-messages';
 	import { ROOM_W, ROOM_D, ROOM_H } from '$lib/game/room-config';
 	import { CYBER_SWITCH_COLORS, FULLSCREEN_SWITCH_COLORS } from '$lib/game/switch-colors';
 	import { cyber_switch_input } from '$lib/game/cyber-switch-input';
 	import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
-	import type { ScoreData } from '$lib/game/score-display-types';
+	import type { ScoreData } from '$lib/simon/score-display-types';
 
 	interface Props {
 		game_board: Snippet;
@@ -26,7 +26,7 @@
 		credits_start_z: number;
 		credits_end_z: number;
 		is_alt: boolean;
-		messages: SceneKitMessages;
+		messages: SceneObjectsMessages;
 		score_display_z: number;
 	}
 

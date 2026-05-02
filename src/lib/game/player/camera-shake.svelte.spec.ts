@@ -4,7 +4,7 @@ import {
 	DECAY_RATE,
 	MAX_POSITION_OFFSET,
 	MAX_ROTATION_OFFSET
-} from '$lib/game/camera-shake.svelte';
+} from '$lib/game/player/camera-shake.svelte';
 
 const STRONG = 1.0;
 const DELTA = 1 / 60;

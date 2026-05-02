@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { player_velocity } from '$lib/game/player-velocity';
-import { player_speed } from '$lib/game/player-speed';
+import { player_velocity } from '$lib/game/player/player-velocity';
+import { player_speed } from '$lib/game/player/player-speed';
 
 const NORMAL_SPEED = player_speed.MOVE_SPEED;
 const SPRINT_SPEED = player_speed.MOVE_SPEED * player_speed.SPRINT_MULTIPLIER;

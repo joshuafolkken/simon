@@ -1,6 +1,6 @@
 <script lang="ts">
 	import GameScene from '$lib/game/GameScene.svelte';
-	import GameSceneObjects from '$lib/game/GameSceneObjects.svelte';
+	import GameSceneObjects from '$lib/simon/GameSceneObjects.svelte';
 	import { game_state } from '$lib/game/state.svelte';
 	import { fonts } from '$lib/game/fonts';
 	import { messages } from '$lib/messages/en';

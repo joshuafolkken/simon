@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SceneObjects from './SceneObjects.svelte';
+	import SceneObjects from '$lib/game/SceneObjects.svelte';
 	import SimonBoard from '$lib/simon/SimonBoard.svelte';
 	import { simon } from '$lib/simon/simon.svelte';
 	import { score } from '$lib/simon/score.svelte';

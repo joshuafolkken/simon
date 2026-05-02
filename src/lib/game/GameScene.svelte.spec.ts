@@ -18,6 +18,9 @@ describe('GameScene', () => {
 	it('renders game-scene container', () => {
 		const { container } = render(GameScene, { props: { label_jump: LABEL_JUMP } });
 		expect(container.querySelector('[data-testid="game-scene"]')).toBeTruthy();
+		expect(container.querySelector('[data-testid="jump-btn"]')?.textContent?.trim()).toBe(
+			LABEL_JUMP
+		);
 	});
 
 	it('renders a canvas element', () => {

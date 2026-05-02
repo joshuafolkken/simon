@@ -3,6 +3,9 @@
 	import SimonBoard from './SimonBoard.svelte';
 	import { simon } from '$lib/simon/simon.svelte';
 	import { score } from '$lib/simon/score.svelte';
+	import { game_state } from '$lib/game/state.svelte';
+	import { messages } from '$lib/messages/en';
+	import type { SceneKitMessages } from '$lib/game/scene-kit-types';
 	import { CREDITS_TEXT, CREDITS_SCROLL_START_Z, CREDITS_SCROLL_END_Z } from '$lib/simon/credits';
 
 	let score_data = $derived({
@@ -21,16 +24,34 @@
 		flash_colors: simon.flash_colors,
 		flash_intensity: simon.flash_intensity
 	});
+
+	let is_alt = $derived(game_state.is_alt);
+	const kit_messages: SceneKitMessages = {
+		game_title: messages.game_title,
+		cyber_switch_label: messages.cyber_switch_label,
+		fullscreen_switch_label: messages.fullscreen_switch_label,
+		score_label_high_score: messages.score_high_score,
+		score_label_round: messages.score_round,
+		score_label_current: messages.score_current
+	};
 </script>
 
 <SceneObjects
 	{score_data}
+	{is_alt}
+	messages={kit_messages}
 	game_phase={simon.phase}
 	credits_text={CREDITS_TEXT}
 	credits_start_z={CREDITS_SCROLL_START_Z}
 	credits_end_z={CREDITS_SCROLL_END_Z}
 >
 	{#snippet game_board()}
-		<SimonBoard {simon_data} />
+		<SimonBoard
+			{simon_data}
+			{is_alt}
+			text_gameover={messages.simon_gameover}
+			text_round={messages.simon_round}
+			text_start={messages.simon_start}
+		/>
 	{/snippet}
 </SceneObjects>

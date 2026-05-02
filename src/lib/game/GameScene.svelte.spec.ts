@@ -8,6 +8,7 @@ import { fullscreen } from '$lib/game/fullscreen.svelte';
 import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
 
 const HINT = 'Click to play';
+const LABEL_JUMP = 'JUMP';
 
 describe('GameScene', () => {
 	afterEach(() => {
@@ -15,22 +16,22 @@ describe('GameScene', () => {
 	});
 
 	it('renders game-scene container', () => {
-		const { container } = render(GameScene);
+		const { container } = render(GameScene, { props: { label_jump: LABEL_JUMP } });
 		expect(container.querySelector('[data-testid="game-scene"]')).toBeTruthy();
 	});
 
 	it('renders a canvas element', () => {
-		const { container } = render(GameScene);
+		const { container } = render(GameScene, { props: { label_jump: LABEL_JUMP } });
 		expect(container.querySelector('canvas')).toBeTruthy();
 	});
 
 	it('shows hint_text before the session starts', () => {
-		const { container } = render(GameScene, { props: { hint_text: HINT } });
+		const { container } = render(GameScene, { props: { hint_text: HINT, label_jump: LABEL_JUMP } });
 		expect(container.querySelector('.click-hint')?.textContent?.trim()).toBe(HINT);
 	});
 
 	it('hides the click-hint after the session starts', () => {
-		const { container } = render(GameScene, { props: { hint_text: HINT } });
+		const { container } = render(GameScene, { props: { hint_text: HINT, label_jump: LABEL_JUMP } });
 		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
 		expect(scene).toBeTruthy();
 		if (!scene) return;
@@ -44,6 +45,7 @@ describe('GameScene', () => {
 		let called = false;
 		const { container } = render(GameScene, {
 			props: {
+				label_jump: LABEL_JUMP,
 				on_start: () => {
 					called = true;
 				}
@@ -60,6 +62,7 @@ describe('GameScene', () => {
 		let call_count = 0;
 		const { container } = render(GameScene, {
 			props: {
+				label_jump: LABEL_JUMP,
 				on_start: () => {
 					call_count++;
 				}
@@ -76,7 +79,7 @@ describe('GameScene', () => {
 
 	it('start_game runs init_audio only once across multiple clicks', () => {
 		const spy = vi.spyOn(audio, 'init_audio');
-		const { container } = render(GameScene);
+		const { container } = render(GameScene, { props: { label_jump: LABEL_JUMP } });
 		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
 		expect(scene).toBeTruthy();
 		if (!scene) return;
@@ -89,7 +92,7 @@ describe('GameScene', () => {
 	it('start_game requests fullscreen on touch-primary devices', () => {
 		vi.spyOn(device, 'is_touch_primary').mockReturnValue(true);
 		const fullscreen_spy = vi.spyOn(fullscreen, 'request').mockResolvedValue();
-		const { container } = render(GameScene);
+		const { container } = render(GameScene, { props: { label_jump: LABEL_JUMP } });
 		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
 		expect(scene).toBeTruthy();
 		if (!scene) return;
@@ -101,7 +104,7 @@ describe('GameScene', () => {
 		vi.spyOn(device, 'is_touch_primary').mockReturnValue(false);
 		const fullscreen_spy = vi.spyOn(fullscreen, 'request').mockResolvedValue();
 		const audio_spy = vi.spyOn(audio, 'init_audio');
-		const { container } = render(GameScene);
+		const { container } = render(GameScene, { props: { label_jump: LABEL_JUMP } });
 		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
 		expect(scene).toBeTruthy();
 		if (!scene) return;
@@ -112,7 +115,7 @@ describe('GameScene', () => {
 
 	it('registers the game-scene container with fullscreen_switch_input on mount', () => {
 		const spy = vi.spyOn(fullscreen_switch_input, 'set_container');
-		const { container } = render(GameScene);
+		const { container } = render(GameScene, { props: { label_jump: LABEL_JUMP } });
 		const scene = container.querySelector<HTMLElement>('[data-testid="game-scene"]');
 		expect(scene).toBeTruthy();
 		expect(spy).toHaveBeenCalledWith(scene);

@@ -2,7 +2,7 @@
 	import { T, useTask } from '@threlte/core';
 	import { Text } from '@threlte/extras';
 	import { fonts } from '$lib/game/fonts';
-	import type { ScoreData } from '$lib/game/score-display-types';
+	import type { ScoreData } from '$lib/simon/score-display-types';
 
 	interface Props {
 		score_data: ScoreData;

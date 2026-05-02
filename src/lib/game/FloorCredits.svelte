@@ -12,7 +12,7 @@
 		CREDITS_GLOW_OPACITY,
 		FLOOR_TEXT_ROTATION_X
 	} from './credits-config';
-	import { advance_scroll } from './credits-scroll';
+	import { advance_scroll } from './credits-config';
 
 	interface Props {
 		is_alt: boolean;

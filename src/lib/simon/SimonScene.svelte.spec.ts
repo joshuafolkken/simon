@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
-import GameSceneObjects from './GameSceneObjects.svelte';
+import SimonScene from './SimonScene.svelte';
 
 vi.mock('$lib/game/SceneObjects.svelte', () => ({ default: function SceneObjects() {} }));
 vi.mock('$lib/simon/SimonBoard.svelte', () => ({ default: function SimonBoard() {} }));
@@ -45,9 +45,9 @@ vi.mock('$lib/simon/credits', () => ({
 	CREDITS_SCROLL_END_Z: -10
 }));
 
-describe('GameSceneObjects', () => {
+describe('SimonScene', () => {
 	it('renders without error', () => {
-		const { container } = render(GameSceneObjects);
+		const { container } = render(SimonScene);
 		expect(container).toBeTruthy();
 	});
 });

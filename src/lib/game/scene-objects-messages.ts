@@ -1,4 +1,4 @@
-export interface SceneKitMessages {
+export interface SceneObjectsMessages {
 	game_title: string;
 	cyber_switch_label: string;
 	fullscreen_switch_label: string;

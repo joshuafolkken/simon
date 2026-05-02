@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { T, useTask } from '@threlte/core';
 	import { input } from '$lib/game/input.svelte';
-	import { player_bounds } from '$lib/game/player-bounds';
-	import { player_jump } from '$lib/game/player-jump';
-	import { player_step } from '$lib/game/player-step';
-	import { camera_shake } from '$lib/game/camera-shake.svelte';
+	import { player_bounds } from '$lib/game/player/player-bounds';
+	import { player_jump } from '$lib/game/player/player-jump';
+	import { player_step } from '$lib/game/player/player-step';
+	import { camera_shake } from '$lib/game/player/camera-shake.svelte';
 
 	const SPAWN_X = 0;
 	const SPAWN_Y = 1;

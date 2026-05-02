@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import { createRawSnippet } from 'svelte';
 import SceneObjects from './SceneObjects.svelte';
-import type { ScoreData } from './score-display-types';
+import type { ScoreData } from '$lib/simon/score-display-types';
 
 vi.mock('@threlte/core', () => ({
 	T: {},
@@ -14,7 +14,7 @@ vi.mock('@threlte/extras', () => ({
 	Text: function Text() {}
 }));
 vi.mock('./Room.svelte', () => ({ default: function Room() {} }));
-vi.mock('./Player.svelte', () => ({ default: function Player() {} }));
+vi.mock('./player/Player.svelte', () => ({ default: function Player() {} }));
 vi.mock('./ScoreDisplay.svelte', () => ({ default: function ScoreDisplay() {} }));
 vi.mock('./Switch.svelte', () => ({ default: function Switch() {} }));
 vi.mock('./FloorCredits.svelte', () => ({ default: function FloorCredits() {} }));

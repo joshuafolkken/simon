@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { player_jump } from '$lib/game/player-jump';
+import { player_jump } from '$lib/game/player/player-jump';
 
 const GROUND_Y = 1;
 const DT = 0.1;

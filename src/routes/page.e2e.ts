@@ -35,6 +35,16 @@ async function stub_touch_primary(page: Page, is_touch: boolean): Promise<void> 
 	);
 }
 
+test('page response includes HTTP security headers', async ({ page }) => {
+	const response = await page.goto('/');
+	const headers = response?.headers() ?? {};
+	expect(headers['x-frame-options']).toBe('SAMEORIGIN');
+	expect(headers['x-content-type-options']).toBe('nosniff');
+	expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
+	expect(headers['permissions-policy']).toContain('camera=()');
+	expect(headers['content-security-policy']).toContain("default-src 'self'");
+});
+
 test('game scene renders immediately with canvas', async ({ page }) => {
 	await page.goto('/');
 	await expect(page.locator('[data-testid="game-scene"]')).toBeVisible();

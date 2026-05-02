@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { test, expect, type Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 const { version } = JSON.parse(
 	readFileSync(new URL('../../package.json', import.meta.url), 'utf-8')
@@ -9,6 +10,12 @@ const LOADING_OVERLAY_TIMEOUT_MS = 8000;
 const FULLSCREEN_NOT_CALLED_WAIT_MS = 200;
 const TOUCH_PRIMARY_QUERY = '(hover: none) and (pointer: coarse)';
 const READY_PROGRESS_VALUE = 100;
+const HIGH_SCORE_STORAGE_KEY = 'simon_high_score';
+const HIGH_SCORE_ROUND_KEY = 'simon_high_score_round';
+const HIGH_SCORE_CHECK_KEY = 'simon_high_score_check';
+const CHECK_SEED = 0x9e3779b9;
+const SAMPLE_HIGH_SCORE = 5000;
+const SAMPLE_HIGH_ROUND = 3;
 
 async function stub_touch_primary(page: Page, is_touch: boolean): Promise<void> {
 	await page.addInitScript(
@@ -242,4 +249,48 @@ test('loading overlay progress element reaches 100 when the scene is ready', asy
 			timeout: LOADING_OVERLAY_TIMEOUT_MS
 		}
 	);
+});
+
+test('page has no critical or serious accessibility violations', async ({ page }) => {
+	await page.goto('/');
+	const results = await new AxeBuilder({ page }).exclude('canvas').analyze();
+	const violations = results.violations.filter(
+		(v) => v.impact === 'critical' || v.impact === 'serious'
+	);
+	expect(violations).toHaveLength(0);
+});
+
+test('high score persists in localStorage across page reload', async ({ page }) => {
+	const stored_check =
+		(Math.imul(SAMPLE_HIGH_SCORE + 1, CHECK_SEED) ^
+			Math.imul(SAMPLE_HIGH_ROUND + 1, CHECK_SEED >>> 1)) >>>
+		0;
+	await page.goto('/');
+	await page.evaluate(
+		([sk, rk, ck, score, round, check]) => {
+			localStorage.setItem(sk, String(score));
+			localStorage.setItem(rk, String(round));
+			localStorage.setItem(ck, String(check));
+		},
+		[
+			HIGH_SCORE_STORAGE_KEY,
+			HIGH_SCORE_ROUND_KEY,
+			HIGH_SCORE_CHECK_KEY,
+			SAMPLE_HIGH_SCORE,
+			SAMPLE_HIGH_ROUND,
+			stored_check
+		] as const
+	);
+	await page.goto('/');
+	const [score_val, round_val, check_val] = await page.evaluate(
+		([sk, rk, ck]) => [
+			localStorage.getItem(sk),
+			localStorage.getItem(rk),
+			localStorage.getItem(ck)
+		],
+		[HIGH_SCORE_STORAGE_KEY, HIGH_SCORE_ROUND_KEY, HIGH_SCORE_CHECK_KEY] as const
+	);
+	expect(score_val).toBe(String(SAMPLE_HIGH_SCORE));
+	expect(round_val).toBe(String(SAMPLE_HIGH_ROUND));
+	expect(check_val).toBe(String(stored_check));
 });

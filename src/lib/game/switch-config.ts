@@ -21,11 +21,11 @@ export const CYBER_OUTER_RING_R = 0.22;
 export const CYBER_OUTER_RING_TUBE = 0.016;
 export const CYBER_INNER_RING_R = 0.14;
 export const CYBER_INNER_RING_TUBE = 0.011;
-export const CYBER_RING_RADIAL = 8;
-export const CYBER_RING_TUBULAR = 6;
+export const CYBER_RING_RADIAL = 4;
+export const CYBER_RING_TUBULAR = 4;
 export const CYBER_INNER_RING_ROTATION = Math.PI / 6;
 export const CYBER_ORB_R = 0.045;
-export const CYBER_ORB_SEGMENTS = 12;
+export const CYBER_ORB_SEGMENTS = 6;
 export const CYBER_ICON_Z = 0.015;
 
 export const CORNER_ARM = 0.1;

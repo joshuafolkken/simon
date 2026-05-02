@@ -109,8 +109,8 @@ describe('CORNER_ARM_CENTER', () => {
 });
 
 describe('CYBER_RING_TUBULAR', () => {
-	it('is 6 for hexagonal ring shape', () => {
-		expect(CYBER_RING_TUBULAR).toBe(6);
+	it('is 4 for reduced geometry performance', () => {
+		expect(CYBER_RING_TUBULAR).toBe(4);
 	});
 });
 

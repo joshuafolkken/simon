@@ -18,6 +18,7 @@
 		hint_font_family?: string;
 		hint_font_size_rem?: number;
 		on_start?: () => void;
+		label_jump: string;
 	}
 
 	let {
@@ -26,7 +27,8 @@
 		hint_text = '',
 		hint_font_family,
 		hint_font_size_rem = 1,
-		on_start
+		on_start,
+		label_jump
 	}: Props = $props();
 
 	let container: HTMLElement;
@@ -85,7 +87,7 @@
 			{@render children?.()}
 		</Suspense>
 	</Canvas>
-	<VirtualJoystick />
+	<VirtualJoystick {label_jump} />
 	{#if is_dragging_look}
 		<svg
 			class="fake-cursor"

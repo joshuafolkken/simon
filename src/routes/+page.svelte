@@ -17,6 +17,7 @@
 
 <GameScene
 	hint_text={messages.click_to_play}
+	label_jump={messages.jump_button}
 	{hint_font_family}
 	{hint_font_size_rem}
 	on_start={session.start_session}

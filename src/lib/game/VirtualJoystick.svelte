@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { input } from '$lib/game/input.svelte';
-	import { messages } from '$lib/messages/en';
 	import { override_event_offset } from '$lib/game/override-event-offset';
+
+	interface Props {
+		label_jump: string;
+	}
+
+	let { label_jump }: Props = $props();
 
 	let move_zone: HTMLElement;
 	let look_zone: HTMLElement;
@@ -242,7 +247,7 @@
 		onclick={() => input.trigger_jump()}
 		ontouchstart={on_jump_touch_start}
 	>
-		{messages.jump_button}
+		{label_jump}
 	</button>
 </div>
 

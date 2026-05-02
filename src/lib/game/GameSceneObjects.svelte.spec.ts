@@ -4,6 +4,20 @@ import GameSceneObjects from './GameSceneObjects.svelte';
 
 vi.mock('./SceneObjects.svelte', () => ({ default: function SceneObjects() {} }));
 vi.mock('./SimonBoard.svelte', () => ({ default: function SimonBoard() {} }));
+vi.mock('$lib/game/state.svelte', () => ({ game_state: { is_alt: false } }));
+vi.mock('$lib/messages/en', () => ({
+	messages: {
+		game_title: 'SIMON',
+		cyber_switch_label: 'CYBER',
+		fullscreen_switch_label: 'FULLSCREEN',
+		score_high_score: 'HI',
+		score_round: 'RND',
+		score_current: 'SCORE',
+		simon_gameover: 'GAME OVER',
+		simon_round: 'ROUND',
+		simon_start: 'START'
+	}
+}));
 vi.mock('$lib/simon/simon.svelte', () => ({
 	simon: {
 		active_color: null,

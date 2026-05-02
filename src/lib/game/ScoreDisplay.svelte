@@ -2,16 +2,19 @@
 	import { T, useTask } from '@threlte/core';
 	import { Text } from '@threlte/extras';
 	import { fonts } from '$lib/game/fonts';
-	import { messages } from '$lib/messages/en';
 	import type { ScoreData } from '$lib/game/score-display-types';
 
 	interface Props {
 		score_data: ScoreData;
 		is_alt: boolean;
 		position_z: number;
+		label_high_score: string;
+		label_round: string;
+		label_current: string;
 	}
 
-	let { score_data, is_alt, position_z }: Props = $props();
+	let { score_data, is_alt, position_z, label_high_score, label_round, label_current }: Props =
+		$props();
 
 	const DISPLAY_Y = 2.5;
 
@@ -123,7 +126,7 @@
 	</T.Mesh>
 
 	<Text
-		text={messages.score_high_score}
+		text={label_high_score}
 		font={current_font}
 		fontSize={label_font_size}
 		color={label_color}
@@ -133,7 +136,7 @@
 		position.z={TEXT_Z}
 	/>
 	<Text
-		text={messages.score_round}
+		text={label_round}
 		font={current_font}
 		fontSize={label_font_size}
 		color={label_color}
@@ -166,7 +169,7 @@
 	/>
 
 	<Text
-		text={messages.score_current}
+		text={label_current}
 		font={current_font}
 		fontSize={label_font_size}
 		color={label_color}

@@ -5,7 +5,7 @@
 	import { score } from '$lib/simon/score.svelte';
 	import { game_state } from '$lib/game/state.svelte';
 	import { messages } from '$lib/messages/en';
-	import type { SceneKitMessages } from '$lib/game/scene-kit-types';
+	import type { SceneObjectsMessages } from '$lib/game/scene-objects-messages';
 	import { BOARD_Z } from '$lib/simon/board-config';
 	import { CREDITS_TEXT, CREDITS_SCROLL_START_Z, CREDITS_SCROLL_END_Z } from '$lib/simon/credits';
 
@@ -30,7 +30,7 @@
 	const SCORE_DISPLAY_Z = BOARD_Z + SCORE_DISPLAY_Z_OFFSET;
 
 	let is_alt = $derived(game_state.is_alt);
-	const kit_messages: SceneKitMessages = {
+	const kit_messages: SceneObjectsMessages = {
 		game_title: messages.game_title,
 		cyber_switch_label: messages.cyber_switch_label,
 		fullscreen_switch_label: messages.fullscreen_switch_label,

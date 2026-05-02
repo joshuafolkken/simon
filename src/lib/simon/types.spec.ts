@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import type { ButtonColor, SimonBoardData } from './board-types';
+import type { ButtonColor, SimonBoardData } from './types';
 
 const ALL_BUTTON_COLORS: ButtonColor[] = ['green', 'red', 'yellow', 'blue'];
 
-describe('board-types', () => {
+describe('simon types', () => {
 	it('ButtonColor covers all four expected colors', () => {
 		expect(ALL_BUTTON_COLORS).toHaveLength(4);
 		expect(ALL_BUTTON_COLORS).toContain('green');

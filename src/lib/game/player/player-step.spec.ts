@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { player_step } from '$lib/game/player-step';
-import { player_speed } from '$lib/game/player-speed';
+import { player_step } from '$lib/game/player/player-step';
+import { player_speed } from '$lib/game/player/player-speed';
 
 const MOVE_SPEED = player_speed.MOVE_SPEED;
 const LOOK_SPEED = 2;

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { simon_board_input } from './simon-board-input';
 import { session } from '$lib/game/session.svelte';
-import type { ButtonColor } from './board-types';
+import type { ButtonColor } from './types';
 
 const LEFT_BUTTON = 0;
 const RIGHT_BUTTON = 2;

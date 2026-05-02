@@ -14,24 +14,24 @@ describe('cyber_switch_input', () => {
 		vi.restoreAllMocks();
 	});
 
-	it('does not toggle cyber when session is not started', () => {
-		expect(game_state.is_cyber).toBe(true);
+	it('does not toggle alt when session is not started', () => {
+		expect(game_state.is_alt).toBe(true);
 		cyber_switch_input.on_click();
-		expect(game_state.is_cyber).toBe(true);
+		expect(game_state.is_alt).toBe(true);
 	});
 
-	it('toggles cyber once session has started', () => {
+	it('toggles alt once session has started', () => {
 		session.start_session();
-		expect(game_state.is_cyber).toBe(true);
+		expect(game_state.is_alt).toBe(true);
 		cyber_switch_input.on_click();
-		expect(game_state.is_cyber).toBe(false);
+		expect(game_state.is_alt).toBe(false);
 	});
 
 	it('toggles back when called twice after session started', () => {
 		session.start_session();
 		cyber_switch_input.on_click();
 		cyber_switch_input.on_click();
-		expect(game_state.is_cyber).toBe(true);
+		expect(game_state.is_alt).toBe(true);
 	});
 
 	it('plays switch click sound when session is started', () => {

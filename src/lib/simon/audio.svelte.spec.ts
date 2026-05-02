@@ -65,7 +65,7 @@ describe('simon audio envelope', () => {
 	});
 
 	it('normal mode uses flat envelope — no exponential ramp', () => {
-		game_state.toggle_cyber();
+		game_state.toggle_alt();
 		const { ctx, gain_node } = make_mock_ctx();
 		vi.spyOn(game_audio, 'init_audio').mockImplementation(() => {});
 		vi.spyOn(game_audio, 'get_audio_context').mockReturnValue(ctx as unknown as AudioContext);
@@ -119,7 +119,7 @@ describe('simon audio envelope', () => {
 	});
 
 	it('play_error_tone normal mode uses flat envelope', () => {
-		game_state.toggle_cyber();
+		game_state.toggle_alt();
 		const { ctx, gain_node } = make_mock_ctx();
 		vi.spyOn(game_audio, 'init_audio').mockImplementation(() => {});
 		vi.spyOn(game_audio, 'get_audio_context').mockReturnValue(ctx as unknown as AudioContext);

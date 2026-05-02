@@ -14,7 +14,7 @@
 	import { fonts } from '$lib/game/fonts';
 	import { messages } from '$lib/messages/en';
 	import { ROOM_W, ROOM_D, ROOM_H } from '$lib/game/room-config';
-	import { SIMON_BOARD_Z } from '$lib/game/simon-board-config';
+	import { BOARD_Z } from '$lib/game/board-config';
 	import { CYBER_SWITCH_COLORS, FULLSCREEN_SWITCH_COLORS } from '$lib/game/switch-colors';
 	import { cyber_switch_input } from '$lib/game/cyber-switch-input';
 	import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
@@ -53,22 +53,22 @@
 	const CYBER_WALL_COLOR = '#0a2035';
 	const CYBER_CEILING_COLOR = '#08082a';
 	const SCORE_DISPLAY_Z_OFFSET = 0.15;
-	const SCORE_DISPLAY_Z = SIMON_BOARD_Z + SCORE_DISPLAY_Z_OFFSET;
+	const SCORE_DISPLAY_Z = BOARD_Z + SCORE_DISPLAY_Z_OFFSET;
 
 	const { camera } = useThrelte();
 	interactivity({ compute: make_pointer_compute(camera) });
 
-	let is_cyber = $derived(game_state.is_cyber);
-	let bg_color = $derived(is_cyber ? CYBER_BG : NORMAL_BG);
-	let ambient_intensity = $derived(lighting.get_ambient_intensity(is_cyber));
-	let ambient_color = $derived(lighting.get_ambient_color(is_cyber));
-	let point_light_intensity = $derived(lighting.get_point_light_intensity(is_cyber));
-	let current_font = $derived(fonts.get_font(is_cyber));
-	let current_font_size_multiplier = $derived(fonts.get_font_size_multiplier(is_cyber));
+	let is_alt = $derived(game_state.is_alt);
+	let bg_color = $derived(is_alt ? CYBER_BG : NORMAL_BG);
+	let ambient_intensity = $derived(lighting.get_ambient_intensity(is_alt));
+	let ambient_color = $derived(lighting.get_ambient_color(is_alt));
+	let point_light_intensity = $derived(lighting.get_point_light_intensity(is_alt));
+	let current_font = $derived(fonts.get_font(is_alt));
+	let current_font_size_multiplier = $derived(fonts.get_font_size_multiplier(is_alt));
 	let current_title_font_size = $derived(TITLE_FONT_SIZE * current_font_size_multiplier);
-	let floor_color = $derived(is_cyber ? CYBER_FLOOR_COLOR : FLOOR_COLOR);
-	let wall_color = $derived(is_cyber ? CYBER_WALL_COLOR : WALL_COLOR);
-	let ceiling_color = $derived(is_cyber ? CYBER_CEILING_COLOR : CEILING_COLOR);
+	let floor_color = $derived(is_alt ? CYBER_FLOOR_COLOR : FLOOR_COLOR);
+	let wall_color = $derived(is_alt ? CYBER_WALL_COLOR : WALL_COLOR);
+	let ceiling_color = $derived(is_alt ? CYBER_CEILING_COLOR : CEILING_COLOR);
 	let score_data = $derived({
 		high_score: score.high_score,
 		current_score: score.current_score,
@@ -89,7 +89,7 @@
 <T.Color attach="background" args={[bg_color]} />
 <T.AmbientLight intensity={ambient_intensity} color={ambient_color} />
 <T.PointLight position={[0, POINT_LIGHT_Y, 0]} intensity={point_light_intensity} castShadow />
-{#if is_cyber}
+{#if is_alt}
 	<T.PointLight
 		position={[0, CYBER_ACCENT_Y, CYBER_ACCENT_Z]}
 		color={CYBER_ACCENT_COLOR}
@@ -139,13 +139,13 @@
 </T.Group>
 
 <Room width={ROOM_W} depth={ROOM_D} height={ROOM_H} {floor_color} {wall_color} {ceiling_color} />
-<FloorCredits is_alt={is_cyber} credits={CREDITS_TEXT} />
+<FloorCredits {is_alt} credits={CREDITS_TEXT} />
 <Player />
 <SimonBoard />
-<ScoreDisplay {score_data} is_alt={is_cyber} position_z={SCORE_DISPLAY_Z} />
+<ScoreDisplay {score_data} {is_alt} position_z={SCORE_DISPLAY_Z} />
 <Switch
 	position_x={CYBER_SWITCH_X}
-	is_active={is_cyber}
+	is_active={is_alt}
 	icon_type="cyber"
 	label={messages.cyber_switch_label}
 	font={current_font}

@@ -41,7 +41,7 @@ describe('SWITCH_Z', () => {
 	});
 
 	it('is at 2x the score display wall distance (-4.30)', () => {
-		// Back wall z=-5, score display z=-4.65 (SIMON_BOARD_Z=-4.8 + FLOAT_Z_OFFSET=0.15)
+		// Back wall z=-5, score display z=-4.65 (BOARD_Z=-4.8 + FLOAT_Z_OFFSET=0.15)
 		// Wall distance=0.35, 2x=0.70 => SWITCH_Z = -5 + 0.70 = -4.30
 		expect(SWITCH_Z).toBeCloseTo(-4.3);
 	});

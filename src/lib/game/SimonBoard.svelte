@@ -5,12 +5,9 @@
 	import { game_state } from '$lib/game/state.svelte';
 	import { fonts } from '$lib/game/fonts';
 	import { simon_board_input } from '$lib/game/simon-board-input';
-	import { SIMON_BOARD_Y, SIMON_BOARD_Z } from '$lib/game/simon-board-config';
+	import { BOARD_Y, BOARD_Z } from '$lib/game/board-config';
 	import type { ButtonColor } from '$lib/simon/types';
 	import { messages } from '$lib/messages/en';
-
-	const BOARD_Y = SIMON_BOARD_Y;
-	const BOARD_Z = SIMON_BOARD_Z;
 
 	const INNER_RADIUS = 0.3;
 	const OUTER_RADIUS = 0.7;
@@ -81,11 +78,11 @@
 	}
 
 	function btn_lit(btn: ButtonConfig): string {
-		return game_state.is_cyber ? btn.cyber_lit_color : btn.lit_color;
+		return game_state.is_alt ? btn.cyber_lit_color : btn.lit_color;
 	}
 
 	function btn_dim(btn: ButtonConfig): string {
-		return game_state.is_cyber ? btn.cyber_dim_color : btn.dim_color;
+		return game_state.is_alt ? btn.cyber_dim_color : btn.dim_color;
 	}
 
 	function get_center_text(): string {
@@ -96,10 +93,10 @@
 
 	let center_text = $derived(get_center_text());
 	let emissive_intensity = $derived(
-		(game_state.is_cyber ? CYBER_EMISSIVE_INTENSITY : EMISSIVE_INTENSITY) * simon.flash_intensity
+		(game_state.is_alt ? CYBER_EMISSIVE_INTENSITY : EMISSIVE_INTENSITY) * simon.flash_intensity
 	);
-	let current_font = $derived(fonts.get_font(game_state.is_cyber));
-	let current_font_size = $derived(FONT_SIZE * fonts.get_font_size_multiplier(game_state.is_cyber));
+	let current_font = $derived(fonts.get_font(game_state.is_alt));
+	let current_font_size = $derived(FONT_SIZE * fonts.get_font_size_multiplier(game_state.is_alt));
 </script>
 
 <T.Group position={[0, BOARD_Y, BOARD_Z]}>

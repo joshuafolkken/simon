@@ -1,18 +1,18 @@
-const DEFAULT_IS_CYBER = true;
-let is_cyber = $state(DEFAULT_IS_CYBER);
+const DEFAULT_IS_ALT = true;
+let is_alt = $state(DEFAULT_IS_ALT);
 
 function return_to_title(): void {
-	is_cyber = DEFAULT_IS_CYBER;
+	is_alt = DEFAULT_IS_ALT;
 }
 
-function toggle_cyber(): void {
-	is_cyber = !is_cyber;
+function toggle_alt(): void {
+	is_alt = !is_alt;
 }
 
 export const game_state = {
-	get is_cyber() {
-		return is_cyber;
+	get is_alt() {
+		return is_alt;
 	},
 	return_to_title,
-	toggle_cyber
+	toggle_alt
 };

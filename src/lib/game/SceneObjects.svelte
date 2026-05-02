@@ -13,7 +13,6 @@
 	import { fonts } from '$lib/game/fonts';
 	import type { SceneKitMessages } from '$lib/game/scene-kit-types';
 	import { ROOM_W, ROOM_D, ROOM_H } from '$lib/game/room-config';
-	import { BOARD_Z } from '$lib/game/board-config';
 	import { CYBER_SWITCH_COLORS, FULLSCREEN_SWITCH_COLORS } from '$lib/game/switch-colors';
 	import { cyber_switch_input } from '$lib/game/cyber-switch-input';
 	import { fullscreen_switch_input } from '$lib/game/fullscreen-switch-input';
@@ -28,6 +27,7 @@
 		credits_end_z: number;
 		is_alt: boolean;
 		messages: SceneKitMessages;
+		score_display_z: number;
 	}
 
 	let {
@@ -38,7 +38,8 @@
 		credits_start_z,
 		credits_end_z,
 		is_alt,
-		messages
+		messages,
+		score_display_z
 	}: Props = $props();
 
 	const POINT_LIGHT_Y = 2.5;
@@ -71,9 +72,6 @@
 	const CYBER_FLOOR_COLOR = '#0d2525';
 	const CYBER_WALL_COLOR = '#0a2035';
 	const CYBER_CEILING_COLOR = '#08082a';
-	const SCORE_DISPLAY_Z_OFFSET = 0.15;
-	const SCORE_DISPLAY_Z = BOARD_Z + SCORE_DISPLAY_Z_OFFSET;
-
 	const { camera } = useThrelte();
 	interactivity({ compute: make_pointer_compute(camera) });
 
@@ -160,7 +158,7 @@
 <ScoreDisplay
 	{score_data}
 	{is_alt}
-	position_z={SCORE_DISPLAY_Z}
+	position_z={score_display_z}
 	label_high_score={messages.score_label_high_score}
 	label_round={messages.score_label_round}
 	label_current={messages.score_label_current}

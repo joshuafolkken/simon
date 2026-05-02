@@ -2,9 +2,9 @@
 	import { T } from '@threlte/core';
 	import { Text } from '@threlte/extras';
 	import { fonts } from '$lib/game/fonts';
-	import { simon_board_input } from '$lib/game/simon-board-input';
-	import { BOARD_Y, BOARD_Z } from '$lib/game/board-config';
-	import type { ButtonColor, SimonBoardData } from '$lib/game/board-types';
+	import { simon_board_input } from './simon-board-input';
+	import { BOARD_Y, BOARD_Z } from './board-config';
+	import type { ButtonColor, SimonBoardData } from './board-types';
 
 	const INNER_RADIUS = 0.3;
 	const OUTER_RADIUS = 0.7;

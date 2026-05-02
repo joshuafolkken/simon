@@ -60,26 +60,14 @@
 	const TITLE_Z = -1;
 	const BOB_SPEED = 0.001;
 	const BOB_AMPLITUDE = 0.05;
-	const NEON_MAGENTA = '#ff00ff';
-	const CYBER_ACCENT_INTENSITY = 6;
-	const CYBER_ACCENT_Y = 0.5;
-	const CYBER_ACCENT_Z = -2;
-	const NEON_CEILING_Y = 2.9;
-	const NEON_TUBE_RADIUS = 0.02;
-	const NEON_TUBE_LENGTH = 8;
-	const NEON_TUBE_SEGMENTS = 8;
-	const NEON_EMISSIVE = 3.0;
-	const NEON_LIGHT_INTENSITY = 12;
-	const NEON_Z_BACK = -3.5;
-	const NEON_Z_MID = -1;
-	const NEON_CYAN = '#00ffff';
-	const NEON_TUBE_ROTATION = Math.PI / 2;
 	const FLOOR_COLOR = '#3a2f2f';
 	const WALL_COLOR = '#4a4a5a';
 	const CEILING_COLOR = '#2a2a3a';
 	const CYBER_FLOOR_COLOR = '#0d2525';
 	const CYBER_WALL_COLOR = '#0a2035';
 	const CYBER_CEILING_COLOR = '#08082a';
+	const CYBER_POINT_LIGHT_COLOR = '#ff00ff';
+	const NORMAL_POINT_LIGHT_COLOR = '#ffffff';
 	const { camera } = useThrelte();
 	interactivity({ compute: make_pointer_compute(camera) });
 
@@ -87,6 +75,7 @@
 	let ambient_intensity = $derived(lighting.get_ambient_intensity(is_alt));
 	let ambient_color = $derived(lighting.get_ambient_color(is_alt));
 	let point_light_intensity = $derived(lighting.get_point_light_intensity(is_alt));
+	let point_light_color = $derived(is_alt ? CYBER_POINT_LIGHT_COLOR : NORMAL_POINT_LIGHT_COLOR);
 	let current_font = $derived(fonts.get_font(is_alt));
 	let current_font_size_multiplier = $derived(fonts.get_font_size_multiplier(is_alt));
 	let current_title_font_size = $derived(TITLE_FONT_SIZE * current_font_size_multiplier);
@@ -104,44 +93,11 @@
 
 <T.Color attach="background" args={[bg_color]} />
 <T.AmbientLight intensity={ambient_intensity} color={ambient_color} />
-<T.PointLight position={[0, POINT_LIGHT_Y, 0]} intensity={point_light_intensity} castShadow />
-{#if is_alt}
-	<T.PointLight
-		position={[0, CYBER_ACCENT_Y, CYBER_ACCENT_Z]}
-		color={NEON_MAGENTA}
-		intensity={CYBER_ACCENT_INTENSITY}
-	/>
-	<T.Mesh position={[0, NEON_CEILING_Y, NEON_Z_BACK]} rotation.z={NEON_TUBE_ROTATION}>
-		<T.CylinderGeometry
-			args={[NEON_TUBE_RADIUS, NEON_TUBE_RADIUS, NEON_TUBE_LENGTH, NEON_TUBE_SEGMENTS]}
-		/>
-		<T.MeshStandardMaterial
-			color={NEON_MAGENTA}
-			emissive={NEON_MAGENTA}
-			emissiveIntensity={NEON_EMISSIVE}
-		/>
-	</T.Mesh>
-	<T.PointLight
-		position={[0, NEON_CEILING_Y, NEON_Z_BACK]}
-		color={NEON_MAGENTA}
-		intensity={NEON_LIGHT_INTENSITY}
-	/>
-	<T.Mesh position={[0, NEON_CEILING_Y, NEON_Z_MID]} rotation.z={NEON_TUBE_ROTATION}>
-		<T.CylinderGeometry
-			args={[NEON_TUBE_RADIUS, NEON_TUBE_RADIUS, NEON_TUBE_LENGTH, NEON_TUBE_SEGMENTS]}
-		/>
-		<T.MeshStandardMaterial
-			color={NEON_CYAN}
-			emissive={NEON_CYAN}
-			emissiveIntensity={NEON_EMISSIVE}
-		/>
-	</T.Mesh>
-	<T.PointLight
-		position={[0, NEON_CEILING_Y, NEON_Z_MID]}
-		color={NEON_CYAN}
-		intensity={NEON_LIGHT_INTENSITY}
-	/>
-{/if}
+<T.PointLight
+	position={[0, POINT_LIGHT_Y, 0]}
+	intensity={point_light_intensity}
+	color={point_light_color}
+/>
 
 <T.Group position={[0, title_y, TITLE_Z]}>
 	<Text

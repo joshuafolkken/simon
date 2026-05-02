@@ -100,7 +100,7 @@
 		</div>
 	{/if}
 	{@render overlay?.()}
-	<Canvas shadows>
+	<Canvas>
 		<Suspense onload={on_scene_loaded}>
 			{@render children?.()}
 		</Suspense>

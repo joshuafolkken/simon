@@ -15,6 +15,12 @@ describe('loading', () => {
 
 	beforeEach(() => {
 		vi.useFakeTimers();
+		loading.configure({
+			downloading: messages.loading_downloading,
+			initializing: messages.loading_initializing,
+			loading_assets: messages.loading_loading_assets,
+			ready: messages.loading_ready
+		});
 		overlay_element = document.createElement('output');
 		overlay_element.id = loading.OVERLAY_ELEMENT_ID;
 		overlay_element.style.setProperty(loading.PROGRESS_CSS_VARIABLE, loading.INITIAL_PROGRESS);

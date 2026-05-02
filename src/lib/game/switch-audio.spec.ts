@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-vi.mock('$lib/assets/sound/dragon-studio-distorted-electronic-click-472367.opus', () => ({
-	default: 'mock-click.opus'
-}));
+const MOCK_URL = 'mock-click.opus';
 
 describe('switch_audio.play_switch_click', () => {
 	let play_mock: ReturnType<typeof vi.fn>;
@@ -23,20 +21,29 @@ describe('switch_audio.play_switch_click', () => {
 		vi.unstubAllGlobals();
 	});
 
+	it('is a no-op before init is called', async () => {
+		const { switch_audio } = await import('./switch-audio.js');
+		switch_audio.play_switch_click();
+		expect(play_mock).not.toHaveBeenCalled();
+	});
+
 	it('does not throw when Audio is unavailable', async () => {
 		vi.stubGlobal('Audio', undefined);
 		const { switch_audio } = await import('./switch-audio.js');
+		switch_audio.init(MOCK_URL);
 		expect(() => switch_audio.play_switch_click()).not.toThrow();
 	});
 
 	it('calls play on the audio element', async () => {
 		const { switch_audio } = await import('./switch-audio.js');
+		switch_audio.init(MOCK_URL);
 		switch_audio.play_switch_click();
 		expect(play_mock).toHaveBeenCalledTimes(1);
 	});
 
 	it('resets currentTime to 0 before playing', async () => {
 		const { switch_audio } = await import('./switch-audio.js');
+		switch_audio.init(MOCK_URL);
 		switch_audio.play_switch_click();
 		shared_instance.currentTime = 99;
 		switch_audio.play_switch_click();
@@ -45,6 +52,7 @@ describe('switch_audio.play_switch_click', () => {
 
 	it('reuses the same Audio instance across calls', async () => {
 		const { switch_audio } = await import('./switch-audio.js');
+		switch_audio.init(MOCK_URL);
 		switch_audio.play_switch_click();
 		switch_audio.play_switch_click();
 		expect(audio_ctor).toHaveBeenCalledTimes(1);
@@ -52,7 +60,8 @@ describe('switch_audio.play_switch_click', () => {
 
 	it('creates Audio with the correct URL', async () => {
 		const { switch_audio } = await import('./switch-audio.js');
+		switch_audio.init(MOCK_URL);
 		switch_audio.play_switch_click();
-		expect(audio_ctor).toHaveBeenCalledWith('mock-click.opus');
+		expect(audio_ctor).toHaveBeenCalledWith(MOCK_URL);
 	});
 });
